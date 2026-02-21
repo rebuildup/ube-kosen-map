@@ -16,7 +16,9 @@
     "dist"
   ],
   "scripts": {
+    "dev": "vite",
     "build": "tsup",
+    "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
     "lint": "biome check src",
@@ -24,7 +26,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",
@@ -32,9 +34,11 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
     "jsdom": "^28.1.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vitest": "^4.0.18"
   },
   "dependencies": {
