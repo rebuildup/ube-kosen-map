@@ -13,7 +13,14 @@ React campus navigation map component library with route finding and search.
 ## Installation
 
 ```bash
-pnpm add ube-kosen-map
+# Clone or copy this repository
+git clone https://github.com/your-org/ube-kosen-map.git
+
+# Install dependencies
+pnpm install
+
+# Build
+pnpm build
 ```
 
 ## Quick Start
