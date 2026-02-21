@@ -3,7 +3,12 @@ import {
   MapProvider,
   MapCanvas,
   useMap,
-  searchNodes,
+  UserMarker,
+  FloorSelector,
+  ZoomControl,
+  ViewModeToggle,
+  SearchPanel,
+  RoutePanel,
   findRoute,
   type Node,
   type Edge,
@@ -11,55 +16,54 @@ import {
 
 // Sample campus data
 const sampleNodes: Node[] = [
-  { id: 'entrance', type: 'entrance', position: { x: 200, y: 50 }, floor: 1, name: 'Main Entrance', tags: [], data: { width: 30, height: 20 } },
-  { id: 'corridor-1', type: 'corridor', position: { x: 200, y: 150 }, floor: 1, name: 'Main Corridor', tags: ['covered'], data: { width: 100, height: 10 } },
-  { id: 'room-101', type: 'room', position: { x: 100, y: 200 }, floor: 1, name: 'Lecture Hall A', tags: ['lecture', 'projector'], data: { width: 60, height: 40, capacity: 100 } },
-  { id: 'room-102', type: 'room', position: { x: 200, y: 250 }, floor: 1, name: 'Lab 102', tags: ['lab', 'pc'], data: { width: 50, height: 30, capacity: 30 } },
-  { id: 'room-103', type: 'room', position: { x: 300, y: 200 }, floor: 1, name: 'Office 103', tags: ['office'], data: { width: 40, height: 30 } },
-  { id: 'stairs-1', type: 'stairs', position: { x: 350, y: 150 }, floor: 1, name: 'Stairs', tags: [], data: { width: 20 } },
-  { id: 'elevator-1', type: 'elevator', position: { x: 50, y: 150 }, floor: 1, name: 'Elevator', tags: ['wheelchair'], data: { width: 15 } },
+  { id: 'entrance', type: 'entrance', position: { x: 400, y: 100 }, floor: 1, name: 'Main Entrance', tags: [], data: { width: 40, height: 25 } },
+  { id: 'corridor-main', type: 'corridor', position: { x: 400, y: 250 }, floor: 1, name: 'Main Corridor', tags: ['covered'], data: { width: 200, height: 15 } },
+  { id: 'corridor-east', type: 'corridor', position: { x: 600, y: 350 }, floor: 1, name: 'East Wing', tags: ['covered'], data: { width: 15, height: 100 } },
+  { id: 'corridor-west', type: 'corridor', position: { x: 200, y: 350 }, floor: 1, name: 'West Wing', tags: ['covered'], data: { width: 15, height: 100 } },
+  { id: 'room-101', type: 'room', position: { x: 150, y: 300 }, floor: 1, name: 'Lecture Hall A', tags: ['lecture', 'projector', 'wifi'], data: { width: 80, height: 50, capacity: 150 } },
+  { id: 'room-102', type: 'room', position: { x: 150, y: 420 }, floor: 1, name: 'Lecture Hall B', tags: ['lecture', 'projector'], data: { width: 80, height: 50, capacity: 100 } },
+  { id: 'room-103', type: 'room', position: { x: 300, y: 350 }, floor: 1, name: 'Computer Lab', tags: ['lab', 'pc', 'wifi'], data: { width: 60, height: 40, capacity: 40 } },
+  { id: 'room-104', type: 'room', position: { x: 500, y: 350 }, floor: 1, name: 'Physics Lab', tags: ['lab', 'science'], data: { width: 60, height: 40 } },
+  { id: 'room-105', type: 'room', position: { x: 650, y: 300 }, floor: 1, name: 'Office 105', tags: ['office'], data: { width: 40, height: 30 } },
+  { id: 'room-106', type: 'room', position: { x: 650, y: 420 }, floor: 1, name: 'Office 106', tags: ['office'], data: { width: 40, height: 30 } },
+  { id: 'stairs-1', type: 'stairs', position: { x: 280, y: 250 }, floor: 1, name: 'Stairs West', tags: [], data: { width: 20 } },
+  { id: 'stairs-2', type: 'stairs', position: { x: 520, y: 250 }, floor: 1, name: 'Stairs East', tags: [], data: { width: 20 } },
+  { id: 'elevator-1', type: 'elevator', position: { x: 400, y: 350 }, floor: 1, name: 'Elevator', tags: ['wheelchair'], data: { width: 18 } },
+  { id: 'restroom-m', type: 'room', position: { x: 350, y: 450 }, floor: 1, name: 'Restroom M', tags: ['restroom'], data: { width: 25, height: 20 } },
+  { id: 'restroom-f', type: 'room', position: { x: 450, y: 450 }, floor: 1, name: 'Restroom F', tags: ['restroom'], data: { width: 25, height: 20 } },
   // Floor 2
-  { id: 'room-201', type: 'room', position: { x: 100, y: 200 }, floor: 2, name: 'Library', tags: ['quiet', 'study'], data: { width: 80, height: 60 } },
-  { id: 'room-202', type: 'room', position: { x: 250, y: 200 }, floor: 2, name: 'Meeting Room', tags: ['meeting'], data: { width: 40, height: 30 } },
+  { id: 'room-201', type: 'room', position: { x: 150, y: 300 }, floor: 2, name: 'Library', tags: ['quiet', 'study', 'wifi'], data: { width: 120, height: 80 } },
+  { id: 'room-202', type: 'room', position: { x: 350, y: 300 }, floor: 2, name: 'Meeting Room A', tags: ['meeting', 'projector'], data: { width: 50, height: 40 } },
+  { id: 'room-203', type: 'room', position: { x: 450, y: 300 }, floor: 2, name: 'Meeting Room B', tags: ['meeting'], data: { width: 50, height: 40 } },
+  { id: 'room-204', type: 'room', position: { x: 600, y: 350 }, floor: 2, name: 'Faculty Office', tags: ['office'], data: { width: 60, height: 40 } },
+  { id: 'corridor-2f', type: 'corridor', position: { x: 400, y: 250 }, floor: 2, name: '2F Corridor', tags: ['covered'], data: { width: 200, height: 15 } },
 ]
 
 const sampleEdges: Edge[] = [
-  { id: 'e1', from: 'entrance', to: 'corridor-1', bidirectional: true, distance: 100, constraints: {}, tags: [], data: {} },
-  { id: 'e2', from: 'corridor-1', to: 'room-101', bidirectional: true, distance: 50, constraints: {}, tags: [], data: {} },
-  { id: 'e3', from: 'corridor-1', to: 'room-102', bidirectional: true, distance: 100, constraints: {}, tags: [], data: {} },
-  { id: 'e4', from: 'corridor-1', to: 'room-103', bidirectional: true, distance: 50, constraints: { requires: ['keycard'] }, tags: [], data: {} },
-  { id: 'e5', from: 'corridor-1', to: 'stairs-1', bidirectional: true, distance: 150, constraints: {}, tags: [], data: {} },
-  { id: 'e6', from: 'corridor-1', to: 'elevator-1', bidirectional: true, distance: 150, constraints: {}, tags: [], data: {} },
-  // Narrow corridor to Lab 102
-  { id: 'e7', from: 'corridor-1', to: 'room-102', bidirectional: true, distance: 100, constraints: { max: { width: 0.8 } }, tags: ['narrow'], data: {} },
+  { id: 'e-entrance', from: 'entrance', to: 'corridor-main', bidirectional: true, distance: 150, constraints: {}, tags: [], data: {} },
+  { id: 'e-main-west', from: 'corridor-main', to: 'corridor-west', bidirectional: true, distance: 200, constraints: {}, tags: [], data: {} },
+  { id: 'e-main-east', from: 'corridor-main', to: 'corridor-east', bidirectional: true, distance: 200, constraints: {}, tags: [], data: {} },
+  { id: 'e-west-101', from: 'corridor-west', to: 'room-101', bidirectional: true, distance: 50, constraints: {}, tags: [], data: {} },
+  { id: 'e-west-102', from: 'corridor-west', to: 'room-102', bidirectional: true, distance: 70, constraints: {}, tags: [], data: {} },
+  { id: 'e-west-103', from: 'corridor-main', to: 'room-103', bidirectional: true, distance: 100, constraints: {}, tags: [], data: {} },
+  { id: 'e-east-104', from: 'corridor-main', to: 'room-104', bidirectional: true, distance: 100, constraints: {}, tags: [], data: {} },
+  { id: 'e-east-105', from: 'corridor-east', to: 'room-105', bidirectional: true, distance: 50, constraints: { requires: ['keycard'] }, tags: [], data: {} },
+  { id: 'e-east-106', from: 'corridor-east', to: 'room-106', bidirectional: true, distance: 70, constraints: { requires: ['keycard'] }, tags: [], data: {} },
+  { id: 'e-stairs-1', from: 'corridor-main', to: 'stairs-1', bidirectional: true, distance: 120, constraints: {}, tags: [], data: {} },
+  { id: 'e-stairs-2', from: 'corridor-main', to: 'stairs-2', bidirectional: true, distance: 120, constraints: {}, tags: [], data: {} },
+  { id: 'e-elevator', from: 'corridor-main', to: 'elevator-1', bidirectional: true, distance: 100, constraints: {}, tags: [], data: {} },
+  { id: 'e-restroom-m', from: 'corridor-west', to: 'restroom-m', bidirectional: true, distance: 100, constraints: { max: { width: 0.9 } }, tags: ['narrow'], data: {} },
+  { id: 'e-restroom-f', from: 'corridor-east', to: 'restroom-f', bidirectional: true, distance: 100, constraints: { max: { width: 0.9 } }, tags: ['narrow'], data: {} },
 ]
 
-function Controls() {
-  const { nodes, edges, activeFloor, dispatch, destination, route, userConstraints } = useMap()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [results, setResults] = useState<Node[]>([])
+function Sidebar() {
+  const { userLocation, userConstraints, dispatch } = useMap()
 
-  const handleSearch = () => {
-    const found = searchNodes(nodes, {
-      nameContains: searchQuery,
-      floor: activeFloor,
+  const setLocationToEntrance = () => {
+    dispatch({
+      type: 'SET_USER_LOCATION',
+      payload: { nodeId: 'entrance', position: { x: 400, y: 100 }, floor: 1 },
     })
-    setResults(found)
-  }
-
-  const handleNavigate = (targetId: string) => {
-    const currentLocation = 'entrance' // Simplified: always start from entrance
-    const result = findRoute(nodes, edges, {
-      from: currentLocation,
-      to: targetId,
-      constraints: userConstraints,
-    })
-    if (result) {
-      dispatch({ type: 'SET_ROUTE', payload: result })
-      dispatch({ type: 'SET_DESTINATION', payload: targetId })
-    } else {
-      alert('No route found!')
-    }
   }
 
   const toggleWheelchair = () => {
@@ -71,67 +75,90 @@ function Controls() {
     })
   }
 
+  const toggleKeycard = () => {
+    const current = userConstraints.requires || []
+    const hasKeycard = current.includes('keycard')
+    dispatch({
+      type: 'SET_USER_CONSTRAINTS',
+      payload: {
+        ...userConstraints,
+        requires: hasKeycard
+          ? current.filter(r => r !== 'keycard')
+          : [...current, 'keycard'],
+      },
+    })
+  }
+
   return (
-    <div style={{ padding: 16, borderBottom: '1px solid #ddd' }}>
-      <div style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <label>Floor:</label>
-        <button onClick={() => dispatch({ type: 'SET_ACTIVE_FLOOR', payload: 1 })} style={{ fontWeight: activeFloor === 1 ? 'bold' : 'normal' }}>1F</button>
-        <button onClick={() => dispatch({ type: 'SET_ACTIVE_FLOOR', payload: 2 })} style={{ fontWeight: activeFloor === 2 ? 'bold' : 'normal' }}>2F</button>
+    <div style={{ width: 280, background: '#fff', borderLeft: '1px solid #ddd', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: 16, borderBottom: '1px solid #eee' }}>
+        <h3 style={{ margin: '0 0 12px 0' }}>🔍 Search</h3>
+        <SearchPanel />
+      </div>
 
-        <span style={{ marginLeft: 16 }}>
-          <button onClick={toggleWheelchair} style={{ background: userConstraints.requires?.includes('wheelchair') ? '#4a90d9' : '#eee' }}>
-            ♿ Wheelchair
+      <div style={{ padding: 16, borderBottom: '1px solid #eee' }}>
+        <h3 style={{ margin: '0 0 12px 0' }}>📍 Navigation</h3>
+        <RoutePanel />
+      </div>
+
+      <div style={{ padding: 16, borderBottom: '1px solid #eee' }}>
+        <h3 style={{ margin: '0 0 12px 0' }}>⚙️ Settings</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button
+            onClick={setLocationToEntrance}
+            style={{ padding: '8px 12px', textAlign: 'left' }}
+          >
+            {userLocation ? '📍 Update Location' : '📍 Set Location to Entrance'}
           </button>
-        </span>
+          <button
+            onClick={toggleWheelchair}
+            style={{
+              padding: '8px 12px',
+              textAlign: 'left',
+              background: userConstraints.requires?.includes('wheelchair') ? '#4a90d9' : '#f0f0f0',
+              color: userConstraints.requires?.includes('wheelchair') ? '#fff' : '#333',
+            }}
+          >
+            ♿ Wheelchair Mode
+          </button>
+          <button
+            onClick={toggleKeycard}
+            style={{
+              padding: '8px 12px',
+              textAlign: 'left',
+              background: userConstraints.requires?.includes('keycard') ? '#4a90d9' : '#f0f0f0',
+              color: userConstraints.requires?.includes('keycard') ? '#fff' : '#333',
+            }}
+          >
+            🔑 Has Keycard
+          </button>
+        </div>
       </div>
 
-      <div style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-        <input
-          type="text"
-          placeholder="Search rooms..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        <button onClick={handleSearch}>Search</button>
+      <div style={{ padding: 16, marginTop: 'auto' }}>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <ZoomControl />
+        </div>
       </div>
-
-      {results.length > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <strong>Results:</strong>
-          <ul style={{ listStyle: 'none', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {results.map((n) => (
-              <li key={n.id}>
-                <button onClick={() => handleNavigate(n.id)}>{n.name}</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {destination && route && (
-        <div style={{ padding: 8, background: '#e8f5e9', borderRadius: 4 }}>
-          <strong>Route to {nodes.get(destination)?.name}</strong>
-          <br />
-          Distance: {route.distance}m | {route.nodeIds.length} nodes
-          <button style={{ marginLeft: 8 }} onClick={() => dispatch({ type: 'SET_ROUTE', payload: null })}>Clear</button>
-        </div>
-      )}
     </div>
   )
 }
 
-function Legend() {
+function MapArea() {
+  const { zoom, activeFloor } = useMap()
+
   return (
-    <div style={{ padding: 16, borderTop: '1px solid #ddd', fontSize: 12 }}>
-      <strong>Legend:</strong>
-      <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
-        <span><span style={{ display: 'inline-block', width: 16, height: 16, background: '#4a90d9', marginRight: 4 }}></span> Room</span>
-        <span><span style={{ display: 'inline-block', width: 16, height: 16, background: '#8bc34a', marginRight: 4 }}></span> Corridor</span>
-        <span><span style={{ display: 'inline-block', width: 16, height: 16, background: '#ff9800', borderRadius: '50%', marginRight: 4 }}></span> Stairs</span>
-        <span><span style={{ display: 'inline-block', width: 16, height: 16, background: '#9c27b0', borderRadius: '50%', marginRight: 4 }}></span> Elevator</span>
-        <span><span style={{ display: 'inline-block', width: 16, height: 16, background: '#f44336', marginRight: 4 }}></span> Entrance</span>
-        <span><span style={{ display: 'inline-block', width: 16, height: 4, background: '#ff6600', marginRight: 4 }}></span> Route</span>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: 8, background: '#f8f8f8', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: 16 }}>
+        <FloorSelector />
+        <ViewModeToggle />
+        <span style={{ marginLeft: 'auto', color: '#666', fontSize: 14 }}>
+          Floor {activeFloor} | Zoom: {Math.round(zoom * 100)}%
+        </span>
+      </div>
+      <div style={{ flex: 1, background: '#e8e8e8', overflow: 'hidden', position: 'relative' }}>
+        <MapCanvas width={800} height={600} scale={zoom} />
+        <UserMarker scale={zoom} />
       </div>
     </div>
   )
@@ -142,14 +169,22 @@ export function App() {
   const edgeMap = new Map(sampleEdges.map((e) => [e.id, e]))
 
   return (
-    <MapProvider initialState={{ nodes: nodeMap, edges: edgeMap, activeFloor: 1, center: { x: 200, y: 150 }, zoom: 1 }}>
+    <MapProvider initialState={{
+      nodes: nodeMap,
+      edges: edgeMap,
+      activeFloor: 1,
+      center: { x: 400, y: 300 },
+      zoom: 1,
+    }}>
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <h1 style={{ padding: 16, background: '#333', color: '#fff' }}>ube-kosen-map Demo</h1>
-        <Controls />
-        <div style={{ flex: 1, background: '#f5f5f5', overflow: 'auto' }}>
-          <MapCanvas width={800} height={500} />
+        <header style={{ padding: '12px 16px', background: '#2c3e50', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h1 style={{ margin: 0, fontSize: 20 }}>ube-kosen-map</h1>
+          <span style={{ opacity: 0.7, fontSize: 14 }}>Campus Navigation Demo</span>
+        </header>
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <MapArea />
+          <Sidebar />
         </div>
-        <Legend />
       </div>
     </MapProvider>
   )
