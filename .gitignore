@@ -18,4 +18,4 @@ Thumbs.db
 # Test coverage
 coverage/
 
-reference/*
+reference/*\n# Local tooling\n.takt/
