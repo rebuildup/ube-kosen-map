@@ -1,8 +1,8 @@
 /**
  * @module editor
- * トレースエディター UI
- *
- * 平面図をベースにスペース・ドア・ノードをトレースする操作インターフェース
+ * TraceEditor UI — map editing application for campus graph construction.
  */
 
-// export * from './TraceEditor'
+export { TraceEditor } from './TraceEditor'
+export { useEditorState } from './useEditorState'
+export type { EditorTool, SelectedKind } from './useEditorState'
