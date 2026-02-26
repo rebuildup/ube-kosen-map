@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "_comment": "キャンパスグラフデータ（JSONファイルで保存・読込 - CORE_POLICY §0）",
+  "_note": "実際のデータファイルは data/*.json として配置する"
+}
