@@ -7,7 +7,7 @@
  */
 
 import type { CampusGraph, ValidationResult, ValidationIssue } from '../schema'
-import { isSelfIntersecting } from '../../math'
+import { isSelfIntersecting, containsPoint, segmentIntersection } from '../../math'
 
 export const validate = (graph: CampusGraph): ValidationResult => {
   const issues: ValidationIssue[] = []
@@ -98,7 +98,34 @@ export const validate = (graph: CampusGraph): ValidationResult => {
     }
   }
 
+  // ── Node-in-space check (NI-3) ──────────────────────────────────────────────
+
+  for (const space of Object.values(graph.spaces)) {
+    for (const nodeId of space.containedNodeIds ?? []) {
+      const node = graph.nodes[nodeId]
+      if (!node?.position || !space.polygon) continue
+      if (!containsPoint(space.polygon, node.position)) {
+        issues.push({
+          ruleId: 'NI-3',
+          severity: 'warning',
+          message: `Node "${nodeId}" is listed in space "${space.id}" but lies outside its polygon.`,
+          targetIds: [nodeId, space.id],
+          policy: 'P-1',
+        })
+      }
+    }
+  }
+
   // ── Space invariants ────────────────────────────────────────────────────────
+
+  // Build wall segments from all space polygons for edge-crossing checks
+  const wallSegments: [{ x: number; y: number }, { x: number; y: number }][] = []
+  for (const space of Object.values(graph.spaces)) {
+    const verts = space.polygon?.vertices ?? []
+    for (let i = 0; i < verts.length; i++) {
+      wallSegments.push([verts[i], verts[(i + 1) % verts.length]])
+    }
+  }
 
   for (const space of Object.values(graph.spaces)) {
     // SI-3: Self-intersecting polygon (Error)
@@ -110,6 +137,50 @@ export const validate = (graph: CampusGraph): ValidationResult => {
         targetIds: [space.id],
         policy: 'P-1',
       })
+    }
+
+    // SI-4: Space with no door edges (no edges connecting to external nodes) — Warning
+    // A space is "accessible" if at least one contained node has an edge to a node
+    // in a different space (or no spaces at all — exterior)
+    const containedSet = new Set(space.containedNodeIds ?? [])
+    if (containedSet.size > 0) {
+      const hasExternalEdge = Object.values(graph.edges).some(
+        e =>
+          (containedSet.has(e.sourceNodeId) && !containedSet.has(e.targetNodeId)) ||
+          (containedSet.has(e.targetNodeId) && !containedSet.has(e.sourceNodeId)),
+      )
+      if (!hasExternalEdge && space.type !== 'corridor' && space.type !== 'outdoor') {
+        issues.push({
+          ruleId: 'SI-4',
+          severity: 'warning',
+          message: `Space "${space.id}" has no door connections (no edges leaving the space).`,
+          targetIds: [space.id],
+          policy: 'P-1',
+        })
+      }
+    }
+  }
+
+  // ── Edge wall-crossing check (EI-6 / V-008) ─────────────────────────────────
+
+  for (const edge of Object.values(graph.edges)) {
+    if (edge.isVertical) continue // vertical edges don't cross 2D walls
+    const src = graph.nodes[edge.sourceNodeId]
+    const dst = graph.nodes[edge.targetNodeId]
+    if (!src?.position || !dst?.position) continue
+
+    for (const [wA, wB] of wallSegments) {
+      const ix = segmentIntersection(src.position, dst.position, wA, wB)
+      if (ix) {
+        issues.push({
+          ruleId: 'EI-6',
+          severity: 'error',
+          message: `Edge "${edge.id}" crosses a wall segment.`,
+          targetIds: [edge.id],
+          policy: 'P-1',
+        })
+        break // one report per edge is enough
+      }
     }
   }
 
