@@ -22,3 +22,6 @@ export {
   DEFAULT_CONTEXT,
   BUILT_IN_PROFILES,
 } from './cost'
+
+export type { Route, RouteResult, FloorTransition, FindRouteOptions } from './astar'
+export { findRoute } from './astar'
