@@ -69,10 +69,10 @@ export const CrossSectionView: React.FC<CrossSectionViewProps> = ({
   return (
     <div
       aria-label="cross section view"
-      style={{ width, background: '#f8fafc', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.12)', overflow: 'hidden' }}
+      style={{ width, background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 4, overflow: 'hidden' }}
     >
       {/* Direction selector */}
-      <div style={{ display: 'flex', gap: 4, padding: 8, background: '#e2e8f0' }}>
+      <div style={{ display: 'flex', gap: 4, padding: 8, background: 'var(--bg-2)', borderBottom: '1px solid var(--border-1)' }}>
         {DIRECTIONS.map(d => (
           <button
             key={d}
@@ -81,21 +81,22 @@ export const CrossSectionView: React.FC<CrossSectionViewProps> = ({
             onClick={() => handleDir(d)}
             style={{
               padding: '2px 10px',
-              fontSize: 12,
-              borderRadius: 4,
+              fontSize: 10,
+              borderRadius: 2,
               border: '1px solid',
               cursor: d === activeDir ? 'default' : 'pointer',
-              background: d === activeDir ? '#2563eb' : '#fff',
-              color: d === activeDir ? '#fff' : '#374151',
-              borderColor: d === activeDir ? '#2563eb' : '#d1d5db',
+              background: d === activeDir ? 'var(--accent-bg)' : 'transparent',
+              color: d === activeDir ? 'var(--accent)' : 'var(--text-2)',
+              borderColor: d === activeDir ? 'var(--accent)' : 'var(--border-2)',
               fontWeight: d === activeDir ? 700 : 400,
+              fontFamily: 'var(--font-mono)',
             }}
           >
             {DIRECTION_LABELS[d]}
           </button>
         ))}
-        <span style={{ marginLeft: 'auto', fontSize: 11, color: '#64748b', alignSelf: 'center' }}>
-          断面方向: {DIRECTION_LABELS[activeDir]}
+        <span style={{ marginLeft: 'auto', fontSize: 9, color: 'var(--text-3)', alignSelf: 'center', fontFamily: 'var(--font-mono)' }}>
+          {DIRECTION_LABELS[activeDir]}
         </span>
       </div>
 
@@ -107,26 +108,27 @@ export const CrossSectionView: React.FC<CrossSectionViewProps> = ({
             data-floor-level={floor.level ?? 0}
             style={{
               height: floorHeight,
-              borderBottom: '1px solid #cbd5e1',
-              borderLeft: '3px solid #64748b',
+              borderBottom: '1px solid var(--border-1)',
+              borderLeft: '3px solid var(--border-2)',
               display: 'flex',
               alignItems: 'center',
               paddingLeft: 8,
               marginBottom: 2,
-              background: '#fff',
-              borderRadius: '0 4px 4px 0',
-              fontSize: 12,
-              color: '#1e293b',
+              background: 'var(--bg-2)',
+              borderRadius: '0 3px 3px 0',
+              fontSize: 11,
+              color: 'var(--text-2)',
+              fontFamily: 'var(--font-mono)',
             }}
           >
-            <span style={{ fontWeight: 600, marginRight: 8, minWidth: 24 }}>
+            <span style={{ fontWeight: 600, marginRight: 8, minWidth: 24, color: 'var(--text-1)' }}>
               {floor.name ?? `${floor.level}F`}
             </span>
             <div style={{
-              flex: 1, height: '60%',
-              background: '#e0e7ef',
+              flex: 1, height: '40%',
+              background: 'var(--border-2)',
               borderRadius: 2,
-              opacity: 0.6,
+              opacity: 0.5,
             }} />
           </div>
         ))}
@@ -141,7 +143,7 @@ export const CrossSectionView: React.FC<CrossSectionViewProps> = ({
               top: 8,
               bottom: 8,
               width: 3,
-              background: 'linear-gradient(to bottom, #f59e0b, #d97706)',
+              background: 'linear-gradient(to bottom, var(--amber), var(--orange))',
               borderRadius: 2,
               opacity: 0.8,
             }}

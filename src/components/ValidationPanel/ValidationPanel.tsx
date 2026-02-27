@@ -13,16 +13,16 @@ export interface ValidationPanelProps {
   onFocus?: (targetIds: string[]) => void
 }
 
-const SEVERITY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  error:   { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626' },
-  warning: { bg: '#fefce8', border: '#fcd34d', text: '#d97706' },
+const SEVERITY_COLORS: Record<string, { border: string; text: string; badgeBg: string }> = {
+  error:   { border: 'rgba(248,113,113,0.3)', text: 'var(--red)',    badgeBg: 'rgba(248,113,113,0.15)' },
+  warning: { border: 'rgba(251,191,36,0.3)',  text: 'var(--amber)',  badgeBg: 'rgba(251,191,36,0.15)' },
 }
 
 const IssueRow: React.FC<{
   issue: ValidationIssue
   onFocus?: (ids: string[]) => void
 }> = ({ issue, onFocus }) => {
-  const colors = SEVERITY_COLORS[issue.severity] ?? { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626' }
+  const colors = SEVERITY_COLORS[issue.severity] ?? SEVERITY_COLORS.error
 
   return (
     <div
@@ -33,9 +33,9 @@ const IssueRow: React.FC<{
       style={{
         padding: '6px 10px',
         marginBottom: 4,
-        borderRadius: 4,
+        borderRadius: 3,
         border: `1px solid ${colors.border}`,
-        background: colors.bg,
+        background: colors.badgeBg,
         cursor: onFocus ? 'pointer' : 'default',
         display: 'flex',
         alignItems: 'flex-start',
@@ -45,18 +45,21 @@ const IssueRow: React.FC<{
       <span
         style={{
           fontWeight: 700,
-          fontSize: 11,
+          fontSize: 9,
           color: colors.text,
           padding: '1px 5px',
-          borderRadius: 3,
-          background: colors.border,
+          borderRadius: 2,
+          background: colors.badgeBg,
+          border: `1px solid ${colors.border}`,
           whiteSpace: 'nowrap',
           flexShrink: 0,
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.06em',
         }}
       >
         {issue.ruleId}
       </span>
-      <span style={{ fontSize: 12, color: '#374151', lineHeight: 1.4 }}>
+      <span style={{ fontSize: 11, color: 'var(--text-2)', lineHeight: 1.5 }}>
         {issue.message}
       </span>
     </div>
@@ -69,13 +72,14 @@ export const ValidationPanel: React.FC<ValidationPanelProps> = ({ result, onFocu
       <div
         data-valid="true"
         style={{
-          padding: 12,
-          background: '#f0fdf4',
-          border: '1px solid #86efac',
-          borderRadius: 6,
-          color: '#15803d',
+          padding: '8px 12px',
+          background: 'rgba(16,185,129,0.08)',
+          border: '1px solid rgba(16,185,129,0.3)',
+          borderRadius: 3,
+          color: 'var(--green)',
           fontWeight: 600,
-          fontSize: 13,
+          fontSize: 11,
+          fontFamily: 'var(--font-mono)',
         }}
       >
         No issues found
@@ -97,21 +101,22 @@ export const ValidationPanel: React.FC<ValidationPanelProps> = ({ result, onFocu
         style={{
           display: 'flex',
           gap: 12,
-          padding: '6px 10px',
-          background: '#f9fafb',
-          borderRadius: 4,
+          padding: '5px 10px',
+          background: 'var(--bg-2)',
+          borderRadius: 3,
           marginBottom: 4,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 600,
+          fontFamily: 'var(--font-mono)',
         }}
       >
         {errors.length > 0 && (
-          <span style={{ color: '#dc2626' }}>
+          <span style={{ color: 'var(--red)' }}>
             {errors.length} error{errors.length !== 1 ? 's' : ''}
           </span>
         )}
         {warnings.length > 0 && (
-          <span style={{ color: '#d97706' }}>
+          <span style={{ color: 'var(--amber)' }}>
             {warnings.length} warning{warnings.length !== 1 ? 's' : ''}
           </span>
         )}
