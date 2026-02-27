@@ -179,9 +179,8 @@ export const TraceEditor: React.FC = () => {
     <div
       data-editor-root="true"
       style={{
-        display: 'flex', width: '100vw', height: '100vh',
-        background: '#0f172a', color: '#e2e8f0',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
+        display: 'flex', width: '100%', height: '100%',
+        background: 'var(--bg-1)', color: 'var(--text-1)',
         overflow: 'hidden',
       }}
     >
@@ -208,15 +207,16 @@ export const TraceEditor: React.FC = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Status bar */}
         <div style={{
-          height: 36, flexShrink: 0,
-          background: '#1e293b', borderBottom: '1px solid #334155',
-          display: 'flex', alignItems: 'center', padding: '0 16px', gap: 12,
+          height: 30, flexShrink: 0,
+          background: 'var(--bg-2)', borderBottom: '1px solid var(--border-1)',
+          display: 'flex', alignItems: 'center', padding: '0 12px', gap: 10,
         }}>
-          <span style={{ fontWeight: 700, color: '#60a5fa', fontSize: 13 }}>TraceEditor</span>
-          <span style={{ fontSize: 12, color: '#64748b' }}>{hint}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-2)', letterSpacing: '0.05em' }}>
+            {hint}
+          </span>
           {editor.activeFloorId && (
-            <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>
-              フロア: {editor.graph.floors[editor.activeFloorId]?.name ?? editor.activeFloorId}
+            <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.06em' }}>
+              FL / {editor.graph.floors[editor.activeFloorId]?.name ?? editor.activeFloorId}
             </span>
           )}
         </div>
@@ -239,11 +239,12 @@ export const TraceEditor: React.FC = () => {
 
       {/* Right: property sidebars */}
       <div style={{
-        width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column',
-        borderLeft: '1px solid #334155', overflow: 'hidden',
+        width: 248, flexShrink: 0, display: 'flex', flexDirection: 'column',
+        borderLeft: '1px solid var(--border-1)', background: 'var(--bg-2)', overflow: 'hidden',
       }}>
         {/* Building / floor manager */}
-        <div style={{ borderBottom: '1px solid #334155', maxHeight: 220, overflowY: 'auto' }}>
+        <div style={{ borderBottom: '1px solid var(--border-1)', maxHeight: 220, overflowY: 'auto' }}>
+          <div className="panel-label">建物・フロア</div>
           <BuildingFloorManager
             graph={editor.graph}
             activeFloorId={editor.activeFloorId}
@@ -253,7 +254,8 @@ export const TraceEditor: React.FC = () => {
         </div>
 
         {/* Attribute panel */}
-        <div style={{ flex: 1, overflowY: 'auto', borderBottom: '1px solid #334155' }}>
+        <div style={{ flex: 1, overflowY: 'auto', borderBottom: '1px solid var(--border-1)' }}>
+          <div className="panel-label">属性</div>
           <AttributePanel
             graph={editor.graph}
             selectedId={editor.selectedId}
@@ -263,7 +265,8 @@ export const TraceEditor: React.FC = () => {
         </div>
 
         {/* Layer control */}
-        <div style={{ padding: 8, borderBottom: '1px solid #334155' }}>
+        <div style={{ borderBottom: '1px solid var(--border-1)' }}>
+          <div className="panel-label">レイヤー</div>
           <LayerControl
             visibility={visibility}
             onChange={setVisibility}
@@ -273,6 +276,7 @@ export const TraceEditor: React.FC = () => {
 
         {/* Validation panel */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div className="panel-label">バリデーション</div>
           <ValidationPanel
             result={validationResult}
             onFocus={ids => editor.selectElement(ids[0] ?? null, 'node')}

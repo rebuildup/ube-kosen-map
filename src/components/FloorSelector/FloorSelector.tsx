@@ -51,12 +51,8 @@ export const FloorSelector: React.FC<FloorSelectorProps> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
-        padding: 8,
-        background: 'rgba(255,255,255,0.9)',
-        borderRadius: 6,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        minWidth: 60,
+        gap: 2,
+        padding: '4px 6px',
       }}
     >
       {sorted.map(floor => {
@@ -69,14 +65,19 @@ export const FloorSelector: React.FC<FloorSelectorProps> = ({
             data-floor-id={floor.id}
             onClick={() => onFloorChange?.(floor.id)}
             style={{
-              padding: '4px 12px',
-              borderRadius: 4,
-              border: isActive ? '2px solid #3b82f6' : '2px solid transparent',
-              background: isActive ? '#dbeafe' : 'transparent',
+              padding: '5px 10px',
+              borderRadius: 3,
+              border: '1px solid',
+              borderColor: isActive ? 'var(--accent)' : 'transparent',
+              background: isActive ? 'var(--accent-bg)' : 'transparent',
               cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
               fontWeight: isActive ? 700 : 400,
-              fontSize: 13,
-              color: isActive ? '#1d4ed8' : '#374151',
+              fontSize: 11,
+              letterSpacing: '0.04em',
+              color: isActive ? 'var(--accent)' : 'var(--text-2)',
+              textAlign: 'left',
+              transition: 'all 0.1s',
             }}
           >
             {floor.name ?? `${floor.level}F`}

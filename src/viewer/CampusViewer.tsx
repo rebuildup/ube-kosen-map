@@ -139,27 +139,20 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
     <div
       data-testid="campus-viewer"
       style={{
-        display: 'flex', width: '100vw', height: '100vh',
-        background: '#0f172a', color: '#e2e8f0',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
+        display: 'flex', width: '100%', height: '100%',
+        background: 'var(--bg-1)', color: 'var(--text-1)',
         overflow: 'hidden',
       }}
     >
       {/* ── Left: floor selector + layer control ─────────────────────────── */}
       <div style={{
-        width: 160, flexShrink: 0,
-        borderRight: '1px solid #334155',
+        width: 152, flexShrink: 0,
+        borderRight: '1px solid var(--border-1)',
+        background: 'var(--bg-2)',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        <div style={{
-          padding: '8px 8px 4px',
-          fontSize: 11, fontWeight: 700,
-          color: '#94a3b8', letterSpacing: '0.05em',
-          borderBottom: '1px solid #334155',
-        }}>
-          フロア
-        </div>
+        <div className="panel-label">フロア</div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <FloorSelector
             floors={floors}
@@ -167,7 +160,8 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
             onFloorChange={setActiveFloorId}
           />
         </div>
-        <div style={{ borderTop: '1px solid #334155' }}>
+        <div style={{ borderTop: '1px solid var(--border-1)' }}>
+          <div className="panel-label">レイヤー</div>
           <LayerControl
             visibility={visibility}
             onChange={setVisibility}
@@ -175,27 +169,29 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
         </div>
       </div>
 
-      {/* ── Center: mode toggle + map ─────────────────────────────────────── */}
+      {/* ── Center: view mode toolbar + map ──────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Top bar */}
+        {/* View controls bar */}
         <div style={{
-          height: 48, flexShrink: 0,
-          background: '#1e293b', borderBottom: '1px solid #334155',
-          display: 'flex', alignItems: 'center', padding: '0 12px', gap: 12,
+          height: 38, flexShrink: 0,
+          background: 'var(--bg-2)', borderBottom: '1px solid var(--border-1)',
+          display: 'flex', alignItems: 'center', padding: '0 10px', gap: 10,
         }}>
-          <span style={{ fontWeight: 700, color: '#38bdf8', fontSize: 13 }}>CampusViewer</span>
           <ViewModeToggle mode={viewMode} onChange={setViewMode} />
           {/* Profile selector */}
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 3 }}>
             {PROFILES.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => setProfileIndex(i)}
                 style={{
-                  fontSize: 11, padding: '2px 8px', borderRadius: 4,
-                  border: '1px solid #475569',
-                  background: i === profileIndex ? '#3b82f6' : 'transparent',
-                  color: i === profileIndex ? '#fff' : '#94a3b8',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 9, letterSpacing: '0.05em',
+                  padding: '2px 8px', borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: i === profileIndex ? 'var(--accent)' : 'var(--border-2)',
+                  background: i === profileIndex ? 'var(--accent-bg)' : 'transparent',
+                  color: i === profileIndex ? 'var(--accent)' : 'var(--text-3)',
                   cursor: 'pointer',
                 }}
               >
@@ -205,48 +201,60 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
           </div>
         </div>
 
-        {/* Map */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        {/* Map area */}
+        <div className="canvas-grid" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
           {mapArea}
         </div>
       </div>
 
       {/* ── Right: search + routing ───────────────────────────────────────── */}
       <div style={{
-        width: 240, flexShrink: 0,
-        borderLeft: '1px solid #334155',
+        width: 256, flexShrink: 0,
+        borderLeft: '1px solid var(--border-1)',
+        background: 'var(--bg-2)',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
       }}>
         {/* Search */}
-        <div style={{ padding: 8, borderBottom: '1px solid #334155' }}>
+        <div style={{ padding: '8px 8px 6px', borderBottom: '1px solid var(--border-1)' }}>
+          <div className="panel-label" style={{ padding: '0 0 4px' }}>施設検索</div>
           <SearchPanel graph={graph} onSelect={handleSearchSelect} />
         </div>
 
-        {/* Route status */}
+        {/* Route endpoints */}
         <div style={{
-          padding: '6px 8px',
-          background: '#1e293b',
-          borderBottom: '1px solid #334155',
-          fontSize: 11, flexShrink: 0,
+          padding: '8px 10px',
+          borderBottom: '1px solid var(--border-1)',
+          flexShrink: 0,
         }}>
-          <div style={{ color: '#10b981', marginBottom: 2 }}>
-            出発: {startNodeId ? startNodeId.slice(0, 12) + '…' : '—（ノードを選択）'}
-          </div>
-          <div style={{ color: '#f97316', marginBottom: 4 }}>
-            目的: {goalNodeId ? goalNodeId.slice(0, 12) + '…' : '—（ノードを選択）'}
+          <div className="panel-label" style={{ padding: '0 0 6px' }}>経路</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: startNodeId ? 'var(--green)' : 'var(--text-3)' }}>
+                {startNodeId ? startNodeId.slice(0, 14) + '…' : '出発地を選択'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: goalNodeId ? 'var(--orange)' : 'var(--text-3)' }}>
+                {goalNodeId ? goalNodeId.slice(0, 14) + '…' : '目的地を選択'}
+              </span>
+            </div>
           </div>
           {(startNodeId || goalNodeId) && (
             <button
               onClick={clearRoute}
               style={{
-                fontSize: 10, padding: '2px 8px', borderRadius: 4,
-                border: '1px solid #475569',
-                background: 'transparent', color: '#94a3b8',
+                marginTop: 6,
+                fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.05em',
+                padding: '2px 8px', borderRadius: 2,
+                border: '1px solid var(--border-2)',
+                background: 'transparent', color: 'var(--text-2)',
                 cursor: 'pointer',
               }}
             >
-              クリア
+              CLEAR
             </button>
           )}
         </div>

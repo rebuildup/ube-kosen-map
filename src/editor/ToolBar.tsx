@@ -7,11 +7,11 @@
 import React from 'react'
 import type { EditorTool } from './useEditorState'
 
-const TOOLS: { tool: EditorTool; label: string; shortcut: string }[] = [
-  { tool: 'select', label: '選択', shortcut: 'V' },
-  { tool: 'space',  label: 'スペース', shortcut: 'S' },
-  { tool: 'node',   label: 'ノード', shortcut: 'N' },
-  { tool: 'door',   label: 'ドア', shortcut: 'D' },
+const TOOLS: { tool: EditorTool; icon: string; label: string; shortcut: string }[] = [
+  { tool: 'select', icon: '↖',  label: '選択',     shortcut: 'V' },
+  { tool: 'space',  icon: '▢',  label: 'スペース', shortcut: 'S' },
+  { tool: 'node',   icon: '◉',  label: 'ノード',   shortcut: 'N' },
+  { tool: 'door',   icon: '⊡',  label: 'ドア',     shortcut: 'D' },
 ]
 
 export interface ToolBarProps {
@@ -32,35 +32,39 @@ export const ToolBar: React.FC<ToolBarProps> = ({
 }) => (
   <div
     style={{
-      display: 'flex', flexDirection: 'column', gap: 4, padding: 8,
-      background: '#1e293b', borderRight: '1px solid #334155',
-      width: 72, minHeight: '100%', alignItems: 'center', flexShrink: 0,
+      display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 6px',
+      background: 'var(--bg-2)', borderRight: '1px solid var(--border-1)',
+      width: 60, minHeight: '100%', alignItems: 'center', flexShrink: 0,
     }}
   >
     {/* Tool buttons */}
-    {TOOLS.map(({ tool, label, shortcut }) => (
-      <button
-        key={tool}
-        data-tool={tool}
-        aria-pressed={activeTool === tool}
-        title={`${label} (${shortcut})`}
-        onClick={() => onToolChange(tool)}
-        style={{
-          width: 56, height: 48, borderRadius: 6, border: '1.5px solid',
-          cursor: 'pointer', fontSize: 11, fontWeight: 600,
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', gap: 2,
-          background: activeTool === tool ? '#3b82f6' : 'transparent',
-          color: activeTool === tool ? '#fff' : '#94a3b8',
-          borderColor: activeTool === tool ? '#3b82f6' : '#475569',
-        }}
-      >
-        <span>{label}</span>
-        <span style={{ fontSize: 9, opacity: 0.7 }}>{shortcut}</span>
-      </button>
-    ))}
+    {TOOLS.map(({ tool, icon, label, shortcut }) => {
+      const active = activeTool === tool
+      return (
+        <button
+          key={tool}
+          data-tool={tool}
+          aria-pressed={active}
+          title={`${label} (${shortcut})`}
+          onClick={() => onToolChange(tool)}
+          style={{
+            width: 44, height: 44, borderRadius: 4,
+            border: '1px solid',
+            borderColor: active ? 'var(--accent)' : 'var(--border-1)',
+            background: active ? 'var(--accent-bg)' : 'transparent',
+            color: active ? 'var(--accent)' : 'var(--text-2)',
+            cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+            transition: 'all 0.1s',
+          }}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1 }}>{icon}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.04em', opacity: 0.7 }}>{shortcut}</span>
+        </button>
+      )
+    })}
 
-    <div style={{ width: '100%', height: 1, background: '#334155', margin: '4px 0' }} />
+    <div style={{ width: 32, height: 1, background: 'var(--border-1)', margin: '6px 0' }} />
 
     {/* Undo */}
     <button
@@ -69,11 +73,14 @@ export const ToolBar: React.FC<ToolBarProps> = ({
       onClick={onUndo}
       title="元に戻す (Ctrl+Z)"
       style={{
-        width: 56, height: 32, borderRadius: 4, border: '1px solid #475569',
-        background: 'transparent', color: canUndo ? '#94a3b8' : '#475569',
-        cursor: canUndo ? 'pointer' : 'not-allowed', fontSize: 11,
+        width: 44, height: 32, borderRadius: 3,
+        border: '1px solid var(--border-1)',
+        background: 'transparent',
+        color: canUndo ? 'var(--text-2)' : 'var(--text-3)',
+        cursor: canUndo ? 'pointer' : 'not-allowed',
+        fontSize: 16,
       }}
-    >↩ Undo</button>
+    >↺</button>
 
     {/* Redo */}
     <button
@@ -82,11 +89,14 @@ export const ToolBar: React.FC<ToolBarProps> = ({
       onClick={onRedo}
       title="やり直し (Ctrl+Y)"
       style={{
-        width: 56, height: 32, borderRadius: 4, border: '1px solid #475569',
-        background: 'transparent', color: canRedo ? '#94a3b8' : '#475569',
-        cursor: canRedo ? 'pointer' : 'not-allowed', fontSize: 11,
+        width: 44, height: 32, borderRadius: 3,
+        border: '1px solid var(--border-1)',
+        background: 'transparent',
+        color: canRedo ? 'var(--text-2)' : 'var(--text-3)',
+        cursor: canRedo ? 'pointer' : 'not-allowed',
+        fontSize: 16,
       }}
-    >↪ Redo</button>
+    >↻</button>
 
     <div style={{ flex: 1 }} />
 
@@ -97,10 +107,13 @@ export const ToolBar: React.FC<ToolBarProps> = ({
         onClick={onLoad}
         title="JSONファイルを読み込む"
         style={{
-          width: 56, height: 32, borderRadius: 4, border: '1px solid #475569',
-          background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 10,
+          width: 44, height: 28, borderRadius: 3,
+          border: '1px solid var(--border-2)',
+          background: 'transparent', color: 'var(--text-2)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.06em',
         }}
-      >読込</button>
+      >LOAD</button>
     )}
 
     {/* Save */}
@@ -110,10 +123,13 @@ export const ToolBar: React.FC<ToolBarProps> = ({
         onClick={onSave}
         title="JSONとして保存"
         style={{
-          width: 56, height: 32, borderRadius: 4, border: '1px solid #10b981',
-          background: '#064e3b', color: '#34d399', cursor: 'pointer', fontSize: 10,
+          width: 44, height: 28, borderRadius: 3,
+          border: '1px solid var(--green)',
+          background: 'rgba(16,185,129,0.08)', color: 'var(--green)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.06em',
         }}
-      >保存</button>
+      >SAVE</button>
     )}
   </div>
 )

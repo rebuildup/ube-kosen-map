@@ -5,47 +5,77 @@ import { createEmptyCampusGraph } from './core/schema/graph'
 
 type AppMode = 'editor' | 'viewer'
 
-const TOGGLE_BASE: React.CSSProperties = {
-  fontSize: 11, padding: '3px 10px', borderRadius: 4,
-  border: '1px solid #475569', cursor: 'pointer',
-}
+const MODES: { key: AppMode; label: string; tag: string }[] = [
+  { key: 'editor', label: 'エディター', tag: 'EDITOR' },
+  { key: 'viewer', label: 'ビューアー', tag: 'VIEWER' },
+]
 
 function App() {
   const [mode, setMode] = useState<AppMode>('editor')
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      {/* Mode toggle — always on top-right */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-1)' }}>
+
+      {/* ── Global app bar ─────────────────────────────────────────────────── */}
       <div style={{
-        position: 'absolute', top: 8, right: 8, zIndex: 100,
-        display: 'flex', gap: 4,
+        height: 36, flexShrink: 0,
+        display: 'flex', alignItems: 'center',
+        padding: '0 14px', gap: 16,
+        background: 'var(--bg-2)',
+        borderBottom: '1px solid var(--border-1)',
       }}>
-        <button
-          onClick={() => setMode('editor')}
-          style={{
-            ...TOGGLE_BASE,
-            background: mode === 'editor' ? '#3b82f6' : 'rgba(30,41,59,0.85)',
-            color: mode === 'editor' ? '#fff' : '#94a3b8',
-          }}
-        >
-          エディター
-        </button>
-        <button
-          onClick={() => setMode('viewer')}
-          style={{
-            ...TOGGLE_BASE,
-            background: mode === 'viewer' ? '#3b82f6' : 'rgba(30,41,59,0.85)',
-            color: mode === 'viewer' ? '#fff' : '#94a3b8',
-          }}
-        >
-          ビューアー
-        </button>
+        {/* Logo */}
+        <span className="app-brand">UBE-KOSEN MAP</span>
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 16, background: 'var(--border-2)' }} />
+
+        {/* Mode toggle */}
+        <div style={{ display: 'flex', gap: 2 }}>
+          {MODES.map(({ key, label, tag }) => (
+            <button
+              key={key}
+              onClick={() => setMode(key)}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10, letterSpacing: '0.08em',
+                padding: '3px 12px', borderRadius: 2,
+                border: '1px solid',
+                borderColor: mode === key ? 'var(--accent)' : 'var(--border-2)',
+                background: mode === key ? 'var(--accent-bg)' : 'transparent',
+                color: mode === key ? 'var(--accent)' : 'var(--text-2)',
+                cursor: 'pointer',
+                transition: 'all 0.12s',
+              }}
+              title={label}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Right status */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: mode === 'editor' ? 'var(--amber)' : 'var(--green)',
+          }} />
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.06em',
+          }}>
+            {mode === 'editor' ? 'EDIT MODE' : 'VIEW MODE'}
+          </span>
+        </div>
       </div>
 
-      {mode === 'editor'
-        ? <TraceEditor />
-        : <CampusViewer graph={createEmptyCampusGraph()} />
-      }
+      {/* ── Content area ───────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+        {mode === 'editor'
+          ? <TraceEditor />
+          : <CampusViewer graph={createEmptyCampusGraph()} />
+        }
+      </div>
     </div>
   )
 }

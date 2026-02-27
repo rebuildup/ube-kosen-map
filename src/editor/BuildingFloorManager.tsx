@@ -57,26 +57,28 @@ export const BuildingFloorManager: React.FC<BuildingFloorManagerProps> = ({
   }
 
   const labelStyle: React.CSSProperties = {
-    fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2,
+    fontSize: 9, color: 'var(--text-3)', textTransform: 'uppercase',
+    letterSpacing: '0.08em', marginBottom: 3, fontFamily: 'var(--font-mono)',
   }
   const inputStyle: React.CSSProperties = {
-    padding: '3px 6px', fontSize: 12, borderRadius: 4,
-    border: '1px solid #334155', background: '#0f172a', color: '#e2e8f0',
-    width: '100%', boxSizing: 'border-box',
+    padding: '4px 7px', fontSize: 11, borderRadius: 3,
+    border: '1px solid var(--border-2)', background: 'var(--bg-1)', color: 'var(--text-1)',
+    width: '100%', boxSizing: 'border-box', outline: 'none',
   }
   const btnStyle: React.CSSProperties = {
-    padding: '3px 8px', fontSize: 11, borderRadius: 4, cursor: 'pointer',
-    border: '1px solid #475569', background: 'transparent', color: '#94a3b8',
+    padding: '3px 9px', fontSize: 10, borderRadius: 3, cursor: 'pointer',
+    border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-2)',
+    fontFamily: 'var(--font-mono)', letterSpacing: '0.04em',
   }
 
   return (
-    <div style={{ padding: 12, fontSize: 12, color: '#e2e8f0' }}>
-      <div style={{ fontWeight: 700, marginBottom: 8, color: '#60a5fa' }}>建物・フロア</div>
-
+    <div style={{ padding: '8px 10px', fontSize: 12, color: 'var(--text-1)' }}>
       {/* Building + floor list */}
       {buildings.map(b => (
-        <div key={b.id} style={{ marginBottom: 6, paddingLeft: 4, borderLeft: '2px solid #475569' }}>
-          <div style={{ fontWeight: 600, color: '#e2e8f0', paddingBottom: 2 }}>{b.name ?? b.id}</div>
+        <div key={b.id} style={{ marginBottom: 8, paddingLeft: 6, borderLeft: '2px solid var(--border-2)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, color: 'var(--text-2)', paddingBottom: 3, letterSpacing: '0.04em' }}>
+            {b.name ?? b.id}
+          </div>
           {floors
             .filter(f => f.buildingId === b.id)
             .map(f => (
@@ -85,10 +87,12 @@ export const BuildingFloorManager: React.FC<BuildingFloorManagerProps> = ({
                 onClick={() => onFloorSelect(f.id)}
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
-                  padding: '2px 8px', fontSize: 11, border: 'none', borderRadius: 3,
-                  cursor: 'pointer', marginTop: 2,
-                  background: f.id === activeFloorId ? '#1d4ed8' : 'transparent',
-                  color: f.id === activeFloorId ? '#fff' : '#94a3b8',
+                  padding: '3px 8px', fontSize: 10, border: '1px solid',
+                  borderColor: f.id === activeFloorId ? 'var(--accent)' : 'transparent',
+                  borderRadius: 2, cursor: 'pointer', marginTop: 2,
+                  background: f.id === activeFloorId ? 'var(--accent-bg)' : 'transparent',
+                  color: f.id === activeFloorId ? 'var(--accent)' : 'var(--text-2)',
+                  fontFamily: 'var(--font-mono)', letterSpacing: '0.04em',
                 }}
               >
                 {f.name ?? levelToName(f.level ?? 0)}

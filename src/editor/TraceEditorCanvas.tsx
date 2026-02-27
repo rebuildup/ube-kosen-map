@@ -199,9 +199,9 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
     <div
       ref={containerRef}
       data-editor-canvas="true"
+      className="canvas-grid"
       style={{
         flex: 1, position: 'relative', overflow: 'hidden',
-        background: '#0f172a',
         cursor: activeTool === 'select' ? 'default' : 'crosshair',
       }}
       onMouseMove={handleMouseMove}

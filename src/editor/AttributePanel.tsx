@@ -28,14 +28,17 @@ export interface AttributePanelProps {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '4px 6px', fontSize: 12,
-  borderRadius: 4, border: '1px solid #334155',
-  background: '#0f172a', color: '#e2e8f0', boxSizing: 'border-box',
+  width: '100%', padding: '4px 7px', fontSize: 11,
+  borderRadius: 3, border: '1px solid var(--border-2)',
+  background: 'var(--bg-1)', color: 'var(--text-1)', boxSizing: 'border-box', outline: 'none',
 }
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div style={{ marginBottom: 8 }}>
-    <div style={{ fontSize: 10, color: '#64748b', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+  <div style={{ marginBottom: 9 }}>
+    <div style={{
+      fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)',
+      marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.08em',
+    }}>
       {label}
     </div>
     {children}
@@ -48,9 +51,9 @@ export const AttributePanel: React.FC<AttributePanelProps> = ({
   // Nothing selected
   if (!selectedId || !selectedKind) {
     return (
-      <div style={{ padding: 16, color: '#475569', fontSize: 12 }}>
+      <div style={{ padding: '16px 12px', color: 'var(--text-3)', fontSize: 11 }}>
         <p>選択なし</p>
-        <p style={{ fontSize: 11, marginTop: 4 }}>ノード・エッジ・スペースをクリックして選択</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, marginTop: 6, letterSpacing: '0.04em' }}>ノード / エッジ / スペースをクリック</p>
       </div>
     )
   }
@@ -65,7 +68,7 @@ export const AttributePanel: React.FC<AttributePanelProps> = ({
     }
     return (
       <div style={{ padding: 12, fontSize: 12 }}>
-        <div style={{ fontWeight: 700, color: '#60a5fa', marginBottom: 12 }}>ノード属性</div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, color: 'var(--accent)', marginBottom: 12, letterSpacing: '0.1em', textTransform: 'uppercase' }}>NODE</div>
         <Field label="種別">
           <select data-field="type" value={node.type ?? 'other'} onChange={e => patch({ type: e.target.value as NodeType })} style={inputStyle}>
             {NODE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -97,7 +100,7 @@ export const AttributePanel: React.FC<AttributePanelProps> = ({
     }
     return (
       <div style={{ padding: 12, fontSize: 12 }}>
-        <div style={{ fontWeight: 700, color: '#34d399', marginBottom: 12 }}>スペース属性</div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, color: 'var(--green)', marginBottom: 12, letterSpacing: '0.1em', textTransform: 'uppercase' }}>SPACE</div>
         <Field label="名称">
           <input data-field="name" type="text" value={space.name ?? ''} onChange={e => patch({ name: e.target.value })} style={inputStyle} />
         </Field>
@@ -135,7 +138,7 @@ export const AttributePanel: React.FC<AttributePanelProps> = ({
     }
     return (
       <div style={{ padding: 12, fontSize: 12 }}>
-        <div style={{ fontWeight: 700, color: '#fb923c', marginBottom: 12 }}>エッジ属性</div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, color: 'var(--orange)', marginBottom: 12, letterSpacing: '0.1em', textTransform: 'uppercase' }}>EDGE</div>
         <Field label="距離 (m)">
           <input data-field="distance" type="number" step="0.1" value={edge.distance ?? ''}
             onChange={e => patch({ distance: Number(e.target.value) })} style={inputStyle} />

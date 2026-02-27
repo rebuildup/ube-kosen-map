@@ -1,24 +1,106 @@
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Backgrounds */
+  --bg-0:      #060d1a;   /* deepest: canvas */
+  --bg-1:      #0a1628;   /* app base */
+  --bg-2:      #0f1e38;   /* sidebar/panel */
+  --bg-3:      #162642;   /* elevated / hover */
+
+  /* Borders */
+  --border-1:  #1a2e47;   /* subtle */
+  --border-2:  #23406e;   /* visible */
+
+  /* Accent */
+  --accent:      #22d3ee;
+  --accent-dim:  #0e7490;
+  --accent-bg:   rgba(34, 211, 238, 0.08);
+
+  /* Semantic */
+  --amber:  #fbbf24;
+  --green:  #10b981;
+  --red:    #f87171;
+  --orange: #fb923c;
+
+  /* Text */
+  --text-1:  #dde9f7;   /* primary */
+  --text-2:  #6a96bb;   /* secondary */
+  --text-3:  #2e4a65;   /* disabled */
+
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Consolas', 'SF Mono', monospace;
+  --font-ui:   system-ui, -apple-system, 'Noto Sans JP', sans-serif;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   width: 100%;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Canvas grid (dot pattern) ──────────────────────────────────────────────── */
+.canvas-grid {
+  background-color: var(--bg-0) !important;
+  background-image:
+    radial-gradient(circle, var(--border-1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar             { width: 4px; height: 4px; }
+::-webkit-scrollbar-track       { background: transparent; }
+::-webkit-scrollbar-thumb       { background: var(--border-2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+/* ── Form elements ──────────────────────────────────────────────────────────── */
+input, select, textarea {
+  background: var(--bg-1);
+  color: var(--text-1);
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-dim);
+}
+
+/* ── App bar label ──────────────────────────────────────────────────────────── */
+.app-brand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* ── Section label ──────────────────────────────────────────────────────────── */
+.panel-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 6px 10px 4px;
 }
