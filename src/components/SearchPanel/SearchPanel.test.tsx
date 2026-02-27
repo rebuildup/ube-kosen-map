@@ -10,7 +10,7 @@ const makeSearchableGraph = (): CampusGraph => {
   const n2 = createNodeId()
   const s1 = createSpaceId()
   g.nodes[n1] = { id: n1, label: '会議室 A', type: 'room' }
-  g.nodes[n2] = { id: n2, label: '職員室', type: 'office' }
+  g.nodes[n2] = { id: n2, label: '職員室', type: 'other' }
   g.spaces[s1] = { id: s1, name: '第一実験室', type: 'lab', tags: ['実験'] }
   return g
 }
@@ -20,7 +20,7 @@ describe('searchNodes', () => {
     const g = makeSearchableGraph()
     const results = searchNodes(g, '会議室')
     expect(results.length).toBeGreaterThan(0)
-    expect(results[0].label).toContain('会議室')
+    expect(results[0]!.label).toContain('会議室')
   })
 
   it('finds spaces by name', () => {
@@ -68,7 +68,7 @@ describe('SearchPanel', () => {
     const result = container.querySelector('[data-search-result]')!
     fireEvent.click(result)
     expect(onSelect).toHaveBeenCalledTimes(1)
-    const [id] = onSelect.mock.calls[0]
+    const [id] = onSelect.mock.calls[0]!
     expect(typeof id).toBe('string')
   })
 })

@@ -47,7 +47,7 @@ export const updateNode = (
     return err(new Error(`Node "${id}" not found.`))
   }
   const g = clone(graph)
-  g.nodes[id] = { ...g.nodes[id], ...patch, id }
+  g.nodes[id] = { ...g.nodes[id]!, ...patch, id }
   return ok(autoComplete(g))
 }
 
@@ -101,7 +101,7 @@ export const updateEdge = (
     return err(new Error(`Edge "${id}" not found.`))
   }
   const g = clone(graph)
-  g.edges[id] = { ...g.edges[id], ...patch, id }
+  g.edges[id] = { ...g.edges[id]!, ...patch, id }
   return ok(autoComplete(g))
 }
 
@@ -142,7 +142,7 @@ export const updateSpace = (
   if (!graph.spaces[id]) {
     return err(new Error(`Space "${id}" not found.`))
   }
-  const candidate = { ...graph.spaces[id], ...patch, id }
+  const candidate = { ...graph.spaces[id]!, ...patch, id }
   if (candidate.polygon && isSelfIntersecting(candidate.polygon)) {
     return err(new Error(`Space "${id}": updated polygon is self-intersecting [SI-3].`))
   }

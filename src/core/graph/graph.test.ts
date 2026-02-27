@@ -28,8 +28,8 @@ describe('addNode', () => {
     const result = addNode(g, { id })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.value.nodes[id].type).toBe('other')
-      expect(result.value.nodes[id].position).toEqual({ x: 0, y: 0 })
+      expect(result.value.nodes[id]!.type).toBe('other')
+      expect(result.value.nodes[id]!.position).toEqual({ x: 0, y: 0 })
     }
   })
 
@@ -102,7 +102,7 @@ describe('addEdge', () => {
       id: eid, sourceNodeId: n1, targetNodeId: n2,
     })
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.value.edges[eid].distance).toBeCloseTo(5.0)
+    if (result.ok) expect(result.value.edges[eid]!.distance).toBeCloseTo(5.0)
   })
 })
 
@@ -115,7 +115,7 @@ describe('updateNode', () => {
     const g1 = addNode(g, { id })
     const result = updateNode(g1.ok ? g1.value : g, id, { label: 'Room 101' })
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.value.nodes[id].label).toBe('Room 101')
+    if (result.ok) expect(result.value.nodes[id]!.label).toBe('Room 101')
   })
 
   it('returns error when node does not exist', () => {
@@ -150,7 +150,7 @@ describe('updateEdge', () => {
     const g3 = addEdge(g2.ok ? g2.value : g, { id: eid, sourceNodeId: n1, targetNodeId: n2 })
     const result = updateEdge(g3.ok ? g3.value : g, eid, { hasSteps: true })
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.value.edges[eid].hasSteps).toBe(true)
+    if (result.ok) expect(result.value.edges[eid]!.hasSteps).toBe(true)
   })
 
   it('returns error when edge does not exist', () => {
@@ -218,7 +218,7 @@ describe('addSpace', () => {
     const result = addSpace(g, { id: sid })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.value.spaces[sid].type).toBe('other')
+      expect(result.value.spaces[sid]!.type).toBe('other')
     }
   })
 
@@ -357,8 +357,8 @@ describe('saveCampusGraph / loadCampusGraph', () => {
     const json = saveCampusGraph(g)
     const loaded = loadCampusGraph(json)
 
-    expect(loaded.nodes[nid].type).toBe('room')
-    expect(loaded.nodes[nid].position).toEqual({ x: 1, y: 2 })
+    expect(loaded.nodes[nid]!.type).toBe('room')
+    expect(loaded.nodes[nid]!.position).toEqual({ x: 1, y: 2 })
     expect(loaded.edges[eid]).toBeDefined()
   })
 
@@ -368,7 +368,7 @@ describe('saveCampusGraph / loadCampusGraph', () => {
     g.nodes[nid] = { id: nid } // no type
     const json = saveCampusGraph(g)
     const loaded = loadCampusGraph(json)
-    expect(loaded.nodes[nid].type).toBe('other')
+    expect(loaded.nodes[nid]!.type).toBe('other')
   })
 
   it('saveCampusGraph produces valid JSON', () => {

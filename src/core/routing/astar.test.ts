@@ -187,7 +187,7 @@ describe('alternative routes', () => {
     )
     if (!result.ok || !result.alternatives?.length) return
     const mainPath = JSON.stringify(result.route.nodeIds)
-    const altPath  = JSON.stringify(result.alternatives[0].nodeIds)
+    const altPath  = JSON.stringify(result.alternatives[0]!.nodeIds)
     expect(mainPath).not.toBe(altPath)
   })
 })

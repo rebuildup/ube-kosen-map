@@ -70,9 +70,10 @@ export const TraceEditor: React.FC = () => {
   const handleVertexAdd = useCallback((worldPos: Vec2) => {
     const verts = editor.drawingVertices
     // Close polygon when clicking near the first vertex (or 3+ verts)
-    const isClose = verts.length >= 3 &&
-      Math.abs(worldPos.x - verts[0].x) < 12 &&
-      Math.abs(worldPos.y - verts[0].y) < 12
+    const firstVert = verts[0]  // noUncheckedIndexedAccess: Vec2 | undefined
+    const isClose = verts.length >= 3 && firstVert != null &&
+      Math.abs(worldPos.x - firstVert.x) < 12 &&
+      Math.abs(worldPos.y - firstVert.y) < 12
 
     if (isClose) {
       // Confirm space: create Space + anchor Node at centroid

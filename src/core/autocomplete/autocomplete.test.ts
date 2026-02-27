@@ -23,7 +23,7 @@ describe('Step 2: default values', () => {
     const id = createNodeId()
     addNode(g, { id })
     const result = autoComplete(g)
-    expect(result.nodes[id].type).toBe('other')
+    expect(result.nodes[id]!.type).toBe('other')
   })
 
   it('does not overwrite existing node.type', () => {
@@ -31,7 +31,7 @@ describe('Step 2: default values', () => {
     const id = createNodeId()
     addNode(g, { id, type: 'room' })
     const result = autoComplete(g)
-    expect(result.nodes[id].type).toBe('room')
+    expect(result.nodes[id]!.type).toBe('room')
   })
 
   it('fills node.position with {x:0, y:0} when missing', () => {
@@ -39,7 +39,7 @@ describe('Step 2: default values', () => {
     const id = createNodeId()
     addNode(g, { id })
     const result = autoComplete(g)
-    expect(result.nodes[id].position).toEqual({ x: 0, y: 0 })
+    expect(result.nodes[id]!.position).toEqual({ x: 0, y: 0 })
   })
 
   it('does not overwrite existing node.position', () => {
@@ -47,7 +47,7 @@ describe('Step 2: default values', () => {
     const id = createNodeId()
     addNode(g, { id, position: { x: 10, y: 20 } })
     const result = autoComplete(g)
-    expect(result.nodes[id].position).toEqual({ x: 10, y: 20 })
+    expect(result.nodes[id]!.position).toEqual({ x: 10, y: 20 })
   })
 
   it('fills edge.direction with "bidirectional" when missing', () => {
@@ -59,7 +59,7 @@ describe('Step 2: default values', () => {
     const eid = createEdgeId()
     addEdge(g, { id: eid, sourceNodeId: src, targetNodeId: dst })
     const result = autoComplete(g)
-    expect(result.edges[eid].direction).toBe('bidirectional')
+    expect(result.edges[eid]!.direction).toBe('bidirectional')
   })
 
   it('fills edge.hasSteps with false when missing', () => {
@@ -71,7 +71,7 @@ describe('Step 2: default values', () => {
     const eid = createEdgeId()
     addEdge(g, { id: eid, sourceNodeId: src, targetNodeId: dst })
     const result = autoComplete(g)
-    expect(result.edges[eid].hasSteps).toBe(false)
+    expect(result.edges[eid]!.hasSteps).toBe(false)
   })
 
   it('fills edge.isOutdoor with false when missing', () => {
@@ -83,7 +83,7 @@ describe('Step 2: default values', () => {
     const eid = createEdgeId()
     addEdge(g, { id: eid, sourceNodeId: src, targetNodeId: dst })
     const result = autoComplete(g)
-    expect(result.edges[eid].isOutdoor).toBe(false)
+    expect(result.edges[eid]!.isOutdoor).toBe(false)
   })
 
   it('fills edge.width with 1.5 when missing', () => {
@@ -95,7 +95,7 @@ describe('Step 2: default values', () => {
     const eid = createEdgeId()
     addEdge(g, { id: eid, sourceNodeId: src, targetNodeId: dst })
     const result = autoComplete(g)
-    expect(result.edges[eid].width).toBe(1.5)
+    expect(result.edges[eid]!.width).toBe(1.5)
   })
 
   it('fills space.type with "other" when missing', () => {
@@ -103,7 +103,7 @@ describe('Step 2: default values', () => {
     const sid = createSpaceId()
     addSpace(g, { id: sid })
     const result = autoComplete(g)
-    expect(result.spaces[sid].type).toBe('other')
+    expect(result.spaces[sid]!.type).toBe('other')
   })
 
   it('fills floor.name from level when both missing', () => {
@@ -111,7 +111,7 @@ describe('Step 2: default values', () => {
     const fid = createFloorId()
     addFloor(g, { id: fid, level: 1 })
     const result = autoComplete(g)
-    expect(result.floors[fid].name).toBe('1F')
+    expect(result.floors[fid]!.name).toBe('1F')
   })
 
   it('generates "B1" for level -1', () => {
@@ -119,7 +119,7 @@ describe('Step 2: default values', () => {
     const fid = createFloorId()
     addFloor(g, { id: fid, level: -1 })
     const result = autoComplete(g)
-    expect(result.floors[fid].name).toBe('B1')
+    expect(result.floors[fid]!.name).toBe('B1')
   })
 
   it('does not overwrite existing floor.name', () => {
@@ -127,7 +127,7 @@ describe('Step 2: default values', () => {
     const fid = createFloorId()
     addFloor(g, { id: fid, level: 1, name: 'Ground Floor' })
     const result = autoComplete(g)
-    expect(result.floors[fid].name).toBe('Ground Floor')
+    expect(result.floors[fid]!.name).toBe('Ground Floor')
   })
 })
 
@@ -145,7 +145,7 @@ describe('Step 3: relation inference', () => {
     addNode(g, { id: nid, floorId: fid }) // no buildingId
 
     const result = autoComplete(g)
-    expect(result.nodes[nid].buildingId).toBe(bid)
+    expect(result.nodes[nid]!.buildingId).toBe(bid)
   })
 
   it('does not overwrite existing node.buildingId', () => {
@@ -160,7 +160,7 @@ describe('Step 3: relation inference', () => {
     addNode(g, { id: nid, floorId: fid, buildingId: bid2 })
 
     const result = autoComplete(g)
-    expect(result.nodes[nid].buildingId).toBe(bid2)
+    expect(result.nodes[nid]!.buildingId).toBe(bid2)
   })
 
   it('infers space.buildingId from floorId', () => {
@@ -174,7 +174,7 @@ describe('Step 3: relation inference', () => {
     addSpace(g, { id: sid, floorId: fid })
 
     const result = autoComplete(g)
-    expect(result.spaces[sid].buildingId).toBe(bid)
+    expect(result.spaces[sid]!.buildingId).toBe(bid)
   })
 
   it('infers edge.isVertical when nodes are on different floors', () => {
@@ -192,7 +192,7 @@ describe('Step 3: relation inference', () => {
     addEdge(g, { id: eid, sourceNodeId: nid1, targetNodeId: nid2 })
 
     const result = autoComplete(g)
-    expect(result.edges[eid].isVertical).toBe(true)
+    expect(result.edges[eid]!.isVertical).toBe(true)
   })
 
   it('sets edge.isVertical to false when nodes on same floor', () => {
@@ -208,7 +208,7 @@ describe('Step 3: relation inference', () => {
     addEdge(g, { id: eid, sourceNodeId: nid1, targetNodeId: nid2 })
 
     const result = autoComplete(g)
-    expect(result.edges[eid].isVertical).toBe(false)
+    expect(result.edges[eid]!.isVertical).toBe(false)
   })
 })
 
@@ -226,7 +226,7 @@ describe('Step 4: geometric computation', () => {
     addEdge(g, { id: eid, sourceNodeId: nid1, targetNodeId: nid2 })
 
     const result = autoComplete(g)
-    expect(result.edges[eid].distance).toBeCloseTo(5.0)
+    expect(result.edges[eid]!.distance).toBeCloseTo(5.0)
   })
 
   it('does not overwrite existing edge.distance', () => {
@@ -240,7 +240,7 @@ describe('Step 4: geometric computation', () => {
     addEdge(g, { id: eid, sourceNodeId: nid1, targetNodeId: nid2, distance: 99 })
 
     const result = autoComplete(g)
-    expect(result.edges[eid].distance).toBe(99)
+    expect(result.edges[eid]!.distance).toBe(99)
   })
 
   it('skips distance calculation when node positions are missing', () => {
@@ -257,7 +257,7 @@ describe('Step 4: geometric computation', () => {
 
     const result = autoComplete(g)
     // Both nodes will be at {0,0} after default fill, so distance = 0
-    expect(typeof result.edges[eid].distance).toBe('number')
+    expect(typeof result.edges[eid]!.distance).toBe('number')
   })
 })
 

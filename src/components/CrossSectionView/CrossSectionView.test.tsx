@@ -27,7 +27,7 @@ function makeGraph(): CampusGraph {
       [n2]: { id: n2, floorId: f2, position: { x: 0, y: 0 }, type: 'staircase', verticalLinks: { below: n1 } },
     },
     edges: {
-      [e1]: { id: e1, from: n1, to: n2, isVertical: true },
+      [e1]: { id: e1, sourceNodeId: n1, targetNodeId: n2, isVertical: true },
     },
     spaces: {},
   }

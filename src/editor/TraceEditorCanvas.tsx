@@ -57,7 +57,9 @@ const collectSegments = (graph: CampusGraph): [Vec2, Vec2][] => {
   for (const space of Object.values(graph.spaces)) {
     const verts = space.polygon?.vertices ?? []
     for (let i = 0; i < verts.length; i++) {
-      segs.push([verts[i], verts[(i + 1) % verts.length]])
+      const a = verts[i]
+      const b = verts[(i + 1) % verts.length]
+      if (a && b) segs.push([a, b])  // noUncheckedIndexedAccess guard
     }
   }
   return segs
@@ -133,7 +135,9 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
   const drawingCircles: React.ReactNode[] = []
 
   for (let i = 0; i < drawingVertices.length; i++) {
-    const s = toScreen(drawingVertices[i])
+    const v = drawingVertices[i]
+    if (!v) continue  // noUncheckedIndexedAccess guard
+    const s = toScreen(v)
     drawingCircles.push(
       <circle
         key={`dv-${i}`}
@@ -143,7 +147,9 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
       />,
     )
     if (i > 0) {
-      const prev = toScreen(drawingVertices[i - 1])
+      const pv = drawingVertices[i - 1]
+      if (!pv) continue  // noUncheckedIndexedAccess guard
+      const prev = toScreen(pv)
       drawingLines.push(
         <line
           key={`dl-${i}`}
@@ -156,8 +162,9 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
   }
 
   // Ghost line: last placed vertex → current snap position
-  if (drawingVertices.length > 0 && snap) {
-    const last = toScreen(drawingVertices[drawingVertices.length - 1])
+  const lastVertex = drawingVertices[drawingVertices.length - 1]
+  if (drawingVertices.length > 0 && snap && lastVertex) {
+    const last = toScreen(lastVertex)
     const sp = toScreen(snap.position)
     drawingLines.push(
       <line

@@ -47,7 +47,7 @@ class MinHeap<T> {
 
   pop(): T | undefined {
     if (this.data.length === 0) return undefined
-    const top = this.data[0].item
+    const top = this.data[0]!.item
     const last = this.data.pop()!
     if (this.data.length > 0) {
       this.data[0] = last
@@ -61,8 +61,8 @@ class MinHeap<T> {
   private _bubbleUp(i: number): void {
     while (i > 0) {
       const parent = (i - 1) >> 1
-      if (this.data[parent].priority <= this.data[i].priority) break
-      ;[this.data[parent], this.data[i]] = [this.data[i], this.data[parent]]
+      if (this.data[parent]!.priority <= this.data[i]!.priority) break
+      ;[this.data[parent], this.data[i]] = [this.data[i]!, this.data[parent]!]
       i = parent
     }
   }
@@ -73,10 +73,10 @@ class MinHeap<T> {
       let smallest = i
       const l = 2 * i + 1
       const r = 2 * i + 2
-      if (l < n && this.data[l].priority < this.data[smallest].priority) smallest = l
-      if (r < n && this.data[r].priority < this.data[smallest].priority) smallest = r
+      if (l < n && this.data[l]!.priority < this.data[smallest]!.priority) smallest = l
+      if (r < n && this.data[r]!.priority < this.data[smallest]!.priority) smallest = r
       if (smallest === i) break
-      ;[this.data[smallest], this.data[i]] = [this.data[i], this.data[smallest]]
+      ;[this.data[smallest], this.data[i]] = [this.data[i]!, this.data[smallest]!]
       i = smallest
     }
   }
@@ -170,13 +170,15 @@ const extractFloorTransitions = (
 ): FloorTransition[] => {
   const transitions: FloorTransition[] = []
   for (let i = 1; i < nodeIds.length; i++) {
-    const prev = graph.nodes[nodeIds[i - 1]]
-    const curr = graph.nodes[nodeIds[i]]
+    const prevId = nodeIds[i - 1]!
+    const currId = nodeIds[i]!
+    const prev = graph.nodes[prevId]
+    const curr = graph.nodes[currId]
     if (prev?.floorId && curr?.floorId && prev.floorId !== curr.floorId) {
       const fromFloor = graph.floors[prev.floorId]
       const toFloor   = graph.floors[curr.floorId]
       transitions.push({
-        nodeId: nodeIds[i],
+        nodeId: currId,
         fromFloorId: prev.floorId,
         toFloorId: curr.floorId,
         description: `${fromFloor?.name ?? prev.floorId}→${toFloor?.name ?? curr.floorId}`,
@@ -202,9 +204,11 @@ const yensKShortest = (
 
   for (let ki = 1; ki < k; ki++) {
     const prev = A[ki - 1]
+    if (!prev) break
 
     for (let spurIdx = 0; spurIdx < prev.nodeIds.length - 1; spurIdx++) {
       const spurNode = prev.nodeIds[spurIdx]
+      if (!spurNode) continue
       const rootPath = prev.nodeIds.slice(0, spurIdx + 1)
 
       const excludedEdges = new Set<string>()

@@ -61,8 +61,8 @@ describe('addVerticalLink', () => {
     // floor2 is "above" floor1
     const n1 = result.value.nodes[node1Id]
     const n2 = result.value.nodes[node2Id]
-    expect(n1.verticalLinks?.above ?? n1.verticalLinks?.below).toBeDefined()
-    expect(n2.verticalLinks?.above ?? n2.verticalLinks?.below).toBeDefined()
+    expect(n1?.verticalLinks?.above ?? n1?.verticalLinks?.below).toBeDefined()
+    expect(n2?.verticalLinks?.above ?? n2?.verticalLinks?.below).toBeDefined()
     void floor1Id; void floor2Id
   })
 
@@ -165,7 +165,7 @@ describe('validateStaircaseIntegrity', () => {
     const issues = validateStaircaseIntegrity(graph)
     const nodeIssues = issues.filter(i => i.targetIds.includes(node1Id))
     expect(nodeIssues.length).toBeGreaterThan(0)
-    expect(nodeIssues[0].ruleId).toBe('NI-2')
-    expect(nodeIssues[0].severity).toBe('warning')
+    expect(nodeIssues[0]?.ruleId).toBe('NI-2')
+    expect(nodeIssues[0]?.severity).toBe('warning')
   })
 })

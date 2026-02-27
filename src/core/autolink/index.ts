@@ -100,8 +100,12 @@ const findAdjacentSpaces = (
   for (const [, wallHits] of byKey) {
     const spaceIds = [...new Set(wallHits.map(h => h.spaceId))]
     if (spaceIds.length >= 2) {
-      const s1 = graph.spaces[spaceIds[0]]
-      const s2 = graph.spaces[spaceIds[1]]
+      const id0 = spaceIds[0]
+      const id1 = spaceIds[1]
+      if (!id0 || !id1) continue
+      const s1 = graph.spaces[id0]
+      const s2 = graph.spaces[id1]
+      if (!s1 || !s2) continue
       return [s1, s2]
     }
   }
@@ -129,8 +133,10 @@ const getOrCreateAnchorNode = (
   const g = clone(graph)
   g.nodes[nodeId] = { id: nodeId, position: pos }
   // Register in space.containedNodeIds
-  if (!g.spaces[space.id].containedNodeIds) g.spaces[space.id].containedNodeIds = []
-  g.spaces[space.id].containedNodeIds!.push(nodeId)
+  const gSpace = g.spaces[space.id]
+  if (!gSpace) return { graph: g, nodeId }
+  if (!gSpace.containedNodeIds) gSpace.containedNodeIds = []
+  gSpace.containedNodeIds.push(nodeId)
 
   return { graph: g, nodeId }
 }
@@ -159,7 +165,11 @@ export const placeDoor = (
 
   // Create or reuse anchor nodes
   const r1 = getOrCreateAnchorNode(graph, spaceA)
-  const r2 = getOrCreateAnchorNode(r1.graph, r1.graph.spaces[spaceB.id])
+  const updatedSpaceB = r1.graph.spaces[spaceB.id]
+  if (!updatedSpaceB) {
+    return err(new Error(`Space "${spaceB.id}" not found after first anchor creation.`))
+  }
+  const r2 = getOrCreateAnchorNode(r1.graph, updatedSpaceB)
 
   // Create edge between anchor nodes
   const edgeId = createEdgeId()

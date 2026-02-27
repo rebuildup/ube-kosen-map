@@ -123,7 +123,9 @@ export const validate = (graph: CampusGraph): ValidationResult => {
   for (const space of Object.values(graph.spaces)) {
     const verts = space.polygon?.vertices ?? []
     for (let i = 0; i < verts.length; i++) {
-      wallSegments.push([verts[i], verts[(i + 1) % verts.length]])
+      const a = verts[i]
+      const b = verts[(i + 1) % verts.length]
+      if (a && b) wallSegments.push([a, b])
     }
   }
 

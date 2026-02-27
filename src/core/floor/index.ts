@@ -7,7 +7,7 @@
  */
 
 import type {
-  CampusGraph, NodeId, BuildingId, Floor, ValidationIssue,
+  CampusGraph, NodeId, EdgeId, BuildingId, Floor, ValidationIssue,
 } from '../schema'
 import { type Result, ok, err } from '../graph/result'
 
@@ -58,9 +58,9 @@ export const addVerticalLink = (
   const g = clone(graph)
 
   // Create the vertical edge
-  const edgeId = `vert-${lowerId}-${upperId}` as Parameters<typeof g.edges>[0]
+  const edgeId = `vert-${lowerId}-${upperId}` as EdgeId
   g.edges[edgeId] = {
-    id: edgeId as never,
+    id: edgeId,
     sourceNodeId: lowerId,
     targetNodeId: upperId,
     isVertical: true,
@@ -69,11 +69,13 @@ export const addVerticalLink = (
 
   // Update verticalLinks on both nodes
   g.nodes[lowerId] = {
-    ...g.nodes[lowerId],
+    ...lowerNode,
+    id: lowerId,
     verticalLinks: { ...(lowerNode.verticalLinks ?? {}), above: upperId },
   }
   g.nodes[upperId] = {
-    ...g.nodes[upperId],
+    ...upperNode,
+    id: upperId,
     verticalLinks: { ...(upperNode.verticalLinks ?? {}), below: lowerId },
   }
 
@@ -94,7 +96,7 @@ export const getFloorsForBuilding = (
 
   return (building.floorIds ?? [])
     .map(fid => graph.floors[fid])
-    .filter(Boolean)
+    .filter((f): f is Floor => f != null)
     .sort((a, b) => (a.level ?? 0) - (b.level ?? 0))
 }
 

@@ -26,7 +26,7 @@ describe('getZoomLevel', () => {
     // Each level should be ≥ the previous
     const order: ZoomLevel[] = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5']
     for (let i = 1; i < levels.length; i++) {
-      expect(order.indexOf(levels[i])).toBeGreaterThanOrEqual(order.indexOf(levels[i - 1]))
+      expect(order.indexOf(levels[i]!)).toBeGreaterThanOrEqual(order.indexOf(levels[i - 1]!))
     }
   })
 

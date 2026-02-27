@@ -25,7 +25,7 @@ describe('BuildingFloorManager', () => {
     fireEvent.change(nameInput, { target: { value: '本館' } })
     fireEvent.click(container.querySelector('[data-action="confirm-add-building"]')!)
     expect(onGraphUpdate).toHaveBeenCalled()
-    const updated = onGraphUpdate.mock.calls[0][0] as CampusGraph
+    const updated = onGraphUpdate.mock.calls[0]![0] as CampusGraph  // calls[0]! guarded by toHaveBeenCalled
     const buildings = Object.values(updated.buildings) as Building[]
     expect(buildings.some(b => b.name === '本館')).toBe(true)
   })
@@ -46,7 +46,7 @@ describe('BuildingFloorManager', () => {
     fireEvent.change(levelInput, { target: { value: '1' } })
     fireEvent.click(container.querySelector('[data-action="confirm-add-floor"]')!)
     expect(onGraphUpdate).toHaveBeenCalled()
-    const updated = onGraphUpdate.mock.calls[0][0] as CampusGraph
+    const updated = onGraphUpdate.mock.calls[0]![0] as CampusGraph  // calls[0]! guarded by toHaveBeenCalled
     expect(Object.keys(updated.floors).length).toBe(1)
   })
 })

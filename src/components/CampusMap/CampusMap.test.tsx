@@ -62,9 +62,9 @@ describe('CampusMap', () => {
     const onNodeClick = vi.fn()
     render(<CampusMap graph={g} onNodeClick={onNodeClick} />)
     const [firstNode] = document.querySelectorAll('[data-node-id]')
-    fireEvent.click(firstNode)
+    fireEvent.click(firstNode!)
     expect(onNodeClick).toHaveBeenCalledTimes(1)
-    const calledId = onNodeClick.mock.calls[0][0]
+    const calledId = onNodeClick.mock.calls[0]![0]
     expect(Object.keys(g.nodes)).toContain(calledId)
   })
 

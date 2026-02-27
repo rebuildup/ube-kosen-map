@@ -173,8 +173,11 @@ export const useGestures = (
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
-      touch.current.prevA = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-      touch.current.prevB = { x: e.touches[1].clientX, y: e.touches[1].clientY }
+      const t0 = e.touches[0]
+      const t1 = e.touches[1]
+      if (!t0 || !t1) return
+      touch.current.prevA = { x: t0.clientX, y: t0.clientY }
+      touch.current.prevB = { x: t1.clientX, y: t1.clientY }
     }
   }, [])
 
@@ -183,8 +186,11 @@ export const useGestures = (
     const t = touch.current
     if (!t.prevA || !t.prevB) return
 
-    const currA: Point = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    const currB: Point = { x: e.touches[1].clientX, y: e.touches[1].clientY }
+    const t0 = e.touches[0]
+    const t1 = e.touches[1]
+    if (!t0 || !t1) return
+    const currA: Point = { x: t0.clientX, y: t0.clientY }
+    const currB: Point = { x: t1.clientX, y: t1.clientY }
 
     const { center, scaleFactor } = getPinchCenterAndScale(t.prevA, t.prevB, currA, currB)
     const rotDelta = getTwoFingerRotation(t.prevA, t.prevB, currA, currB)

@@ -82,7 +82,7 @@ describe('placeDoor', () => {
     if (!result.ok) return
     const { graph, anchorNodeIds } = result.value
     // Space A centroid: (25, 50), Space B centroid: (75, 50)
-    const positions = anchorNodeIds.map(id => graph.nodes[id].position!)
+    const positions = anchorNodeIds.map(id => graph.nodes[id]!.position!)
     const xs = positions.map(p => p.x).sort((a, b) => a - b)
     expect(xs[0]).toBeCloseTo(25)
     expect(xs[1]).toBeCloseTo(75)
@@ -93,8 +93,8 @@ describe('placeDoor', () => {
     // Add a node to the first space
     const existingNodeId = createNodeId()
     g.nodes[existingNodeId] = { id: existingNodeId, position: { x: 20, y: 30 } }
-    const firstSpaceId = Object.keys(g.spaces)[0]
-    g.spaces[firstSpaceId].containedNodeIds = [existingNodeId]
+    const firstSpaceId = Object.keys(g.spaces)[0]!
+    g.spaces[firstSpaceId]!.containedNodeIds = [existingNodeId]
 
     const result = placeDoor(g, { x: 50, y: 50 })
     expect(result.ok).toBe(true)

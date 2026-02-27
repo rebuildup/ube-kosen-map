@@ -22,7 +22,7 @@ const IssueRow: React.FC<{
   issue: ValidationIssue
   onFocus?: (ids: string[]) => void
 }> = ({ issue, onFocus }) => {
-  const colors = SEVERITY_COLORS[issue.severity] ?? SEVERITY_COLORS['error']
+  const colors = SEVERITY_COLORS[issue.severity] ?? { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626' }
 
   return (
     <div

@@ -40,7 +40,7 @@ const getVerticalLinks = (graph: CampusGraph, floorIds: Set<FloorId>) => {
     if (n.floorId && floorIds.has(n.floorId)) nodeFloor.set(n.id, n.floorId)
   })
   return Object.values(graph.edges).filter(e =>
-    e.isVertical && nodeFloor.has(e.from) && nodeFloor.has(e.to),
+    e.isVertical && nodeFloor.has(e.sourceNodeId) && nodeFloor.has(e.targetNodeId),
   )
 }
 

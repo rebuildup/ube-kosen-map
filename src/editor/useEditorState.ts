@@ -55,7 +55,7 @@ export const useEditorState = () => {
   const undo = useCallback(() => {
     setUndoStack(stack => {
       if (stack.length === 0) return stack
-      const prev = stack[stack.length - 1]
+      const prev = stack[stack.length - 1] as CampusGraph  // length > 0 guaranteed above
       setGraph(cur => {
         setRedoStack(r => [...r, cur])
         return prev
@@ -67,7 +67,7 @@ export const useEditorState = () => {
   const redo = useCallback(() => {
     setRedoStack(stack => {
       if (stack.length === 0) return stack
-      const next = stack[stack.length - 1]
+      const next = stack[stack.length - 1] as CampusGraph  // length > 0 guaranteed above
       setGraph(cur => {
         setUndoStack(u => [...u, cur])
         return next
