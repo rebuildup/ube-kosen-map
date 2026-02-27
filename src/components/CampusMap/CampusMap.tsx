@@ -17,21 +17,24 @@ import { useViewTransform, matToTransform, transformPoint } from './useViewTrans
 
 export interface CampusMapProps {
   graph: CampusGraph
-  width?: number
-  height?: number
+  width?: number | string
+  height?: number | string
   selectedNodeId?: NodeId | string
   onNodeClick?: (nodeId: string) => void
   /** Optional base floor plan image URL */
   baseImageUrl?: string
+  /** Render graph overlays (spaces/edges/nodes) on top of base image */
+  showGraphOverlay?: boolean
 }
 
 export const CampusMap: React.FC<CampusMapProps> = ({
   graph,
-  width = 800,
-  height = 600,
+  width = '100%',
+  height = '100%',
   selectedNodeId,
   onNodeClick,
   baseImageUrl,
+  showGraphOverlay = true,
 }) => {
   const { matrix, zoom, pan } = useViewTransform()
   const isDragging = useRef(false)
@@ -107,6 +110,9 @@ export const CampusMap: React.FC<CampusMapProps> = ({
           style={{
             position: 'absolute',
             inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
             transform: transformStr,
             transformOrigin: '0 0',
             pointerEvents: 'none',
@@ -115,52 +121,54 @@ export const CampusMap: React.FC<CampusMapProps> = ({
       )}
 
       {/* SVG layer: spaces + edges */}
-      <svg
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}
-        aria-hidden="true"
-      >
-        <g transform={transformStr}>
-          {/* Spaces */}
-          {spaces.map(space => {
-            const verts = space.polygon?.vertices ?? []
-            if (verts.length < 3) return null
-            const points = verts.map(v => `${v.x},${v.y}`).join(' ')
-            return (
-              <polygon
-                key={space.id}
-                data-space-id={space.id}
-                points={points}
-                fill="rgba(100, 160, 220, 0.15)"
-                stroke="rgba(100, 160, 220, 0.6)"
-                strokeWidth={1}
-              />
-            )
-          })}
+      {showGraphOverlay && (
+        <svg
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}
+          aria-hidden="true"
+        >
+          <g transform={transformStr}>
+            {/* Spaces */}
+            {spaces.map(space => {
+              const verts = space.polygon?.vertices ?? []
+              if (verts.length < 3) return null
+              const points = verts.map(v => `${v.x},${v.y}`).join(' ')
+              return (
+                <polygon
+                  key={space.id}
+                  data-space-id={space.id}
+                  points={points}
+                  fill="rgba(100, 160, 220, 0.15)"
+                  stroke="rgba(100, 160, 220, 0.6)"
+                  strokeWidth={1}
+                />
+              )
+            })}
 
-          {/* Edges */}
-          {edges.map(edge => {
-            const src = graph.nodes[edge.sourceNodeId]
-            const dst = graph.nodes[edge.targetNodeId]
-            const sp = src?.position ?? { x: 0, y: 0 }
-            const dp = dst?.position ?? { x: 0, y: 0 }
-            return (
-              <line
-                key={edge.id}
-                data-edge-id={edge.id}
-                x1={sp.x}
-                y1={sp.y}
-                x2={dp.x}
-                y2={dp.y}
-                stroke="#6b7280"
-                strokeWidth={2}
-              />
-            )
-          })}
-        </g>
-      </svg>
+            {/* Edges */}
+            {edges.map(edge => {
+              const src = graph.nodes[edge.sourceNodeId]
+              const dst = graph.nodes[edge.targetNodeId]
+              const sp = src?.position ?? { x: 0, y: 0 }
+              const dp = dst?.position ?? { x: 0, y: 0 }
+              return (
+                <line
+                  key={edge.id}
+                  data-edge-id={edge.id}
+                  x1={sp.x}
+                  y1={sp.y}
+                  x2={dp.x}
+                  y2={dp.y}
+                  stroke="#6b7280"
+                  strokeWidth={2}
+                />
+              )
+            })}
+          </g>
+        </svg>
+      )}
 
       {/* Node layer: DOM divs */}
-      {nodes.map(node => {
+      {showGraphOverlay && nodes.map(node => {
         const pos = node.position ?? { x: 0, y: 0 }
         const screen = worldToScreen(pos.x, pos.y)
         const isSelected = node.id === selectedNodeId

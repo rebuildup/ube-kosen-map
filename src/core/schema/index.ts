@@ -20,6 +20,7 @@ export {
   createFloorId, createBuildingId, createProfileId,
   isNodeId, isEdgeId, isSpaceId,
   isFloorId, isBuildingId, isProfileId,
+  toNodeId, toEdgeId, toSpaceId, toFloorId, toBuildingId,
 } from './ids'
 
 export {

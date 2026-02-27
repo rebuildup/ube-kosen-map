@@ -45,5 +45,26 @@ describe('useReferenceImage', () => {
     expect(result.current.ref.dataUrl).toBe('data:image/png;base64,abc')
     expect(result.current.ref.naturalWidth).toBe(800)
     expect(result.current.ref.naturalHeight).toBe(600)
+    expect(result.current.ref.cropWidth).toBe(800)
+    expect(result.current.ref.cropHeight).toBe(600)
+  })
+
+  it('setCrop clamps crop box to natural bounds', () => {
+    const { result } = renderHook(() => useReferenceImage())
+    act(() => result.current.setRaw('data:image/png;base64,abc', 300, 200))
+    act(() => result.current.setCrop(-20, 50, 500, 500))
+    expect(result.current.ref.cropX).toBe(0)
+    expect(result.current.ref.cropY).toBe(50)
+    expect(result.current.ref.cropWidth).toBe(300)
+    expect(result.current.ref.cropHeight).toBe(150)
+  })
+
+  it('setCurrentPage keeps page in [1, pageCount]', () => {
+    const { result } = renderHook(() => useReferenceImage())
+    act(() => result.current.setRaw('data:image/png;base64,abc', 800, 600, 3))
+    act(() => result.current.setCurrentPage(99))
+    expect(result.current.ref.currentPage).toBe(3)
+    act(() => result.current.setCurrentPage(0))
+    expect(result.current.ref.currentPage).toBe(1)
   })
 })

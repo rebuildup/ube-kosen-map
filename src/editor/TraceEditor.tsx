@@ -22,6 +22,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useEditorState } from './useEditorState'
 import { ToolBar } from './ToolBar'
 import { TraceEditorCanvas } from './TraceEditorCanvas'
+import { ReferencePanel } from './ReferencePanel'
+import type { ReferenceImageState } from './useReferenceImage'
 import { AttributePanel } from './AttributePanel'
 import { BuildingFloorManager } from './BuildingFloorManager'
 import { ValidationPanel } from '../components/ValidationPanel/ValidationPanel'
@@ -42,8 +44,96 @@ export const TraceEditor: React.FC = () => {
   const editor = useEditorState()
   const [matrix, setMatrix] = useState<Mat3>(identityFn)
   const [visibility, setVisibility] = useState<LayerVisibility>(INITIAL_VISIBILITY)
+  type StoredReference = ReferenceImageState & { id: string, name: string, pdfBytes: Uint8Array | null }
+  const [references, setReferences] = useState<StoredReference[]>([])
+  const [activeReferenceId, setActiveReferenceId] = useState<string | null>(null)
+  const [referenceError, setReferenceError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const refFileInputRef = useRef<HTMLInputElement>(null)
   const validationResult = validate(editor.graph)
+  const activeReference = references.find((ref) => ref.id === activeReferenceId) ?? null
+
+  const createReferenceId = useCallback(() => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID()
+    }
+    return `ref-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  }, [])
+
+  const updateActiveReference = useCallback((updater: (prev: StoredReference) => StoredReference) => {
+    if (!activeReferenceId) return
+    setReferences((prev) => prev.map((item) => (item.id === activeReferenceId ? updater(item) : item)))
+  }, [activeReferenceId])
+
+  const setActiveCrop = useCallback((cropX: number, cropY: number, cropWidth: number, cropHeight: number) => {
+    updateActiveReference((s) => {
+      const maxX = Math.max(0, s.naturalWidth - 1)
+      const maxY = Math.max(0, s.naturalHeight - 1)
+      const safeX = Math.min(maxX, Math.max(0, cropX))
+      const safeY = Math.min(maxY, Math.max(0, cropY))
+      const safeWidth = Math.min(Math.max(1, s.naturalWidth - safeX), Math.max(1, cropWidth))
+      const safeHeight = Math.min(Math.max(1, s.naturalHeight - safeY), Math.max(1, cropHeight))
+      return { ...s, cropX: safeX, cropY: safeY, cropWidth: safeWidth, cropHeight: safeHeight }
+    })
+  }, [updateActiveReference])
+
+  const setActiveRaw = useCallback((dataUrl: string, w: number, h: number, pageCount = 1, currentPage = 1) => {
+    updateActiveReference((s) => {
+      const safeW = Math.max(1, w)
+      const safeH = Math.max(1, h)
+      const safePageCount = Math.max(1, pageCount)
+      const safePage = Math.min(Math.max(1, currentPage), safePageCount)
+      return {
+        ...s,
+        dataUrl,
+        naturalWidth: safeW,
+        naturalHeight: safeH,
+        cropX: 0,
+        cropY: 0,
+        cropWidth: safeW,
+        cropHeight: safeH,
+        pageCount: safePageCount,
+        currentPage: safePage,
+      }
+    })
+  }, [updateActiveReference])
+
+  const removeActiveReference = useCallback(() => {
+    if (!activeReferenceId) return
+    setReferences((prev) => {
+      const filtered = prev.filter((item) => item.id !== activeReferenceId)
+      setActiveReferenceId(filtered[0]?.id ?? null)
+      return filtered
+    })
+  }, [activeReferenceId])
+
+  const readAsDataUrl = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result)
+          return
+        }
+        reject(new Error('Unsupported file content'))
+      }
+      reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'))
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
+  const loadImageNaturalSize = useCallback((dataUrl: string): Promise<{ width: number, height: number }> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => {
+        const width = image.naturalWidth > 0 ? image.naturalWidth : 1000
+        const height = image.naturalHeight > 0 ? image.naturalHeight : 1000
+        resolve({ width, height })
+      }
+      image.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
+      image.src = dataUrl
+    })
+  }, [])
 
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
 
@@ -158,6 +248,99 @@ export const TraceEditor: React.FC = () => {
     e.target.value = ''
   }, [editor])
 
+  const handleRefFileLoad = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setReferenceError(null)
+    const id = createReferenceId()
+    const name = file.name
+    const base: StoredReference = {
+      id,
+      name,
+      dataUrl: null,
+      opacity: 0.5,
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotation: 0,
+      naturalWidth: 1,
+      naturalHeight: 1,
+      cropX: 0,
+      cropY: 0,
+      cropWidth: 1,
+      cropHeight: 1,
+      pageCount: 1,
+      currentPage: 1,
+      pdfBytes: null,
+    }
+    setReferences((prev) => [...prev, base])
+    setActiveReferenceId(id)
+
+    try {
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        const bytes = new Uint8Array(await file.arrayBuffer())
+        setReferences((prev) => prev.map((item) => (
+          item.id === id ? { ...item, pdfBytes: bytes, currentPage: 1 } : item
+        )))
+        return
+      }
+
+      const dataUrl = await readAsDataUrl(file)
+      const size = await loadImageNaturalSize(dataUrl)
+      setReferences((prev) => prev.map((item) => (
+        item.id === id
+          ? {
+              ...item,
+              dataUrl,
+              naturalWidth: size.width,
+              naturalHeight: size.height,
+              cropX: 0,
+              cropY: 0,
+              cropWidth: size.width,
+              cropHeight: size.height,
+              pageCount: 1,
+              currentPage: 1,
+              pdfBytes: null,
+            }
+          : item
+      )))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error'
+      setReferenceError(`リファレンスの読み込みに失敗しました: ${message}`)
+      setReferences((prev) => prev.filter((item) => item.id !== id))
+      setActiveReferenceId((current) => (current === id ? null : current))
+    }
+  }, [createReferenceId, loadImageNaturalSize, readAsDataUrl])
+
+  useEffect(() => {
+    if (!activeReference?.pdfBytes) return
+    let cancelled = false
+
+    const run = async () => {
+      try {
+        const currentPage = activeReference.currentPage
+        const { loadPdfPage } = await import('./loadPdfPage')
+        const pageImage = await loadPdfPage(activeReference.pdfBytes, currentPage)
+        if (cancelled) return
+        setActiveRaw(
+          pageImage.dataUrl,
+          pageImage.width,
+          pageImage.height,
+          pageImage.pageCount,
+          currentPage,
+        )
+      } catch (error) {
+        if (cancelled) return
+        const message = error instanceof Error ? error.message : 'unknown error'
+        setReferenceError(`PDFの描画に失敗しました: ${message}`)
+      }
+    }
+
+    void run()
+    return () => { cancelled = true }
+  }, [activeReference?.id, activeReference?.pdfBytes, activeReference?.currentPage, setActiveRaw])
+
   // ── Instruction hint for status bar ──────────────────────────────────────
 
   const hint = (() => {
@@ -202,6 +385,13 @@ export const TraceEditor: React.FC = () => {
         style={{ display: 'none' }}
         onChange={handleLoadFile}
       />
+      <input
+        ref={refFileInputRef}
+        type="file"
+        accept=".pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,.bmp"
+        style={{ display: 'none' }}
+        onChange={(e) => { void handleRefFileLoad(e) }}
+      />
 
       {/* Center: canvas + status bar */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -234,6 +424,7 @@ export const TraceEditor: React.FC = () => {
           onSelect={editor.selectElement}
           onNodePlace={handleNodePlace}
           onDoorPlace={handleDoorPlace}
+          referenceImages={references}
         />
       </div>
 
@@ -272,6 +463,35 @@ export const TraceEditor: React.FC = () => {
             onChange={setVisibility}
             isEditorMode
           />
+        </div>
+
+        {/* Reference panel */}
+        <div style={{ borderBottom: '1px solid var(--border-1)' }}>
+          <div className="panel-label">リファレンス</div>
+          <ReferencePanel
+            references={references.map((item) => ({ id: item.id, name: item.name, ref: item }))}
+            activeId={activeReferenceId}
+            onSelect={setActiveReferenceId}
+            onAdd={() => refFileInputRef.current?.click()}
+            onRemoveActive={removeActiveReference}
+            actions={{
+              setOpacity: (v) => updateActiveReference((s) => ({ ...s, opacity: Math.max(0, Math.min(1, v)) })),
+              setX: (v) => updateActiveReference((s) => ({ ...s, x: v })),
+              setY: (v) => updateActiveReference((s) => ({ ...s, y: v })),
+              setScale: (v) => updateActiveReference((s) => ({ ...s, scale: Math.max(0.01, v) })),
+              setRotation: (v) => updateActiveReference((s) => ({ ...s, rotation: v })),
+              setCrop: setActiveCrop,
+              setCurrentPage: (page) => updateActiveReference((s) => ({
+                ...s,
+                currentPage: Math.min(Math.max(1, page), Math.max(1, s.pageCount)),
+              })),
+            }}
+          />
+          {referenceError && (
+            <div style={{ padding: '0 10px 10px', color: 'var(--red)', fontSize: 11 }}>
+              {referenceError}
+            </div>
+          )}
         </div>
 
         {/* Validation panel */}

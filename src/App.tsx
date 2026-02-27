@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { TraceEditor } from './editor'
 import { CampusViewer } from './viewer'
-import { createEmptyCampusGraph } from './core/schema/graph'
+import type { CampusGraph } from './core/schema'
+import page1GraphJson from '../data/derived/page_1.graph.json'
 
 type AppMode = 'editor' | 'viewer'
 
@@ -11,7 +12,8 @@ const MODES: { key: AppMode; label: string; tag: string }[] = [
 ]
 
 function App() {
-  const [mode, setMode] = useState<AppMode>('editor')
+  const [mode, setMode] = useState<AppMode>('viewer')
+  const page1Graph = page1GraphJson as unknown as CampusGraph
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-1)' }}>
@@ -73,7 +75,7 @@ function App() {
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         {mode === 'editor'
           ? <TraceEditor />
-          : <CampusViewer graph={createEmptyCampusGraph()} />
+          : <CampusViewer graph={page1Graph} />
         }
       </div>
     </div>

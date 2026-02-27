@@ -148,6 +148,12 @@ export const useGestures = (
   }, [])
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    const isMiddleDrag = e.button === 1
+    const isRotateDrag = e.button === 0 && e.shiftKey
+    if (!isMiddleDrag && !isRotateDrag) {
+      mouse.current.isDown = false
+      return
+    }
     mouse.current = { isDown: true, isShift: e.shiftKey, lastX: e.clientX, lastY: e.clientY, startX: e.clientX, startY: e.clientY }
   }, [])
 

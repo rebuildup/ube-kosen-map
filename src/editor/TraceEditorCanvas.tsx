@@ -14,7 +14,7 @@
  * [P-6] Screen↔world conversion via Mat3 inversion
  */
 
-import React, { useRef, useState, useCallback } from 'react'
+import React, { useRef, useState, useCallback, useId } from 'react'
 import type { CampusGraph } from '../core/schema'
 import type { Vec2, Mat3 } from '../math'
 import { invert, transformPoint } from '../math'
@@ -23,6 +23,7 @@ import type { SnapResult } from '../core/snap'
 import { useGestures } from '../components/CampusMap/useGestures'
 import { matToTransform } from '../components/CampusMap/useViewTransform'
 import type { EditorTool } from './useEditorState'
+import type { ReferenceImageState } from './useReferenceImage'
 
 export interface TraceEditorCanvasProps {
   graph: CampusGraph
@@ -36,6 +37,7 @@ export interface TraceEditorCanvasProps {
   onSelect: (id: string | null, kind: 'node' | 'edge' | 'space' | null) => void
   onNodePlace: (worldPos: Vec2) => void
   onDoorPlace: (worldPos: Vec2) => void
+  referenceImages?: ReferenceImageState[]
 }
 
 // ── Snap context helpers ──────────────────────────────────────────────────────
@@ -81,9 +83,11 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
   graph, matrix, setMatrix,
   activeTool, drawingVertices, activeFloorId,
   onVertexAdd, onCancel, onSelect, onNodePlace, onDoorPlace,
+  referenceImages = [],
 }) => {
   const [snap, setSnap] = useState<SnapResult | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const clipPathId = useId().replace(/:/g, '-')
   const gestures = useGestures(matrix, setMatrix)
 
   const screenToWorld = useCallback((sx: number, sy: number): Vec2 => {
@@ -194,6 +198,7 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
   const spaces = Object.values(graph.spaces)
   const edges  = Object.values(graph.edges)
   const nodes  = Object.values(graph.nodes)
+  const visibleReferences = referenceImages.filter((ref) => ref.dataUrl && ref.cropWidth > 0 && ref.cropHeight > 0)
 
   return (
     <div
@@ -221,6 +226,43 @@ export const TraceEditorCanvas: React.FC<TraceEditorCanvasProps> = ({
       >
         {/* World-space graph content */}
         <g transform={transformStr}>
+          {visibleReferences.map((referenceImage, idx) => {
+            const cropWidth = referenceImage.cropWidth
+            const cropHeight = referenceImage.cropHeight
+            const cropCenterX = cropWidth / 2
+            const cropCenterY = cropHeight / 2
+            const refClipId = `${clipPathId}-${idx}`
+            return (
+              <g
+                key={refClipId}
+                transform={[
+                  `translate(${referenceImage.x} ${referenceImage.y})`,
+                  `rotate(${referenceImage.rotation} ${cropCenterX * referenceImage.scale} ${cropCenterY * referenceImage.scale})`,
+                  `scale(${referenceImage.scale})`,
+                ].join(' ')}
+                opacity={referenceImage.opacity}
+                style={{ pointerEvents: 'none' }}
+                data-reference-image-layer="true"
+              >
+                <defs>
+                  <clipPath id={refClipId}>
+                    <rect x={0} y={0} width={cropWidth} height={cropHeight} />
+                  </clipPath>
+                </defs>
+                <image
+                  data-reference-image="true"
+                  href={referenceImage.dataUrl ?? undefined}
+                  x={-referenceImage.cropX}
+                  y={-referenceImage.cropY}
+                  width={referenceImage.naturalWidth}
+                  height={referenceImage.naturalHeight}
+                  clipPath={`url(#${refClipId})`}
+                  preserveAspectRatio="none"
+                />
+              </g>
+            )
+          })}
+
           {/* Spaces */}
           {spaces.map(s => {
             const pts = (s.polygon?.vertices ?? []).map(v => `${v.x},${v.y}`).join(' ')

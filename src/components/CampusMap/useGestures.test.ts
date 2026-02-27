@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
 import {
   getDoubleTapNextState,
   getPinchCenterAndScale,
   getTwoFingerRotation,
   DoubleTapState,
+  useGestures,
 } from './useGestures'
 
 // ── Double-tap state machine ──────────────────────────────────────────────────
@@ -78,5 +80,35 @@ describe('getTwoFingerRotation', () => {
       { x: 0, y: 0 }, { x: 100, y: 0 },
     )
     expect(delta).toBeLessThan(0)
+  })
+})
+
+describe('mouse pan button policy', () => {
+  it('does not pan on left drag', () => {
+    const setMatrix = vi.fn()
+    const { result } = renderHook(() => useGestures({
+      m00: 1, m10: 0, m20: 0, m01: 0, m11: 1, m21: 0,
+    }, setMatrix))
+
+    act(() => {
+      result.current.onMouseDown({ button: 0, shiftKey: false, clientX: 10, clientY: 10 } as React.MouseEvent)
+      result.current.onMouseMove({ clientX: 30, clientY: 30 } as React.MouseEvent)
+    })
+
+    expect(setMatrix).not.toHaveBeenCalled()
+  })
+
+  it('pans on middle-button drag', () => {
+    const setMatrix = vi.fn()
+    const { result } = renderHook(() => useGestures({
+      m00: 1, m10: 0, m20: 0, m01: 0, m11: 1, m21: 0,
+    }, setMatrix))
+
+    act(() => {
+      result.current.onMouseDown({ button: 1, shiftKey: false, clientX: 10, clientY: 10 } as React.MouseEvent)
+      result.current.onMouseMove({ clientX: 30, clientY: 30 } as React.MouseEvent)
+    })
+
+    expect(setMatrix).toHaveBeenCalled()
   })
 })

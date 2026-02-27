@@ -10,6 +10,9 @@
 両層は同一のグラフデータモデル（JSON）を共有し、
 **React DOM** の描画と **数理モデル** による空間抽象化で統一される。
 
+> 2026-02-27 更新: 実データ生成の主経路は手動トレースではなく
+> `SVG -> 数理プリミティブ -> CampusGraph` パイプラインに移行。
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     データ層 (JSON / 正規化)                      │
@@ -105,6 +108,18 @@ Reactコンポーネントとして配布し、Props/Ref APIで操作する。
   → Constraint Engine (バリデーション) [P-2]
   → Graph Manager (グラフ更新) [P-1]
   → JSON保存
+```
+
+### SVGパイプラインフロー（実データ構築）
+
+```
+抽出SVG (`docs/reference/page_1.svg`)
+  → Stroke path抽出
+  → Pathのpolyline化（数理プリミティブ化）
+  → Node/Edge合成（CampusGraph）
+  → Auto-Complete (補完) [P-5]
+  → Validation (error=0を必須) [P-2]
+  → 派生JSON保存 (`data/derived/page_1.graph.json`)
 ```
 
 ### ビューアーフロー（データ消費）

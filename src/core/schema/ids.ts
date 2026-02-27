@@ -69,3 +69,14 @@ export const isSpaceId    = (id: SpaceId):    boolean => spaceIds.has(id)
 export const isFloorId    = (id: FloorId):    boolean => floorIds.has(id)
 export const isBuildingId = (id: BuildingId): boolean => buildingIds.has(id)
 export const isProfileId  = (id: ProfileId):  boolean => profileIds.has(id)
+
+// ── Deterministic ID helpers (for import pipelines/tests) ────────────────────
+
+const normalize = (raw: string): string =>
+  raw.replace(/[^a-zA-Z0-9_-]/g, '-')
+
+export const toNodeId = (raw: string): NodeId => normalize(raw) as NodeId
+export const toEdgeId = (raw: string): EdgeId => normalize(raw) as EdgeId
+export const toSpaceId = (raw: string): SpaceId => normalize(raw) as SpaceId
+export const toFloorId = (raw: string): FloorId => normalize(raw) as FloorId
+export const toBuildingId = (raw: string): BuildingId => normalize(raw) as BuildingId

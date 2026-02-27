@@ -19,20 +19,20 @@ import type { CampusGraph, NodeId } from '../core/schema'
 import type { RoutingProfile } from '../core/routing/cost'
 import type { Route } from '../core/routing'
 import type { ViewMode } from '../components/ViewModeToggle/ViewModeToggle'
-import { CampusMap } from '../components/CampusMap'
+import { StructuralSvgPseudo3D } from '../components/CampusMap'
 import { FloorSelector } from '../components/FloorSelector/FloorSelector'
 import { LayerControl } from '../components/LayerControl/LayerControl'
 import { SearchPanel } from '../components/SearchPanel/SearchPanel'
 import { RoutePanel } from '../components/RoutePanel/RoutePanel'
 import { ViewModeToggle } from '../components/ViewModeToggle/ViewModeToggle'
 import { CrossSectionView } from '../components/CrossSectionView/CrossSectionView'
-import { Pseudo3DView } from '../components/Pseudo3DView/Pseudo3DView'
 import { findRoute } from '../core/routing/astar'
 import {
   PROFILE_DEFAULT, PROFILE_CART, PROFILE_RAIN, PROFILE_ACCESSIBLE,
   DEFAULT_CONTEXT,
 } from '../core/routing/cost'
 import { getLayerVisibility } from '../core/zoom'
+import page1SvgRaw from '../../docs/reference/page_1.svg?raw'
 
 const PROFILES: RoutingProfile[] = [
   PROFILE_DEFAULT, PROFILE_CART, PROFILE_RAIN, PROFILE_ACCESSIBLE,
@@ -58,6 +58,7 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
   const [goalNodeId,  setGoalNodeId]  = useState<NodeId | null>(null)
   const [profileIndex, setProfileIndex] = useState(0)
   const [visibility, setVisibility]   = useState({ ...getLayerVisibility('Z4'), validation: false })
+  const [hideNonBuildingSymbols, setHideNonBuildingSymbols] = useState(true)
 
   const profile = PROFILES[profileIndex] ?? PROFILE_DEFAULT
 
@@ -117,18 +118,18 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
     }
     if (viewMode === 'pseudo-3d') {
       return (
-        <Pseudo3DView
-          graph={graph}
-          floorSpacing={80}
+        <StructuralSvgPseudo3D
+          rawSvg={page1SvgRaw}
+          mode="3d"
+          hideNonBuildingSymbols={hideNonBuildingSymbols}
         />
       )
     }
-    // aerial / floor / building → CampusMap (same component, different zoom context)
     return (
-      <CampusMap
-        graph={graph}
-        selectedNodeId={startNodeId ?? undefined}
-        onNodeClick={handleNodeClick}
+      <StructuralSvgPseudo3D
+        rawSvg={page1SvgRaw}
+        mode="flat"
+        hideNonBuildingSymbols={hideNonBuildingSymbols}
       />
     )
   })()
@@ -178,6 +179,24 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
           display: 'flex', alignItems: 'center', padding: '0 10px', gap: 10,
         }}>
           <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+          <button
+            onClick={() => setHideNonBuildingSymbols((v) => !v)}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9,
+              letterSpacing: '0.05em',
+              padding: '2px 8px',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: hideNonBuildingSymbols ? 'var(--accent)' : 'var(--border-2)',
+              background: hideNonBuildingSymbols ? 'var(--accent-bg)' : 'transparent',
+              color: hideNonBuildingSymbols ? 'var(--accent)' : 'var(--text-3)',
+              cursor: 'pointer',
+            }}
+            aria-label="non-building symbol toggle"
+          >
+            記号非表示
+          </button>
           {/* Profile selector */}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 3 }}>
             {PROFILES.map((p, i) => (

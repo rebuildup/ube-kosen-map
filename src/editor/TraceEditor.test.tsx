@@ -32,4 +32,9 @@ describe('TraceEditor', () => {
     const spaceBtn = container.querySelector('[data-tool="space"]') as HTMLElement
     expect(spaceBtn.getAttribute('aria-pressed')).toBe('true')
   })
+
+  it('renders reference panel import action', () => {
+    const { container } = render(<TraceEditor />)
+    expect(container.querySelector('[data-ref-import]')).not.toBeNull()
+  })
 })
