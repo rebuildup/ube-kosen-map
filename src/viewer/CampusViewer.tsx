@@ -122,6 +122,8 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
           rawSvg={page1SvgRaw}
           mode="3d"
           hideNonBuildingSymbols={hideNonBuildingSymbols}
+          showWalls
+          showLayerToggles
         />
       )
     }
