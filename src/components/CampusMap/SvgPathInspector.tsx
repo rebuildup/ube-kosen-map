@@ -4,6 +4,10 @@ import { groupSvgPaths, type StyleGroup } from '../../importer/svg/groupSvgPaths
 
 export interface SvgPathInspectorProps {
   rawSvg: string
+  /** If provided, only these group indices are shown; all others are force-hidden */
+  keepGroups?: number[]
+  /** If true, hides all text, tspan, use, and image elements in the SVG */
+  excludeText?: boolean
 }
 
 const PATH_DISPLAY_LIMIT = 200
@@ -14,10 +18,15 @@ function swatchColor(g: StyleGroup): string {
   return '#64748b'
 }
 
-export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) => {
+export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keepGroups, excludeText }) => {
   const { groups, svgInnerHTML, viewBox } = useMemo(
     () => groupSvgPaths(rawSvg),
     [rawSvg],
+  )
+
+  const keepGroupSet = useMemo(
+    () => (keepGroups ? new Set(keepGroups) : null),
+    [keepGroups],
   )
 
   // group-level visibility
@@ -71,8 +80,18 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
   // CSS generation
   const cssText = useMemo(() => {
     const rules: string[] = []
+    // Force-hide all groups not in keepGroups
+    if (keepGroupSet) {
+      groups.forEach(g => {
+        if (!keepGroupSet.has(g.index)) {
+          rules.push(`[data-sg="${g.index}"]{display:none}`)
+        }
+      })
+    }
     hiddenGroups.forEach(idx => rules.push(`[data-sg="${idx}"]{display:none}`))
     hiddenPaths.forEach(pidx => rules.push(`[data-sp="${pidx}"]{display:none}`))
+    // Hide text, icons not captured by path grouping
+    if (excludeText) rules.push('text,tspan,use,image{display:none}')
     if (hoveredGroup !== null) {
       rules.push(`[data-sg="${hoveredGroup}"]{stroke:orange!important;stroke-width:3!important;opacity:1!important}`)
     }
@@ -80,7 +99,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
       rules.push(`[data-sp="${hoveredPath}"]{stroke:cyan!important;stroke-width:4!important;opacity:1!important}`)
     }
     return rules.join('\n')
-  }, [hiddenGroups, hiddenPaths, hoveredGroup, hoveredPath])
+  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, excludeText, hoveredGroup, hoveredPath])
 
   // group toggle
   const toggleGroup = useCallback((idx: number) => {
@@ -109,10 +128,14 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
     })
   }, [])
 
-  const hideAll = useCallback(() => setHiddenGroups(new Set(groups.map(g => g.index))), [groups])
+  const hideAll = useCallback(() => {
+    const targets = keepGroupSet ? groups.filter(g => keepGroupSet.has(g.index)) : groups
+    setHiddenGroups(new Set(targets.map(g => g.index)))
+  }, [groups, keepGroupSet])
   const showAll = useCallback(() => { setHiddenGroups(new Set()); setHiddenPaths(new Set()) }, [])
 
-  const visibleCount = groups.length - hiddenGroups.size
+  const activeGroups = keepGroupSet ? groups.filter(g => keepGroupSet.has(g.index)) : groups
+  const visibleCount = activeGroups.filter(g => !hiddenGroups.has(g.index)).length
   const isDragging = dragRef.current !== null
 
   return (
@@ -171,7 +194,8 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
           flexShrink: 0,
         }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-2)', flex: 1 }}>
-            {visibleCount}/{groups.length} groups
+            {visibleCount}/{activeGroups.length} groups
+            {keepGroupSet && <span style={{ color: 'var(--text-3)', marginLeft: 4 }}>({groups.length} total)</span>}
           </span>
           {(['HIDE ALL', 'SHOW ALL'] as const).map(label => (
             <button
@@ -194,6 +218,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {groups.map(g => {
             const isGroupHidden = hiddenGroups.has(g.index)
+            const isForceExcluded = keepGroupSet !== null && !keepGroupSet.has(g.index)
             const isExpanded = expandedGroups.has(g.index)
             const isHovered = hoveredGroup === g.index
 
@@ -210,15 +235,15 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
                     gap: 5,
                     padding: '4px 8px',
                     borderBottom: '1px solid var(--border-1)',
-                    background: isHovered ? 'var(--accent-bg)' : 'transparent',
-                    opacity: isGroupHidden ? 0.4 : 1,
-                    cursor: 'pointer',
+                    background: isHovered && !isForceExcluded ? 'var(--accent-bg)' : 'transparent',
+                    opacity: isForceExcluded ? 0.25 : isGroupHidden ? 0.4 : 1,
+                    cursor: isForceExcluded ? 'default' : 'pointer',
                   }}
-                  onClick={() => toggleExpand(g.index)}
+                  onClick={() => { if (!isForceExcluded) toggleExpand(g.index) }}
                 >
                   {/* Expand indicator */}
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)', width: 8, flexShrink: 0 }}>
-                    {isExpanded ? '▼' : '▶'}
+                    {isForceExcluded ? '–' : isExpanded ? '▼' : '▶'}
                   </span>
 
                   {/* Color swatch */}
@@ -235,7 +260,16 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
                     <div style={{ color: 'var(--text-3)', fontSize: 8 }}>sw:{g.strokeWidth}</div>
                   </div>
 
-                  {/* Group toggle */}
+                  {/* Group toggle (or excluded badge) */}
+                  {isForceExcluded ? (
+                    <span style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 7,
+                      padding: '1px 4px', borderRadius: 2,
+                      border: '1px solid var(--border-2)',
+                      color: 'var(--text-3)',
+                      flexShrink: 0,
+                    }}>excl</span>
+                  ) : (
                   <button
                     data-toggle={g.index}
                     onClick={(e) => { e.stopPropagation(); toggleGroup(g.index) }}
@@ -252,6 +286,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg }) =>
                   >
                     {isGroupHidden ? 'OFF' : 'ON'}
                   </button>
+                  )}
                 </div>
 
                 {/* Expanded: individual path list */}

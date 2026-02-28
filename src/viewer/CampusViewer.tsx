@@ -107,7 +107,7 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
 
   const mapArea = (() => {
     if (viewMode === 'inspect') {
-      return <SvgPathInspector rawSvg={page1SvgRaw} />
+      return <SvgPathInspector rawSvg={page1SvgRaw} keepGroups={[4, 12, 13, 14]} excludeText />
     }
     if (viewMode === 'cross-section') {
       return (
