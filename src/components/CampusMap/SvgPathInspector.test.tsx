@@ -47,4 +47,14 @@ describe('SvgPathInspector', () => {
     const style = container.querySelector('[data-inspector-style]')
     expect(style?.textContent).toBe('')
   })
+
+  it('hovering a row generates orange highlight CSS', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    const row = container.querySelector('[data-group-row="0"]')!
+    fireEvent.mouseEnter(row)
+    const style = container.querySelector('[data-inspector-style]')
+    expect(style?.textContent).toContain('stroke:orange')
+    fireEvent.mouseLeave(row)
+    expect(style?.textContent).not.toContain('stroke:orange')
+  })
 })
