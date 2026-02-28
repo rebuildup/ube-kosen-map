@@ -54,4 +54,38 @@ describe('groupSvgPaths', () => {
     expect(svgInnerHTML).toContain('data-sp="1"')
     expect(svgInnerHTML).toContain('data-sp="2"')
   })
+
+  // Shape grouping tests
+  it('connected paths (sharing endpoint) are placed in the same ShapeGroup', () => {
+    const { groups } = groupSvgPaths(RAW)
+    // group 0 has path0 (M0 0 L10 10) and path1 (M10 10 L20 0), sharing (10,10)
+    const g0 = groups[0]!
+    expect(g0.shapes.length).toBe(1)
+    expect(g0.shapes[0]!.paths.length).toBe(2)
+  })
+
+  it('disconnected path gets its own ShapeGroup', () => {
+    const { groups } = groupSvgPaths(RAW)
+    // group 1 has only path2 (M0 50 L100 50), no shared endpoints
+    const g1 = groups[1]!
+    expect(g1.shapes.length).toBe(1)
+    expect(g1.shapes[0]!.paths.length).toBe(1)
+  })
+
+  it('data-ss attribute is assigned as "{groupIndex}-{shapeIndex}"', () => {
+    const { svgInnerHTML } = groupSvgPaths(RAW)
+    // Both paths in group 0 belong to shape 0 → data-ss="0-0"
+    expect(svgInnerHTML).toContain('data-ss="0-0"')
+    // Path in group 1 → data-ss="1-0"
+    expect(svgInnerHTML).toContain('data-ss="1-0"')
+  })
+
+  it('ShapeGroup.paths contains correct pathIndex values', () => {
+    const { groups } = groupSvgPaths(RAW)
+    const g0 = groups[0]!
+    const shape0 = g0.shapes[0]!
+    const pathIndices = shape0.paths.map(p => p.pathIndex).sort((a, b) => a - b)
+    // group 0 holds global path indices 0 and 1
+    expect(pathIndices).toEqual([0, 1])
+  })
 })
