@@ -64,12 +64,10 @@ function tokenizePathD(d: string): Array<{ cmd: string; nums: number[] }> {
   const segments: Array<{ cmd: string; nums: number[] }> = []
   // Split on command letters, keeping the delimiter
   const parts = d.trim().split(/([MmLlHhVvCcSsQqTtAaZz])/)
-  let currentCmd = ''
   for (const part of parts) {
     const trimmed = part.trim()
     if (!trimmed) continue
     if (/^[MmLlHhVvCcSsQqTtAaZz]$/.test(trimmed)) {
-      currentCmd = trimmed
       segments.push({ cmd: trimmed, nums: [] })
     } else {
       // Numbers for the current command
@@ -350,6 +348,8 @@ function buildShapes(
 
   for (const [, localIndices] of componentMap) {
     const endpointCount = new Map<string, number>()
+    // Keys that belong to a self-closed path (polygon / path with Z where start===end)
+    const selfClosedKeys = new Set<string>()
 
     for (const li of localIndices) {
       const info = pathInfos[li]!
@@ -360,11 +360,18 @@ function buildShapes(
       if (startKey !== endKey) {
         endpointCount.set(endKey, (endpointCount.get(endKey) ?? 0) + 1)
       }
-      // isClosed paths contribute both start and end as the same point (already counted once above)
-      // For a closed path alone, its single endpoint appears once → not fully connected to others
+
+      // Self-closed path: its endpoint is geometrically satisfied by itself
+      if (info.isClosed) {
+        selfClosedKeys.add(startKey)
+        selfClosedKeys.add(endKey)
+      }
     }
 
-    const isClosed = Array.from(endpointCount.values()).every(c => c >= 2)
+    // A key is satisfied if its count >= 2 OR it belongs to a self-closed path
+    const isClosed = Array.from(endpointCount.keys()).every(
+      key => (endpointCount.get(key) ?? 0) >= 2 || selfClosedKeys.has(key)
+    )
 
     // Sort by pathIndex for stable output
     localIndices.sort((a, b) => pathInfos[a]!.pathIndex - pathInfos[b]!.pathIndex)

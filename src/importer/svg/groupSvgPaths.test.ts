@@ -88,4 +88,10 @@ describe('groupSvgPaths', () => {
     // group 0 holds global path indices 0 and 1
     expect(pathIndices).toEqual([0, 1])
   })
+
+  it('single polygon shape is isClosed', () => {
+    const svg = '<svg viewBox="0 0 100 100"><polygon style="fill:none;stroke:#111;stroke-width:1;" points="0,0 10,0 10,10 0,10"/></svg>'
+    const { groups } = groupSvgPaths(svg)
+    expect(groups[0]!.shapes[0]!.isClosed).toBe(true)
+  })
 })
