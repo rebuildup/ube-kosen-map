@@ -1,6 +1,6 @@
 // src/components/CampusMap/SvgPathInspector.tsx
 import React, { useMemo, useState, useRef, useCallback } from 'react'
-import { groupSvgPaths, type StyleGroup } from '../../importer/svg/groupSvgPaths'
+import { groupSvgPaths, type StyleGroup, type ShapeGroup } from '../../importer/svg/groupSvgPaths'
 
 export interface SvgPathInspectorProps {
   rawSvg: string
@@ -35,11 +35,15 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
   const [hiddenGroups, setHiddenGroups] = useState<Set<number>>(new Set())
   // individual path visibility
   const [hiddenPaths, setHiddenPaths] = useState<Set<number>>(new Set())
+  // shape-level visibility — key format: "{groupIndex}-{shapeIndex}"
+  const [hiddenShapes, setHiddenShapes] = useState<Set<string>>(new Set())
   // hover state
   const [hoveredGroup, setHoveredGroup] = useState<number | null>(null)
   const [hoveredPath, setHoveredPath] = useState<number | null>(null)
+  const [hoveredShape, setHoveredShape] = useState<string | null>(null)
   // expand/collapse
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set())
+  const [expandedShapes, setExpandedShapes] = useState<Set<string>>(new Set())
 
   // zoom/pan
   const [zoom, setZoom] = useState(1)
@@ -92,6 +96,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     }
     hiddenGroups.forEach(idx => rules.push(`[data-sg="${idx}"]{display:none}`))
     hiddenPaths.forEach(pidx => rules.push(`[data-sp="${pidx}"]{display:none}`))
+    hiddenShapes.forEach(key => rules.push(`[data-ss="${key}"]{display:none}`))
     // Permanently hidden path ranges
     if (hiddenPathRanges) {
       for (const { group, start, end } of hiddenPathRanges) {
@@ -109,8 +114,11 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     if (hoveredPath !== null) {
       rules.push(`[data-sp="${hoveredPath}"]{stroke:cyan!important;stroke-width:4!important;opacity:1!important}`)
     }
+    if (hoveredShape !== null) {
+      rules.push(`[data-ss="${hoveredShape}"]{stroke:yellow!important;stroke-width:2!important;opacity:1!important}`)
+    }
     return rules.join('\n')
-  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, hiddenPathRanges, excludeText, hoveredGroup, hoveredPath])
+  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, hiddenShapes, hiddenPathRanges, excludeText, hoveredGroup, hoveredPath, hoveredShape])
 
   // group toggle
   const toggleGroup = useCallback((idx: number) => {
@@ -130,11 +138,42 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     })
   }, [])
 
-  // expand/collapse group
-  const toggleExpand = useCallback((idx: number) => {
+  // shape toggle
+  const toggleShape = useCallback((key: string) => {
+    setHiddenShapes(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
+      return next
+    })
+  }, [])
+
+  // expand/collapse group — auto-expands first shape so path rows are immediately visible
+  const toggleExpand = useCallback((idx: number, shapes: ShapeGroup[]) => {
     setExpandedGroups(prev => {
       const next = new Set(prev)
-      if (next.has(idx)) next.delete(idx); else next.add(idx)
+      if (next.has(idx)) {
+        next.delete(idx)
+      } else {
+        next.add(idx)
+        // Auto-expand the first shape to preserve existing test behavior
+        if (shapes.length > 0) {
+          const firstKey = `${idx}-0`
+          setExpandedShapes(s => {
+            const ns = new Set(s)
+            ns.add(firstKey)
+            return ns
+          })
+        }
+      }
+      return next
+    })
+  }, [])
+
+  // expand/collapse individual shape
+  const toggleExpandShape = useCallback((key: string) => {
+    setExpandedShapes(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key); else next.add(key)
       return next
     })
   }, [])
@@ -143,7 +182,12 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     const targets = keepGroupSet ? groups.filter(g => keepGroupSet.has(g.index)) : groups
     setHiddenGroups(new Set(targets.map(g => g.index)))
   }, [groups, keepGroupSet])
-  const showAll = useCallback(() => { setHiddenGroups(new Set()); setHiddenPaths(new Set()) }, [])
+
+  const showAll = useCallback(() => {
+    setHiddenGroups(new Set())
+    setHiddenPaths(new Set())
+    setHiddenShapes(new Set())
+  }, [])
 
   const activeGroups = keepGroupSet ? groups.filter(g => keepGroupSet.has(g.index)) : groups
   const visibleCount = activeGroups.filter(g => !hiddenGroups.has(g.index)).length
@@ -250,7 +294,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
                     opacity: isForceExcluded ? 0.25 : isGroupHidden ? 0.4 : 1,
                     cursor: isForceExcluded ? 'default' : 'pointer',
                   }}
-                  onClick={() => { if (!isForceExcluded) toggleExpand(g.index) }}
+                  onClick={() => { if (!isForceExcluded) toggleExpand(g.index, g.shapes) }}
                 >
                   {/* Expand indicator */}
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)', width: 8, flexShrink: 0 }}>
@@ -281,70 +325,129 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
                       flexShrink: 0,
                     }}>excl</span>
                   ) : (
-                  <button
-                    data-toggle={g.index}
-                    onClick={(e) => { e.stopPropagation(); toggleGroup(g.index) }}
-                    style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 8,
-                      padding: '1px 5px', borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: isGroupHidden ? 'var(--border-2)' : 'var(--accent)',
-                      background: isGroupHidden ? 'transparent' : 'var(--accent-bg)',
-                      color: isGroupHidden ? 'var(--text-3)' : 'var(--accent)',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isGroupHidden ? 'OFF' : 'ON'}
-                  </button>
+                    <button
+                      data-toggle={g.index}
+                      onClick={(e) => { e.stopPropagation(); toggleGroup(g.index) }}
+                      style={{
+                        fontFamily: 'var(--font-mono)', fontSize: 8,
+                        padding: '1px 5px', borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: isGroupHidden ? 'var(--border-2)' : 'var(--accent)',
+                        background: isGroupHidden ? 'transparent' : 'var(--accent-bg)',
+                        color: isGroupHidden ? 'var(--text-3)' : 'var(--accent)',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isGroupHidden ? 'OFF' : 'ON'}
+                    </button>
                   )}
                 </div>
 
-                {/* Expanded: individual path list */}
+                {/* Expanded: shape list */}
                 {isExpanded && (
                   <div style={{ background: 'rgba(0,0,0,0.15)' }}>
-                    {g.count > PATH_DISPLAY_LIMIT && (
-                      <div style={{ padding: '3px 24px', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>
-                        最初の {PATH_DISPLAY_LIMIT} 件を表示 (全 {g.count} 件)
-                      </div>
-                    )}
-                    {g.paths.slice(0, PATH_DISPLAY_LIMIT).map(p => {
-                      const isPathHidden = hiddenPaths.has(p.pathIndex)
-                      const isPathHovered = hoveredPath === p.pathIndex
+                    {g.shapes.map((shape: ShapeGroup) => {
+                      const shapeKey = `${g.index}-${shape.shapeIndex}`
+                      const isShapeHidden = hiddenShapes.has(shapeKey)
+                      const isShapeExpanded = expandedShapes.has(shapeKey)
+
                       return (
-                        <div
-                          key={p.pathIndex}
-                          data-path-row={p.pathIndex}
-                          onMouseEnter={() => setHoveredPath(p.pathIndex)}
-                          onMouseLeave={() => setHoveredPath(null)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            padding: '2px 8px 2px 24px',
-                            borderBottom: '1px solid rgba(255,255,255,0.04)',
-                            background: isPathHovered ? 'rgba(6,182,212,0.15)' : 'transparent',
-                            opacity: isPathHidden ? 0.35 : 1,
-                          }}
-                        >
-                          <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>
-                            path {p.pathIndex}
-                          </span>
-                          <button
-                            data-path-toggle={p.pathIndex}
-                            onClick={() => togglePath(p.pathIndex)}
+                        <div key={shapeKey}>
+                          {/* Shape row */}
+                          <div
+                            data-shape-row={shapeKey}
+                            onMouseEnter={() => setHoveredShape(shapeKey)}
+                            onMouseLeave={() => setHoveredShape(null)}
                             style={{
-                              fontFamily: 'var(--font-mono)', fontSize: 7,
-                              padding: '0px 4px', borderRadius: 2,
-                              border: '1px solid',
-                              borderColor: isPathHidden ? 'var(--border-2)' : 'rgba(6,182,212,0.6)',
-                              background: isPathHidden ? 'transparent' : 'rgba(6,182,212,0.1)',
-                              color: isPathHidden ? 'var(--text-3)' : 'rgb(6,182,212)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              padding: '3px 8px 3px 16px',
+                              borderBottom: '1px solid rgba(255,255,255,0.04)',
+                              background: 'rgba(0,0,0,0.08)',
+                              opacity: isShapeHidden ? 0.4 : 1,
                               cursor: 'pointer',
                             }}
+                            onClick={() => toggleExpandShape(shapeKey)}
                           >
-                            {isPathHidden ? 'OFF' : 'ON'}
-                          </button>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)', width: 8, flexShrink: 0 }}>
+                              {isShapeExpanded ? '▼' : '▶'}
+                            </span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)', flexShrink: 0 }}>
+                              {shape.isClosed ? '⬡' : '○'}
+                            </span>
+                            <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-2)' }}>
+                              shape {shape.shapeIndex} ({shape.paths.length} paths)
+                            </span>
+                            <button
+                              data-shape-toggle={shapeKey}
+                              onClick={(e) => { e.stopPropagation(); toggleShape(shapeKey) }}
+                              style={{
+                                fontFamily: 'var(--font-mono)', fontSize: 7,
+                                padding: '0px 4px', borderRadius: 2,
+                                border: '1px solid',
+                                borderColor: isShapeHidden ? 'var(--border-2)' : 'rgba(250,204,21,0.6)',
+                                background: isShapeHidden ? 'transparent' : 'rgba(250,204,21,0.1)',
+                                color: isShapeHidden ? 'var(--text-3)' : 'rgb(250,204,21)',
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {isShapeHidden ? 'OFF' : 'ON'}
+                            </button>
+                          </div>
+
+                          {/* Path rows — shown when shape is expanded */}
+                          {isShapeExpanded && (
+                            <div>
+                              {shape.paths.length > PATH_DISPLAY_LIMIT && (
+                                <div style={{ padding: '3px 32px', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>
+                                  最初の {PATH_DISPLAY_LIMIT} 件を表示 (全 {shape.paths.length} 件)
+                                </div>
+                              )}
+                              {shape.paths.slice(0, PATH_DISPLAY_LIMIT).map(p => {
+                                const isPathHidden = hiddenPaths.has(p.pathIndex)
+                                const isPathHovered = hoveredPath === p.pathIndex
+                                return (
+                                  <div
+                                    key={p.pathIndex}
+                                    data-path-row={p.pathIndex}
+                                    onMouseEnter={() => setHoveredPath(p.pathIndex)}
+                                    onMouseLeave={() => setHoveredPath(null)}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 5,
+                                      padding: '2px 8px 2px 32px',
+                                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                      background: isPathHovered ? 'rgba(6,182,212,0.15)' : 'transparent',
+                                      opacity: isPathHidden ? 0.35 : 1,
+                                    }}
+                                  >
+                                    <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>
+                                      path {p.pathIndex}
+                                    </span>
+                                    <button
+                                      data-path-toggle={p.pathIndex}
+                                      onClick={() => togglePath(p.pathIndex)}
+                                      style={{
+                                        fontFamily: 'var(--font-mono)', fontSize: 7,
+                                        padding: '0px 4px', borderRadius: 2,
+                                        border: '1px solid',
+                                        borderColor: isPathHidden ? 'var(--border-2)' : 'rgba(6,182,212,0.6)',
+                                        background: isPathHidden ? 'transparent' : 'rgba(6,182,212,0.1)',
+                                        color: isPathHidden ? 'var(--text-3)' : 'rgb(6,182,212)',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      {isPathHidden ? 'OFF' : 'ON'}
+                                    </button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
                         </div>
                       )
                     })}

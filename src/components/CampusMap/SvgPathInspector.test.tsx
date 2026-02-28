@@ -83,4 +83,22 @@ describe('SvgPathInspector', () => {
     expect(style?.textContent).toContain('data-sp=')
     expect(style?.textContent).toContain('display:none')
   })
+
+  it('shows shape rows when group is expanded', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
+    const shapeRows = container.querySelectorAll('[data-shape-row]')
+    expect(shapeRows.length).toBeGreaterThan(0)
+  })
+
+  it('shape toggle hides all paths in that shape via data-ss CSS', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
+    const shapeRow = container.querySelector('[data-shape-row]')!
+    const shapeToggle = shapeRow.querySelector('[data-shape-toggle]') as HTMLButtonElement
+    fireEvent.click(shapeToggle)
+    const style = container.querySelector('[data-inspector-style]')
+    expect(style?.textContent).toContain('data-ss=')
+    expect(style?.textContent).toContain('display:none')
+  })
 })
