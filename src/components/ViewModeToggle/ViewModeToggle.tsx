@@ -6,9 +6,9 @@
 
 import React from 'react'
 
-export type ViewMode = 'aerial' | 'floor' | 'cross-section' | 'pseudo-3d' | 'building'
+export type ViewMode = 'aerial' | 'floor' | 'cross-section' | 'pseudo-3d' | 'building' | 'inspect'
 
-export const VIEW_MODES: ViewMode[] = ['aerial', 'floor', 'cross-section', 'pseudo-3d', 'building']
+export const VIEW_MODES: ViewMode[] = ['aerial', 'floor', 'cross-section', 'pseudo-3d', 'building', 'inspect']
 
 const MODE_LABELS: Record<ViewMode, string> = {
   'aerial':       '上空',
@@ -16,6 +16,7 @@ const MODE_LABELS: Record<ViewMode, string> = {
   'cross-section':'断面',
   'pseudo-3d':    '立体',
   'building':     '建物',
+  'inspect':      '検査',
 }
 
 export interface ViewModeToggleProps {

@@ -19,7 +19,7 @@ import type { CampusGraph, NodeId } from '../core/schema'
 import type { RoutingProfile } from '../core/routing/cost'
 import type { Route } from '../core/routing'
 import type { ViewMode } from '../components/ViewModeToggle/ViewModeToggle'
-import { StructuralSvgPseudo3D } from '../components/CampusMap'
+import { StructuralSvgPseudo3D, SvgPathInspector } from '../components/CampusMap'
 import { FloorSelector } from '../components/FloorSelector/FloorSelector'
 import { LayerControl } from '../components/LayerControl/LayerControl'
 import { SearchPanel } from '../components/SearchPanel/SearchPanel'
@@ -106,6 +106,9 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
   // ── Map area: switches on viewMode ─────────────────────────────────────────
 
   const mapArea = (() => {
+    if (viewMode === 'inspect') {
+      return <SvgPathInspector rawSvg={page1SvgRaw} />
+    }
     if (viewMode === 'cross-section') {
       return (
         <CrossSectionView
