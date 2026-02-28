@@ -336,22 +336,37 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
             />
           )}
         </div>
-      </div>
 
-      {showLayerToggles && (
-        <div data-layer-toggles style={{ display: 'flex', gap: 8, padding: '4px 8px' }}>
-          {(['buildings', 'roads', 'walls', 'details'] as const).map(key => (
-            <label key={key} style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="checkbox"
-                checked={layerToggles[key]}
-                onChange={e => setLayerToggles(prev => ({ ...prev, [key]: e.target.checked }))}
-              />
-              {key}
-            </label>
-          ))}
-        </div>
-      )}
+        {showLayerToggles && (
+          <div
+            data-layer-toggles
+            style={{
+              position: 'absolute',
+              bottom: 6,
+              left: 6,
+              zIndex: 10,
+              display: 'flex',
+              gap: 8,
+              padding: '4px 8px',
+              background: 'rgba(15,23,42,0.75)',
+              borderRadius: 4,
+              border: '1px solid rgba(148,163,184,0.2)',
+              pointerEvents: 'auto',
+            }}
+          >
+            {(['buildings', 'roads', 'walls', 'details'] as const).map(key => (
+              <label key={key} style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={layerToggles[key]}
+                  onChange={e => setLayerToggles(prev => ({ ...prev, [key]: e.target.checked }))}
+                />
+                {key}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   )
 }
