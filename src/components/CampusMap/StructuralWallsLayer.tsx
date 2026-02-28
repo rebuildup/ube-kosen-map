@@ -1,5 +1,5 @@
 // src/components/CampusMap/StructuralWallsLayer.tsx
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { Segment, SegmentKind } from '../../importer/svg/parseSvgSegments'
 import { resolveHeight, type HeightMap } from '../../importer/svg/loadHeights'
 
@@ -17,6 +17,7 @@ export interface StructuralWallsLayerProps {
   heights: HeightMap
   mode: 'flat' | '3d'
   visibleKinds?: Set<SegmentKind>
+  onSelect?: (featureId: string | undefined, kind: SegmentKind | undefined) => void
 }
 
 const KIND_COLORS: Record<SegmentKind, string> = {
@@ -34,15 +35,31 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
   heights,
   mode,
   visibleKinds,
+  onSelect,
 }) => {
-  const walls = useMemo(() => {
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
+
+  const filteredSegments = useMemo(() => {
     if (mode !== '3d') return []
-    return segments
-      .filter(seg => {
-        if (!visibleKinds) return true
-        return visibleKinds.has(seg.kind ?? 'other')
-      })
-      .map((seg, i) => {
+    return segments.filter(seg => {
+      if (!visibleKinds) return true
+      return visibleKinds.has(seg.kind ?? 'other')
+    })
+  }, [segments, mode, visibleKinds])
+
+  if (mode !== '3d') return null
+
+  return (
+    <div
+      data-walls-layer="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {filteredSegments.map((seg, i) => {
         const { a, b } = seg
         const dx = b.x - a.x
         const dy = b.y - a.y
@@ -61,12 +78,14 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
         const wallHeight = resolveHeight(seg.featureId, heights, defaultWallHeight)
         const kind: SegmentKind = seg.kind ?? 'other'
         const color = KIND_COLORS[kind]
+        const isSelected = seg.featureId !== undefined && seg.featureId === selectedId
 
         return (
           <div
             key={i}
             data-wall={kind}
             data-feature-id={seg.featureId}
+            data-selected={isSelected ? 'true' : undefined}
             style={{
               position: 'absolute',
               left: `${midXPct}%`,
@@ -79,26 +98,17 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
               // rotateZ aligns the div along the segment direction;
               // rotateX(90deg) flips height into the Z axis (wall becomes vertical)
               transform: `rotateZ(${angleDeg}deg) rotateX(90deg)`,
-              pointerEvents: 'none',
+              pointerEvents: 'auto',
+              cursor: 'pointer',
+              outline: isSelected ? '2px solid rgba(251,191,36,0.9)' : undefined,
+            }}
+            onClick={() => {
+              setSelectedId(seg.featureId)
+              onSelect?.(seg.featureId, seg.kind)
             }}
           />
         )
-      })
-  }, [segments, vb, defaultWallHeight, heights, mode, visibleKinds])
-
-  if (mode !== '3d') return null
-
-  return (
-    <div
-      data-walls-layer="true"
-      style={{
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        transformStyle: 'preserve-3d',
-      }}
-    >
-      {walls}
+      })}
     </div>
   )
 }

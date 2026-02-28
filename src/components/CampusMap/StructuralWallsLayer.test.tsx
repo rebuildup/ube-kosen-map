@@ -1,6 +1,6 @@
 // src/components/CampusMap/StructuralWallsLayer.test.tsx
-import { describe, expect, it } from 'vitest'
-import { render } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { render, fireEvent } from '@testing-library/react'
 import { StructuralWallsLayer } from './StructuralWallsLayer'
 import type { Segment } from '../../importer/svg/parseSvgSegments'
 
@@ -95,5 +95,37 @@ describe('StructuralWallsLayer', () => {
     )
     const walls = container.querySelectorAll('[data-wall]')
     expect(walls.length).toBe(1)
+  })
+
+  it('calls onSelect with featureId and kind when wall is clicked', () => {
+    const onSelect = vi.fn()
+    const { container } = render(
+      <StructuralWallsLayer
+        segments={[{ a: { x: 0, y: 0 }, b: { x: 10, y: 0 }, kind: 'building', featureId: 'B001' }]}
+        viewBox={vb}
+        defaultWallHeight={30}
+        heights={{}}
+        mode="3d"
+        onSelect={onSelect}
+      />
+    )
+    const wall = container.querySelector('[data-wall]') as HTMLElement
+    fireEvent.click(wall)
+    expect(onSelect).toHaveBeenCalledWith('B001', 'building')
+  })
+
+  it('sets data-selected="true" on the clicked wall', () => {
+    const { container } = render(
+      <StructuralWallsLayer
+        segments={[{ a: { x: 0, y: 0 }, b: { x: 10, y: 0 }, kind: 'building', featureId: 'B001' }]}
+        viewBox={vb}
+        defaultWallHeight={30}
+        heights={{}}
+        mode="3d"
+      />
+    )
+    const wall = container.querySelector('[data-wall]') as HTMLElement
+    fireEvent.click(wall)
+    expect(wall.getAttribute('data-selected')).toBe('true')
   })
 })
