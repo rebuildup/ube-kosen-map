@@ -153,11 +153,19 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
       const next = new Set(prev)
       if (next.has(idx)) {
         next.delete(idx)
+        // purge expanded shape state for this group
+        setExpandedShapes(s => {
+          const ns = new Set(s)
+          for (const k of ns) {
+            if (k.startsWith(`${idx}-`)) ns.delete(k)
+          }
+          return ns
+        })
       } else {
         next.add(idx)
-        // Auto-expand the first shape to preserve existing test behavior
+        // Auto-expand the first shape so path rows are immediately visible
         if (shapes.length > 0) {
-          const firstKey = `${idx}-0`
+          const firstKey = `${idx}-${shapes[0]!.shapeIndex}`
           setExpandedShapes(s => {
             const ns = new Set(s)
             ns.add(firstKey)
