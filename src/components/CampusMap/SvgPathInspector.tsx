@@ -8,8 +8,8 @@ export interface SvgPathInspectorProps {
   keepGroups?: number[]
   /** If true, hides all text, tspan, use, and image elements in the SVG */
   excludeText?: boolean
-  /** Inclusive [start, end] ranges of data-sp path indices to permanently hide */
-  hiddenPathRanges?: Array<[number, number]>
+  /** Permanently hidden path ranges. group constrains to a specific data-sg. */
+  hiddenPathRanges?: Array<{ group?: number; start: number; end: number }>
 }
 
 const PATH_DISPLAY_LIMIT = 200
@@ -94,9 +94,10 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     hiddenPaths.forEach(pidx => rules.push(`[data-sp="${pidx}"]{display:none}`))
     // Permanently hidden path ranges
     if (hiddenPathRanges) {
-      for (const [start, end] of hiddenPathRanges) {
+      for (const { group, start, end } of hiddenPathRanges) {
+        const prefix = group !== undefined ? `[data-sg="${group}"]` : ''
         for (let i = start; i <= end; i++) {
-          rules.push(`[data-sp="${i}"]{display:none}`)
+          rules.push(`${prefix}[data-sp="${i}"]{display:none}`)
         }
       }
     }

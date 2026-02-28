@@ -112,7 +112,7 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
           rawSvg={page1SvgRaw}
           keepGroups={[4, 12, 13, 14]}
           excludeText
-          hiddenPathRanges={[[96, 1090]]}
+          hiddenPathRanges={[{ group: 4, start: 96, end: 1090 }]}
         />
       )
     }
