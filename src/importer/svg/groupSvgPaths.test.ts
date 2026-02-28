@@ -40,4 +40,18 @@ describe('groupSvgPaths', () => {
     const matches = svgInnerHTML.match(/data-sg="0"/g) ?? []
     expect(matches.length).toBe(groups[0]!.count)
   })
+
+  it('each group has paths array with correct count', () => {
+    const { groups } = groupSvgPaths(RAW)
+    expect(groups[0]!.paths.length).toBe(groups[0]!.count)
+    expect(groups[1]!.paths.length).toBe(groups[1]!.count)
+  })
+
+  it('adds data-sp attribute to each element', () => {
+    const { svgInnerHTML } = groupSvgPaths(RAW)
+    // 3 paths → data-sp="0", "1", "2"
+    expect(svgInnerHTML).toContain('data-sp="0"')
+    expect(svgInnerHTML).toContain('data-sp="1"')
+    expect(svgInnerHTML).toContain('data-sp="2"')
+  })
 })

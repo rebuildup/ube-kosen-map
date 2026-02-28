@@ -57,4 +57,30 @@ describe('SvgPathInspector', () => {
     fireEvent.mouseLeave(row)
     expect(style?.textContent).not.toContain('stroke:orange')
   })
+
+  it('shows expand indicator in each group row', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    const rows = container.querySelectorAll('[data-group-row]')
+    expect(rows[0]?.textContent).toContain('▶')
+  })
+
+  it('expands a group to show path rows when header is clicked', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    const row = container.querySelector('[data-group-row="0"]')!
+    fireEvent.click(row)
+    const pathRows = container.querySelectorAll('[data-path-row]')
+    expect(pathRows.length).toBeGreaterThan(0)
+  })
+
+  it('toggles an individual path off', () => {
+    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
+    // expand group 0
+    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
+    // click path toggle
+    const pathToggle = container.querySelector('[data-path-toggle]') as HTMLButtonElement
+    fireEvent.click(pathToggle)
+    const style = container.querySelector('[data-inspector-style]')
+    expect(style?.textContent).toContain('data-sp=')
+    expect(style?.textContent).toContain('display:none')
+  })
 })

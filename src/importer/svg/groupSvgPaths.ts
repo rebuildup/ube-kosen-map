@@ -1,9 +1,14 @@
+export interface PathInfo {
+  pathIndex: number
+}
+
 export interface StyleGroup {
   index: number
   strokeColor: string
   strokeWidth: string
   fillColor: string
   count: number
+  paths: PathInfo[]  // added
 }
 
 export interface GroupedSvgPaths {
@@ -44,6 +49,7 @@ export function groupSvgPaths(rawSvg: string): GroupedSvgPaths {
 
   const styleMap = new Map<string, number>()
   const groupAccum: Omit<StyleGroup, 'index'>[] = []
+  let globalPathIdx = 0
 
   for (const el of shapes) {
     const { strokeColor, strokeWidth, fillColor } = extractStyle(el)
@@ -52,10 +58,13 @@ export function groupSvgPaths(rawSvg: string): GroupedSvgPaths {
     if (idx === undefined) {
       idx = groupAccum.length
       styleMap.set(key, idx)
-      groupAccum.push({ strokeColor, strokeWidth, fillColor, count: 0 })
+      groupAccum.push({ strokeColor, strokeWidth, fillColor, count: 0, paths: [] })
     }
+    const pathIdx = globalPathIdx++
     groupAccum[idx]!.count++
+    groupAccum[idx]!.paths.push({ pathIndex: pathIdx })
     el.setAttribute('data-sg', String(idx))
+    el.setAttribute('data-sp', String(pathIdx))
   }
 
   const groups: StyleGroup[] = groupAccum.map((g, i) => ({ ...g, index: i }))
