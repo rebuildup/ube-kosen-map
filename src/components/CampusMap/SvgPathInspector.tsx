@@ -8,6 +8,8 @@ export interface SvgPathInspectorProps {
   keepGroups?: number[]
   /** If true, hides all text, tspan, use, and image elements in the SVG */
   excludeText?: boolean
+  /** Inclusive [start, end] ranges of data-sp path indices to permanently hide */
+  hiddenPathRanges?: Array<[number, number]>
 }
 
 const PATH_DISPLAY_LIMIT = 200
@@ -18,7 +20,7 @@ function swatchColor(g: StyleGroup): string {
   return '#64748b'
 }
 
-export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keepGroups, excludeText }) => {
+export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keepGroups, excludeText, hiddenPathRanges }) => {
   const { groups, svgInnerHTML, viewBox } = useMemo(
     () => groupSvgPaths(rawSvg),
     [rawSvg],
@@ -90,6 +92,14 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
     }
     hiddenGroups.forEach(idx => rules.push(`[data-sg="${idx}"]{display:none}`))
     hiddenPaths.forEach(pidx => rules.push(`[data-sp="${pidx}"]{display:none}`))
+    // Permanently hidden path ranges
+    if (hiddenPathRanges) {
+      for (const [start, end] of hiddenPathRanges) {
+        for (let i = start; i <= end; i++) {
+          rules.push(`[data-sp="${i}"]{display:none}`)
+        }
+      }
+    }
     // Hide text, icons not captured by path grouping
     if (excludeText) rules.push('text,tspan,use,image{display:none}')
     if (hoveredGroup !== null) {
@@ -99,7 +109,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({ rawSvg, keep
       rules.push(`[data-sp="${hoveredPath}"]{stroke:cyan!important;stroke-width:4!important;opacity:1!important}`)
     }
     return rules.join('\n')
-  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, excludeText, hoveredGroup, hoveredPath])
+  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, hiddenPathRanges, excludeText, hoveredGroup, hoveredPath])
 
   // group toggle
   const toggleGroup = useCallback((idx: number) => {
