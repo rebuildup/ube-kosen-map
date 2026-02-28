@@ -18,6 +18,13 @@ export interface StructuralWallsLayerProps {
   mode: 'flat' | '3d'
   visibleKinds?: Set<SegmentKind>
   onSelect?: (featureId: string | undefined, kind: SegmentKind | undefined) => void
+  svgLayout?: {
+    cw: number
+    ch: number
+    scale: number
+    offsetX: number
+    offsetY: number
+  } | null
 }
 
 const KIND_COLORS: Record<SegmentKind, string> = {
@@ -36,6 +43,7 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
   mode,
   visibleKinds,
   onSelect,
+  svgLayout,
 }) => {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
 
@@ -64,16 +72,36 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
         const dx = b.x - a.x
         const dy = b.y - a.y
 
-        const midXPct = ((a.x + b.x) / 2 - vb.minX) / vb.width * 100
-        const midYPct = ((a.y + b.y) / 2 - vb.minY) / vb.height * 100
+        const midX = (a.x + b.x) / 2
+        const midY = (a.y + b.y) / 2
 
-        const len = Math.sqrt(dx * dx + dy * dy)
-        const lenPct = len / vb.width * 100
+        let leftPct: number
+        let topPct: number
+        let lenPct: number
+        let angleDeg: number
 
-        // Compute angle in display space (account for viewBox aspect ratio)
-        const dxPct = dx / vb.width * 100
-        const dyPct = dy / vb.height * 100
-        const angleDeg = Math.atan2(dyPct, dxPct) * (180 / Math.PI)
+        if (svgLayout) {
+          const { cw, ch, scale, offsetX, offsetY } = svgLayout
+          // CSS pixel position (accounting for preserveAspectRatio letterbox offset)
+          const midPxX = offsetX + (midX - vb.minX) * scale
+          const midPxY = offsetY + (midY - vb.minY) * scale
+          leftPct = midPxX / cw * 100
+          topPct = midPxY / ch * 100
+          // Length in CSS pixels → % of container width
+          const len = Math.sqrt(dx * dx + dy * dy)
+          lenPct = len * scale / cw * 100
+          // Angle in world SVG coordinate space (scale is uniform, so angle is preserved)
+          angleDeg = Math.atan2(dy, dx) * (180 / Math.PI)
+        } else {
+          // Fallback: simple % mapping (used in tests / when container size unknown)
+          leftPct = (midX - vb.minX) / vb.width * 100
+          topPct = (midY - vb.minY) / vb.height * 100
+          const len = Math.sqrt(dx * dx + dy * dy)
+          lenPct = len / vb.width * 100
+          const dxPct = dx / vb.width * 100
+          const dyPct = dy / vb.height * 100
+          angleDeg = Math.atan2(dyPct, dxPct) * (180 / Math.PI)
+        }
 
         const wallHeight = resolveHeight(seg.featureId, heights, defaultWallHeight)
         const kind: SegmentKind = seg.kind ?? 'other'
@@ -88,8 +116,8 @@ export const StructuralWallsLayer: React.FC<StructuralWallsLayerProps> = ({
             data-selected={isSelected ? 'true' : undefined}
             style={{
               position: 'absolute',
-              left: `${midXPct}%`,
-              top: `${midYPct}%`,
+              left: `${leftPct}%`,
+              top: `${topPct}%`,
               width: `${lenPct}%`,
               height: wallHeight,
               background: color,

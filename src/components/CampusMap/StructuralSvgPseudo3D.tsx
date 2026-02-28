@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react'
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { analyzeStructuralGroups } from '../../importer/svg/analyzeStructuralGroups'
 import { parseSvgSegments, type SegmentKind } from '../../importer/svg/parseSvgSegments'
 import { classifySegments } from '../../importer/svg/classifyFeatures'
@@ -69,6 +69,8 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
   const [panX, setPanX] = useState(0)
   const [panY, setPanY] = useState(0)
   const dragState = useRef<{ x: number; y: number; mode: 'rotate' | 'pan' } | null>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 })
 
   const [layerToggles, setLayerToggles] = useState({
     buildings: true, roads: true, walls: true, details: true,
@@ -84,6 +86,30 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
     setPanX(0)
     setPanY(0)
   }, [])
+
+  useEffect(() => {
+    const el = viewportRef.current
+    if (!el) return
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect()
+      if (width > 0 && height > 0) setContainerSize({ w: width, h: height })
+    }
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // SVG rendering offset due to preserveAspectRatio="xMidYMid meet"
+  const svgLayout = useMemo(() => {
+    const { w: cw, h: ch } = containerSize
+    if (!cw || !ch) return null
+    const scale = Math.min(cw / vb.width, ch / vb.height)
+    const offsetX = (cw - vb.width * scale) / 2
+    const offsetY = (ch - vb.height * scale) / 2
+    return { cw, ch, scale, offsetX, offsetY }
+  }, [containerSize, vb])
 
   const onWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -144,6 +170,7 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
   return (
     <>
       <div
+        ref={viewportRef}
         data-structural-3d="true"
         onWheel={onWheel}
         onMouseDown={onMouseDown}
@@ -305,6 +332,7 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
               heights={heights}
               mode={mode}
               visibleKinds={visibleKinds}
+              svgLayout={svgLayout}
             />
           )}
         </div>
