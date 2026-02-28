@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render } from '@testing-library/react'
 import { StructuralSvgPseudo3D } from './StructuralSvgPseudo3D'
 
@@ -105,5 +105,28 @@ describe('StructuralSvgPseudo3D', () => {
     const ends = container.querySelectorAll('[data-structural-z-point="end"]')
     expect(starts.length).toBeGreaterThan(0)
     expect(ends.length).toBeGreaterThan(0)
+  })
+
+  it('renders walls layer when mode is 3d and showWalls is true', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D rawSvg={RAW} mode="3d" showWalls />
+    )
+    const wallsLayer = container.querySelector('[data-walls-layer="true"]')
+    expect(wallsLayer).not.toBeNull()
+  })
+
+  it('does not render walls layer in flat mode even with showWalls', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D rawSvg={RAW} mode="flat" showWalls />
+    )
+    const wallsLayer = container.querySelector('[data-walls-layer="true"]')
+    expect(wallsLayer).toBeNull()
+  })
+
+  it('renders layer toggle controls when showLayerToggles is true', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D rawSvg={RAW} mode="3d" showWalls showLayerToggles />
+    )
+    expect(container.querySelector('[data-layer-toggles]')).not.toBeNull()
   })
 })

@@ -1,5 +1,9 @@
 import React, { useMemo, useState, useRef, useCallback } from 'react'
 import { analyzeStructuralGroups } from '../../importer/svg/analyzeStructuralGroups'
+import { parseSvgSegments, type SegmentKind } from '../../importer/svg/parseSvgSegments'
+import { classifySegments } from '../../importer/svg/classifyFeatures'
+import { type HeightMap } from '../../importer/svg/loadHeights'
+import { StructuralWallsLayer } from './StructuralWallsLayer'
 
 export interface StructuralSvgPseudo3DProps {
   rawSvg: string
@@ -7,6 +11,11 @@ export interface StructuralSvgPseudo3DProps {
   hideNonBuildingSymbols?: boolean
   width?: number | string
   height?: number | string
+  showWalls?: boolean
+  showLayerToggles?: boolean
+  heights?: HeightMap
+  defaultWallHeight?: number
+  onFeatureSelect?: (featureId: string | undefined, kind: SegmentKind | undefined) => void
 }
 
 const ANALYSIS_CACHE = new Map<string, ReturnType<typeof analyzeStructuralGroups>>()
@@ -39,6 +48,11 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
   hideNonBuildingSymbols = true,
   width = '100%',
   height = '100%',
+  showWalls = false,
+  showLayerToggles = false,
+  heights = {},
+  defaultWallHeight = 30,
+  onFeatureSelect,
 }) => {
   const analysis = useMemo(
     () => getCachedAnalysis(rawSvg, hideNonBuildingSymbols),
@@ -55,6 +69,10 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
   const [panX, setPanX] = useState(0)
   const [panY, setPanY] = useState(0)
   const dragState = useRef<{ x: number; y: number; mode: 'rotate' | 'pan' } | null>(null)
+
+  const [layerToggles, setLayerToggles] = useState({
+    buildings: true, roads: true, walls: true, details: true,
+  })
 
   const clampZoom = (v: number): number => Math.max(0.25, Math.min(5, v))
 
@@ -104,58 +122,58 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
     dragState.current = null
   }, [])
 
+  const segments = useMemo(() => {
+    if (!showWalls) return []
+    const raw = parseSvgSegments(rawSvg)
+    return classifySegments(raw, rawSvg)
+  }, [rawSvg, showWalls])
+
+  const visibleKinds = useMemo((): Set<SegmentKind> => {
+    const kinds = new Set<SegmentKind>()
+    if (layerToggles.buildings) { kinds.add('building'); kinds.add('balcony') }
+    if (layerToggles.roads) kinds.add('road')
+    if (layerToggles.details) kinds.add('door')
+    if (layerToggles.walls) kinds.add('other')
+    return kinds
+  }, [layerToggles])
+
   const sceneTransform = mode === '3d'
     ? `translate(${panX}px, ${panY}px) scale(${zoom}) rotateX(${rotationX}deg) rotateY(${rotationY}deg) rotateZ(${rotationZ}deg)`
     : `translate(${panX}px, ${panY}px) scale(${zoom})`
 
   return (
-    <div
-      data-structural-3d="true"
-      onWheel={onWheel}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-      onDoubleClick={resetView}
-      style={{
-        position: 'relative',
-        width,
-        height,
-        overflow: 'hidden',
-        perspective: mode === '3d' ? 1600 : 'none',
-        background: 'var(--bg-1)',
-        cursor: dragState.current ? 'grabbing' : 'grab',
-        userSelect: 'none',
-      }}
-    >
+    <>
       <div
-        data-structural-scene="true"
-        data-mode={mode}
+        data-structural-3d="true"
+        onWheel={onWheel}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onDoubleClick={resetView}
         style={{
-          position: 'absolute',
-          inset: 0,
-          transformStyle: 'preserve-3d',
-          transform: sceneTransform,
-          transformOrigin: '50% 50%',
+          position: 'relative',
+          width,
+          height,
+          overflow: 'hidden',
+          perspective: mode === '3d' ? 1600 : 'none',
+          background: 'var(--bg-1)',
+          cursor: dragState.current ? 'grabbing' : 'grab',
+          userSelect: 'none',
         }}
       >
-        <svg
-          viewBox={analysis.viewBox}
-          preserveAspectRatio="xMidYMid meet"
+        <div
+          data-structural-scene="true"
+          data-mode={mode}
           style={{
             position: 'absolute',
             inset: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
+            transformStyle: 'preserve-3d',
+            transform: sceneTransform,
+            transformOrigin: '50% 50%',
           }}
-          dangerouslySetInnerHTML={{ __html: analysis.baseStrokeSvg.replace(/^<svg[^>]*>|<\/svg>$/g, '') }}
-        />
-
-        {analysis.layers.map((layer) => (
+        >
           <svg
-            key={layer.id}
-            data-structural-layer={layer.id}
             viewBox={analysis.viewBox}
             preserveAspectRatio="xMidYMid meet"
             style={{
@@ -163,106 +181,149 @@ export const StructuralSvgPseudo3D: React.FC<StructuralSvgPseudo3DProps> = ({
               inset: 0,
               width: '100%',
               height: '100%',
-              transformStyle: 'preserve-3d',
-              transform: mode === '3d' ? `translateZ(${layer.height}px)` : 'translateZ(0px)',
               pointerEvents: 'none',
             }}
-            dangerouslySetInnerHTML={{ __html: layer.svgMarkup }}
+            dangerouslySetInnerHTML={{ __html: analysis.baseStrokeSvg.replace(/^<svg[^>]*>|<\/svg>$/g, '') }}
           />
-        ))}
 
-        {mode === '3d' && maxLayerZ > 0 && (
-          <div
-            data-structural-frame="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              transformStyle: 'preserve-3d',
-            }}
-          >
-            {[
-              { x: vb.minX, y: vb.minY },
-              { x: vb.minX + vb.width, y: vb.minY },
-              { x: vb.minX, y: vb.minY + vb.height },
-              { x: vb.minX + vb.width, y: vb.minY + vb.height },
-            ].map((c, i) => {
-              const leftPct = ((c.x - vb.minX) / vb.width) * 100
-              const topPct = ((c.y - vb.minY) / vb.height) * 100
-              return (
-                <div
-                  key={`pillar-${i}`}
-                  style={{
-                    position: 'absolute',
-                    left: `${leftPct}%`,
-                    top: `${topPct}%`,
-                    width: 1,
-                    height: maxLayerZ,
-                    background: 'rgba(148,163,184,0.8)',
-                    transformOrigin: 'top left',
-                    transform: 'translateZ(0px) rotateX(90deg)',
-                  }}
-                />
-              )
-            })}
+          {analysis.layers.map((layer) => (
+            <svg
+              key={layer.id}
+              data-structural-layer={layer.id}
+              viewBox={analysis.viewBox}
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                transformStyle: 'preserve-3d',
+                transform: mode === '3d' ? `translateZ(${layer.height}px)` : 'translateZ(0px)',
+                pointerEvents: 'none',
+              }}
+              dangerouslySetInnerHTML={{ __html: layer.svgMarkup }}
+            />
+          ))}
 
-            {analysis.connectors.map((c, i) => {
-              const dz = Math.abs(c.zTo - c.zFrom)
-              if (dz < 1) return null
-              const leftPct = ((c.xFrom - vb.minX) / vb.width) * 100
-              const topPct = ((c.yFrom - vb.minY) / vb.height) * 100
-              const zStart = Math.min(c.zFrom, c.zTo)
-              const zEnd = Math.max(c.zFrom, c.zTo)
-              return (
-                <React.Fragment key={`zlink-${i}`}>
+          {mode === '3d' && maxLayerZ > 0 && (
+            <div
+              data-structural-frame="true"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none',
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              {[
+                { x: vb.minX, y: vb.minY },
+                { x: vb.minX + vb.width, y: vb.minY },
+                { x: vb.minX, y: vb.minY + vb.height },
+                { x: vb.minX + vb.width, y: vb.minY + vb.height },
+              ].map((c, i) => {
+                const leftPct = ((c.x - vb.minX) / vb.width) * 100
+                const topPct = ((c.y - vb.minY) / vb.height) * 100
+                return (
                   <div
-                    data-structural-z-link="true"
+                    key={`pillar-${i}`}
                     style={{
                       position: 'absolute',
                       left: `${leftPct}%`,
                       top: `${topPct}%`,
-                      width: 2,
-                      height: dz,
-                      background: 'rgba(236,72,153,0.92)',
-                      pointerEvents: 'none',
+                      width: 1,
+                      height: maxLayerZ,
+                      background: 'rgba(148,163,184,0.8)',
                       transformOrigin: 'top left',
-                      transform: `translateZ(${zStart}px) rotateX(90deg)`,
+                      transform: 'translateZ(0px) rotateX(90deg)',
                     }}
                   />
-                  <div
-                    data-structural-z-point="start"
-                    style={{
-                      position: 'absolute',
-                      left: `${leftPct}%`,
-                      top: `${topPct}%`,
-                      width: 4,
-                      height: 4,
-                      borderRadius: '50%',
-                      background: 'rgba(236,72,153,0.98)',
-                      pointerEvents: 'none',
-                      transform: `translate(-1px, -1px) translateZ(${zStart}px)`,
-                    }}
-                  />
-                  <div
-                    data-structural-z-point="end"
-                    style={{
-                      position: 'absolute',
-                      left: `${leftPct}%`,
-                      top: `${topPct}%`,
-                      width: 4,
-                      height: 4,
-                      borderRadius: '50%',
-                      background: 'rgba(236,72,153,0.75)',
-                      pointerEvents: 'none',
-                      transform: `translate(-1px, -1px) translateZ(${zEnd}px)`,
-                    }}
-                  />
-                </React.Fragment>
-              )
-            })}
-          </div>
-        )}
+                )
+              })}
+
+              {analysis.connectors.map((c, i) => {
+                const dz = Math.abs(c.zTo - c.zFrom)
+                if (dz < 1) return null
+                const leftPct = ((c.xFrom - vb.minX) / vb.width) * 100
+                const topPct = ((c.yFrom - vb.minY) / vb.height) * 100
+                const zStart = Math.min(c.zFrom, c.zTo)
+                const zEnd = Math.max(c.zFrom, c.zTo)
+                return (
+                  <React.Fragment key={`zlink-${i}`}>
+                    <div
+                      data-structural-z-link="true"
+                      style={{
+                        position: 'absolute',
+                        left: `${leftPct}%`,
+                        top: `${topPct}%`,
+                        width: 2,
+                        height: dz,
+                        background: 'rgba(236,72,153,0.92)',
+                        pointerEvents: 'none',
+                        transformOrigin: 'top left',
+                        transform: `translateZ(${zStart}px) rotateX(90deg)`,
+                      }}
+                    />
+                    <div
+                      data-structural-z-point="start"
+                      style={{
+                        position: 'absolute',
+                        left: `${leftPct}%`,
+                        top: `${topPct}%`,
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        background: 'rgba(236,72,153,0.98)',
+                        pointerEvents: 'none',
+                        transform: `translate(-1px, -1px) translateZ(${zStart}px)`,
+                      }}
+                    />
+                    <div
+                      data-structural-z-point="end"
+                      style={{
+                        position: 'absolute',
+                        left: `${leftPct}%`,
+                        top: `${topPct}%`,
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        background: 'rgba(236,72,153,0.75)',
+                        pointerEvents: 'none',
+                        transform: `translate(-1px, -1px) translateZ(${zEnd}px)`,
+                      }}
+                    />
+                  </React.Fragment>
+                )
+              })}
+            </div>
+          )}
+
+          {showWalls && (
+            <StructuralWallsLayer
+              segments={segments}
+              viewBox={vb}
+              defaultWallHeight={defaultWallHeight}
+              heights={heights}
+              mode={mode}
+              visibleKinds={visibleKinds}
+            />
+          )}
+        </div>
       </div>
-    </div>
+
+      {showLayerToggles && (
+        <div data-layer-toggles style={{ display: 'flex', gap: 8, padding: '4px 8px' }}>
+          {(['buildings', 'roads', 'walls', 'details'] as const).map(key => (
+            <label key={key} style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <input
+                type="checkbox"
+                checked={layerToggles[key]}
+                onChange={e => setLayerToggles(prev => ({ ...prev, [key]: e.target.checked }))}
+              />
+              {key}
+            </label>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
