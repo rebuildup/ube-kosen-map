@@ -71,7 +71,11 @@ function tokenizePathD(d: string): Array<{ cmd: string; nums: number[] }> {
       segments.push({ cmd: trimmed, nums: [] })
     } else {
       // Numbers for the current command
-      const nums = trimmed.split(/[\s,]+/).map(Number).filter(n => !isNaN(n))
+      // Use regex to handle sign-separated numbers like "85.04-40.07" (common in PDF-exported SVG)
+      const nums = Array.from(
+        trimmed.matchAll(/[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g),
+        m => Number(m[0]),
+      )
       if (nums.length > 0 && segments.length > 0) {
         segments[segments.length - 1]!.nums.push(...nums)
       }

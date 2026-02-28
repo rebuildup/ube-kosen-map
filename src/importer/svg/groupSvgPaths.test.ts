@@ -94,4 +94,18 @@ describe('groupSvgPaths', () => {
     const { groups } = groupSvgPaths(svg)
     expect(groups[0]!.shapes[0]!.isClosed).toBe(true)
   })
+
+  it('sign-separated path numbers (PDF-exported SVG) are parsed correctly', () => {
+    // "M10-5" means moveto (10, -5) — minus is the separator, not a space/comma
+    const svg = [
+      '<svg viewBox="0 0 100 100">',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M0 0L10-5"/>',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M10-5L20 0"/>',
+      '</svg>',
+    ].join('')
+    const { groups } = groupSvgPaths(svg)
+    // Both paths share endpoint (10,-5) → same ShapeGroup
+    expect(groups[0]!.shapes.length).toBe(1)
+    expect(groups[0]!.shapes[0]!.paths.length).toBe(2)
+  })
 })
