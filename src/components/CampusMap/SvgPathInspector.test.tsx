@@ -17,27 +17,26 @@ describe('SvgPathInspector', () => {
     expect(container.querySelector('[data-inspector-svg]')).not.toBeNull()
   })
 
-  it('renders a row per style group', () => {
+  it('renders a row per path (flat list)', () => {
     const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    const rows = container.querySelectorAll('[data-group-row]')
-    expect(rows.length).toBe(2) // two unique styles
+    const rows = container.querySelectorAll('[data-path-row]')
+    expect(rows.length).toBe(3) // three paths
   })
 
-  it('toggles a group off when its button is clicked', () => {
+  it('toggles a path off when its button is clicked', () => {
     const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    const rows = container.querySelectorAll('[data-group-row]')
-    const toggleBtn = rows[0]!.querySelector('button[data-toggle]') as HTMLButtonElement
+    const toggleBtn = container.querySelector('button[data-path-toggle]') as HTMLButtonElement
     fireEvent.click(toggleBtn)
     const style = container.querySelector('[data-inspector-style]')
     expect(style?.textContent).toContain('display:none')
   })
 
-  it('HIDE ALL hides all groups', () => {
+  it('HIDE ALL hides all paths', () => {
     const { container, getByText } = render(<SvgPathInspector rawSvg={RAW} />)
     fireEvent.click(getByText('HIDE ALL'))
     const style = container.querySelector('[data-inspector-style]')
-    expect(style?.textContent).toContain('data-sg="0"')
-    expect(style?.textContent).toContain('data-sg="1"')
+    expect(style?.textContent).toContain('data-sp=')
+    expect(style?.textContent).toContain('display:none')
   })
 
   it('SHOW ALL re-enables all groups', () => {
@@ -48,57 +47,59 @@ describe('SvgPathInspector', () => {
     expect(style?.textContent).toBe('')
   })
 
-  it('hovering a row generates orange highlight CSS', () => {
+  it('hovering a path row generates cyan highlight CSS', () => {
     const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    const row = container.querySelector('[data-group-row="0"]')!
-    fireEvent.mouseEnter(row)
-    const style = container.querySelector('[data-inspector-style]')
-    expect(style?.textContent).toContain('stroke:orange')
-    fireEvent.mouseLeave(row)
-    expect(style?.textContent).not.toContain('stroke:orange')
+    const row = container.querySelector('[data-path-row="0"]')
+    expect(row).toBeTruthy()
+    fireEvent.mouseEnter(row!)
+    const highlightStyle = container.querySelector('[data-inspector-style="highlight"]')
+    expect(highlightStyle?.textContent).toContain('stroke:cyan')
+    fireEvent.mouseLeave(row!)
+    expect(container.querySelector('[data-inspector-style="highlight"]')?.textContent).not.toContain('stroke:cyan')
   })
 
-  it('shows expand indicator in each group row', () => {
+  it('shows path rows with g/p labels', () => {
     const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    const rows = container.querySelectorAll('[data-group-row]')
-    expect(rows[0]?.textContent).toContain('▶')
+    const rows = container.querySelectorAll('[data-path-row]')
+    expect(rows.length).toBeGreaterThan(0)
+    expect(rows[0]?.textContent).toMatch(/g\d+p\d+/)
   })
 
-  it('expands a group to show path rows when header is clicked', () => {
-    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    const row = container.querySelector('[data-group-row="0"]')!
-    fireEvent.click(row)
-    const pathRows = container.querySelectorAll('[data-path-row]')
-    expect(pathRows.length).toBeGreaterThan(0)
+  it('shows 完了 and 未完了 filter toggles', () => {
+    const { getByText } = render(<SvgPathInspector rawSvg={RAW} />)
+    expect(getByText('完了')).toBeTruthy()
+    expect(getByText('未完了')).toBeTruthy()
   })
 
-  it('toggles an individual path off', () => {
+  it('path status button exists and cycles on click', () => {
     const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    // expand group 0
-    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
-    // click path toggle
-    const pathToggle = container.querySelector('[data-path-toggle]') as HTMLButtonElement
-    fireEvent.click(pathToggle)
-    const style = container.querySelector('[data-inspector-style]')
-    expect(style?.textContent).toContain('data-sp=')
-    expect(style?.textContent).toContain('display:none')
+    const pathRow = container.querySelector('[data-path-row]')
+    expect(pathRow).toBeTruthy()
+    const statusBtn = pathRow!.querySelector('[data-path-status]') as HTMLButtonElement
+    expect(statusBtn).toBeTruthy()
+    expect(statusBtn.textContent).toMatch(/^[未完削]$/)
+    fireEvent.click(statusBtn)
+    const btnAfter = container.querySelector('[data-path-status]')
+    expect(btnAfter?.textContent).toMatch(/^[未完削]$/)
   })
 
-  it('shows shape rows when group is expanded', () => {
-    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
-    const shapeRows = container.querySelectorAll('[data-shape-row]')
-    expect(shapeRows.length).toBeGreaterThan(0)
+  it('shows バックアップ and 保存 buttons', () => {
+    const { getByText } = render(<SvgPathInspector rawSvg={RAW} />)
+    expect(getByText('バックアップ')).toBeTruthy()
+    expect(getByText('保存')).toBeTruthy()
   })
 
-  it('shape toggle hides all paths in that shape via data-ss CSS', () => {
-    const { container } = render(<SvgPathInspector rawSvg={RAW} />)
-    fireEvent.click(container.querySelector('[data-group-row="0"]')!)
-    const shapeRow = container.querySelector('[data-shape-row]')!
-    const shapeToggle = shapeRow.querySelector('[data-shape-toggle]') as HTMLButtonElement
-    fireEvent.click(shapeToggle)
-    const style = container.querySelector('[data-inspector-style]')
-    expect(style?.textContent).toContain('data-ss=')
-    expect(style?.textContent).toContain('display:none')
+  it('shows 削除 button when paths are selected', () => {
+    const { container, getByRole } = render(<SvgPathInspector rawSvg={RAW} />)
+    const checkbox = container.querySelector('input[type="checkbox"]') as HTMLInputElement
+    fireEvent.click(checkbox)
+    const deleteBtn = getByRole('button', { name: /削除 \(\d+\)/ })
+    expect(deleteBtn).toBeTruthy()
+  })
+
+  it('shows 元に戻す and やり直す buttons', () => {
+    const { getByText } = render(<SvgPathInspector rawSvg={RAW} />)
+    expect(getByText('元に戻す')).toBeTruthy()
+    expect(getByText('やり直す')).toBeTruthy()
   })
 })

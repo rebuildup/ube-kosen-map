@@ -14,7 +14,7 @@
  * [P-4] ViewMode-driven disclosure: aerial / floor / cross-section / pseudo-3d / building
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import type { CampusGraph, NodeId } from '../core/schema'
 import type { RoutingProfile } from '../core/routing/cost'
 import type { Route } from '../core/routing'
@@ -33,6 +33,9 @@ import {
 } from '../core/routing/cost'
 import { getLayerVisibility } from '../core/zoom'
 import page1SvgRaw from '../../docs/reference/page_1.svg?raw'
+import type { Page1InspectConfig } from '../components/CampusMap/page1InspectTypes'
+
+const DEFAULT_INSPECT_CONFIG: Page1InspectConfig = { keepGroups: [], hiddenPathRanges: [], pathStatus: {}, customShapes: [], hiddenShapeIds: [] }
 
 const PROFILES: RoutingProfile[] = [
   PROFILE_DEFAULT, PROFILE_CART, PROFILE_RAIN, PROFILE_ACCESSIBLE,
@@ -59,6 +62,18 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
   const [profileIndex, setProfileIndex] = useState(0)
   const [visibility, setVisibility]   = useState({ ...getLayerVisibility('Z4'), validation: false })
   const [hideNonBuildingSymbols, setHideNonBuildingSymbols] = useState(true)
+  const [page1InspectConfig, setPage1InspectConfig] = useState<Page1InspectConfig>(DEFAULT_INSPECT_CONFIG)
+
+  const loadInspectConfig = useCallback(() => {
+    fetch('/api/load-config?filename=page1-inspect-config.json')
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('not found'))))
+      .then((cfg: Page1InspectConfig) => setPage1InspectConfig(cfg))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (viewMode === 'inspect') loadInspectConfig()
+  }, [viewMode, loadInspectConfig])
 
   const profile = PROFILES[profileIndex] ?? PROFILE_DEFAULT
 
@@ -109,10 +124,13 @@ export const CampusViewer: React.FC<CampusViewerProps> = ({ graph }) => {
     if (viewMode === 'inspect') {
       return (
         <SvgPathInspector
+          key={JSON.stringify(page1InspectConfig)}
           rawSvg={page1SvgRaw}
-          keepGroups={[4, 12, 13, 14]}
+          keepGroups={page1InspectConfig.keepGroups}
           excludeText
-          hiddenPathRanges={[{ group: 4, start: 96, end: 1090 }]}
+          hiddenPathRanges={page1InspectConfig.hiddenPathRanges}
+          initialConfig={page1InspectConfig}
+          configFileName="page1-inspect-config.json"
         />
       )
     }

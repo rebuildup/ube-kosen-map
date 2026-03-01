@@ -11,6 +11,7 @@
     "format": "biome format --write src/",
     "preview": "vite preview",
     "test": "vitest",
+    "analyze:page1": "vitest run src/importer/svg/analyzePage1Groups.test",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit"

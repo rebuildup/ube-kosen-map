@@ -28,6 +28,8 @@ export interface GroupedSvgPaths {
 }
 
 const SHAPE_SEL = 'path,polyline,polygon,line'
+type Mat2D = [number, number, number, number, number, number] // a,b,c,d,e,f
+const IDENTITY: Mat2D = [1, 0, 0, 1, 0, 0]
 
 function inDefsOrSymbol(el: Element): boolean {
   return Boolean(el.closest('defs') || el.closest('symbol'))
@@ -47,6 +49,84 @@ function extractStyle(el: Element): { strokeColor: string; strokeWidth: string; 
     strokeWidth: strokeWidth.trim(),
     fillColor:   fillColor.trim().toLowerCase(),
   }
+}
+
+function toNumbers(raw: string): number[] {
+  return Array.from(raw.matchAll(/[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?/gi), (m) => Number(m[0]))
+}
+
+function mul(m1: Mat2D, m2: Mat2D): Mat2D {
+  const [a1, b1, c1, d1, e1, f1] = m1
+  const [a2, b2, c2, d2, e2, f2] = m2
+  return [
+    a1 * a2 + c1 * b2,
+    b1 * a2 + d1 * b2,
+    a1 * c2 + c1 * d2,
+    b1 * c2 + d1 * d2,
+    a1 * e2 + c1 * f2 + e1,
+    b1 * e2 + d1 * f2 + f1,
+  ]
+}
+
+function applyMat(m: Mat2D, x: number, y: number): [number, number] {
+  const [a, b, c, d, e, f] = m
+  return [a * x + c * y + e, b * x + d * y + f]
+}
+
+function parseTransform(raw: string): Mat2D {
+  let out: Mat2D = IDENTITY
+  const re = /(matrix|translate|scale|rotate)\(([^)]+)\)/gi
+  const parts = Array.from(raw.matchAll(re))
+  for (const part of parts) {
+    const fn = (part[1] ?? '').toLowerCase()
+    const nums = toNumbers(part[2] ?? '')
+    let m: Mat2D = IDENTITY
+    if (fn === 'matrix' && nums.length >= 6) {
+      m = [nums[0] ?? 1, nums[1] ?? 0, nums[2] ?? 0, nums[3] ?? 1, nums[4] ?? 0, nums[5] ?? 0]
+    } else if (fn === 'translate') {
+      const tx = nums[0] ?? 0
+      const ty = nums[1] ?? 0
+      m = [1, 0, 0, 1, tx, ty]
+    } else if (fn === 'scale') {
+      const sx = nums[0] ?? 1
+      const sy = nums[1] ?? sx
+      m = [sx, 0, 0, sy, 0, 0]
+    } else if (fn === 'rotate') {
+      const deg = nums[0] ?? 0
+      const rad = (deg * Math.PI) / 180
+      const cos = Math.cos(rad)
+      const sin = Math.sin(rad)
+      if (nums.length >= 3) {
+        const cx = nums[1] ?? 0
+        const cy = nums[2] ?? 0
+        const t1: Mat2D = [1, 0, 0, 1, cx, cy]
+        const r: Mat2D = [cos, sin, -sin, cos, 0, 0]
+        const t2: Mat2D = [1, 0, 0, 1, -cx, -cy]
+        m = mul(mul(t1, r), t2)
+      } else {
+        m = [cos, sin, -sin, cos, 0, 0]
+      }
+    }
+    out = mul(out, m)
+  }
+  return out
+}
+
+function getElementTransform(el: Element): Mat2D {
+  let m: Mat2D = IDENTITY
+  const chain: Element[] = []
+  let cur: Element | null = el
+  while (cur) {
+    chain.push(cur)
+    cur = cur.parentElement
+  }
+  chain.reverse()
+  for (const node of chain) {
+    const t = node.getAttribute('transform')
+    if (!t) continue
+    m = mul(m, parseTransform(t))
+  }
+  return m
 }
 
 // Parse space/comma-separated number list from SVG points attribute
@@ -398,10 +478,27 @@ function buildShapes(
   return shapeGroups
 }
 
+/** Parse viewBox "minX minY width height" and return { width, height } */
+function parseViewBox(viewBox: string): { width: number; height: number } {
+  const parts = viewBox.trim().split(/\s+/).map(Number)
+  return {
+    width: parts[2] ?? 100,
+    height: parts[3] ?? 100,
+  }
+}
+
+/** Epsilon for vertex connectivity: ~1% of smaller dimension, min 1. Catches PDF-export gaps. */
+function connectivityEpsilon(viewBox: string): number {
+  const { width, height } = parseViewBox(viewBox)
+  const minDim = Math.min(width, height)
+  return Math.max(1, minDim * 0.01)
+}
+
 export function groupSvgPaths(rawSvg: string): GroupedSvgPaths {
   const doc = new DOMParser().parseFromString(rawSvg, 'image/svg+xml')
   const root = doc.documentElement
   const viewBox = root.getAttribute('viewBox') ?? '0 0 100 100'
+  const epsilon = connectivityEpsilon(viewBox)
 
   const shapeElements = Array.from(root.querySelectorAll(SHAPE_SEL))
     .filter(el => !inDefsOrSymbol(el))
@@ -424,8 +521,9 @@ export function groupSvgPaths(rawSvg: string): GroupedSvgPaths {
     }
 
     const endpoints = extractElementEndpoints(el)
-    const startPt: [number, number] = endpoints ? endpoints.start : [0, 0]
-    const endPt: [number, number] = endpoints ? endpoints.end : [0, 0]
+    const tf = getElementTransform(el)
+    const startPt: [number, number] = endpoints ? applyMat(tf, endpoints.start[0], endpoints.start[1]) : [0, 0]
+    const endPt: [number, number] = endpoints ? applyMat(tf, endpoints.end[0], endpoints.end[1]) : [0, 0]
     const isClosed = endpoints ? endpoints.isClosed : false
 
     const pathIdx = globalPathIdx++
@@ -440,7 +538,7 @@ export function groupSvgPaths(rawSvg: string): GroupedSvgPaths {
   const groups: StyleGroup[] = groupAccum.map((g, i) => ({
     ...g,
     index: i,
-    shapes: buildShapes(i, groupElements[i]!, g.paths),
+    shapes: buildShapes(i, groupElements[i]!, g.paths, epsilon),
   }))
 
   const svgInnerHTML = root.innerHTML

@@ -108,4 +108,43 @@ describe('groupSvgPaths', () => {
     expect(groups[0]!.shapes.length).toBe(1)
     expect(groups[0]!.shapes[0]!.paths.length).toBe(2)
   })
+
+  it('merges paths that connect after transform is applied', () => {
+    const svg = [
+      '<svg viewBox="0 0 300 300">',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M0 0 L10 0" transform="translate(100 100)"/>',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M20 0 L30 0" transform="translate(90 100)"/>',
+      '</svg>',
+    ].join('')
+    const { groups } = groupSvgPaths(svg)
+    expect(groups[0]!.shapes.length).toBe(1)
+    expect(groups[0]!.shapes[0]!.paths.length).toBe(2)
+  })
+
+  it('does not merge paths that are disconnected after transform is applied', () => {
+    const svg = [
+      '<svg viewBox="0 0 300 300">',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M0 0 L10 0" transform="translate(0 0)"/>',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M0 0 L10 0" transform="translate(100 0)"/>',
+      '</svg>',
+    ].join('')
+    const { groups } = groupSvgPaths(svg)
+    expect(groups[0]!.shapes.length).toBe(2)
+    expect(groups[0]!.shapes[0]!.paths.length).toBe(1)
+    expect(groups[0]!.shapes[1]!.paths.length).toBe(1)
+  })
+
+  it('merges nearly-connected paths within tolerance (viewBox-scaled epsilon)', () => {
+    // Large viewBox (595x841) → epsilon ~6; paths ~2 units apart should merge
+    const svg = [
+      '<svg viewBox="0 0 595 842">',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M0 0 L100 0"/>',
+      '<path style="fill:none;stroke:#111;stroke-width:1;" d="M100.5 0.5 L200 0"/>',
+      '</svg>',
+    ].join('')
+    const { groups } = groupSvgPaths(svg)
+    // Endpoints (100,0) and (100.5,0.5) are within epsilon/2 in each axis → same bucket
+    expect(groups[0]!.shapes.length).toBe(1)
+    expect(groups[0]!.shapes[0]!.paths.length).toBe(2)
+  })
 })
