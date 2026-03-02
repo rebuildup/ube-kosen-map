@@ -48,4 +48,16 @@ describe('parseSvgSegments', () => {
     const segs = parseSvgSegments(svg)
     expect(segs.length).toBe(0)
   })
+
+  it('keeps pathIndex aligned with full shape order even when non-stroked shapes exist', () => {
+    const svg = [
+      '<svg viewBox="0 0 100 100">',
+      '<path d="M0 0 L10 0" style="fill:#fff;stroke:none" />',
+      '<path d="M0 10 L10 10" style="stroke:#000" />',
+      '</svg>',
+    ].join('')
+    const segs = parseSvgSegments(svg)
+    expect(segs.length).toBe(1)
+    expect(segs[0]?.pathIndex).toBe(1)
+  })
 })

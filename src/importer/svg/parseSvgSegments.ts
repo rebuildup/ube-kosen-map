@@ -6,6 +6,7 @@ export type SegmentKind = 'building' | 'road' | 'door' | 'balcony' | 'other'
 export interface Segment {
   a: Vec2
   b: Vec2
+  pathIndex?: number
   featureId?: string
   kind?: SegmentKind
 }
@@ -189,9 +190,13 @@ export function parseSvgSegments(rawSvg: string): Segment[] {
   const root = doc.documentElement
   const shapes = Array.from(root.querySelectorAll(SHAPE_SELECTOR))
   const result: Segment[] = []
+  let pathIndex = 0
 
   for (const el of shapes) {
-    if (inDefsOrSymbol(el) || !hasStroke(el)) continue
+    if (inDefsOrSymbol(el)) continue
+    const currentPathIndex = pathIndex
+    pathIndex += 1
+    if (!hasStroke(el)) continue
     const featureId = el.getAttribute('id') ?? el.getAttribute('data-id') ?? undefined
     const { pts, close } = getPointsWorld(el)
     if (pts.length < 2) continue
@@ -202,7 +207,7 @@ export function parseSvgSegments(rawSvg: string): Segment[] {
       const dx = b.x - a.x
       const dy = b.y - a.y
       if (Math.sqrt(dx*dx + dy*dy) < EPS) continue
-      result.push({ a, b, featureId })
+      result.push({ a, b, pathIndex: currentPathIndex, featureId })
     }
   }
 

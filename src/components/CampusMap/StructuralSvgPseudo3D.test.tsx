@@ -5,51 +5,14 @@ import { StructuralSvgPseudo3D } from './StructuralSvgPseudo3D'
 const RAW = [
   '<svg viewBox="0 0 20 20">',
   '<g>',
-  '<path d="M0 0 L10 0" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 1 L10 1" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 2 L10 2" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 3 L10 3" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 4 L10 4" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 5 L10 5" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 6 L10 6" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 7 L10 7" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 8 L10 8" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 9 L10 9" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 10 L10 10" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 11 L10 11" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 12 L10 12" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 13 L10 13" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 14 L10 14" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 15 L10 15" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 16 L10 16" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 17 L10 17" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 18 L10 18" style="fill:none;stroke:#111;stroke-width:1;" />',
-  '<path d="M0 19 L10 19" style="fill:none;stroke:#111;stroke-width:1;" />',
+  '<path d="M1 1 L10 1 L10 10" style="fill:none;stroke:#111;stroke-width:1;" />',
+  '<path d="M10 10 L1 10 L1 1" style="fill:none;stroke:#111;stroke-width:1;" />',
+  '<path d="M12 2 L18 2" style="fill:none;stroke:#111;stroke-width:1;" />',
   '</g>',
   '</svg>',
 ].join('')
 
-const RAW_MULTI = [
-  '<svg viewBox="0 0 20 20">',
-  '<g>',
-  '<path d="M0 0 L10 0 L10 10" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 10 L10 10" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 0 L10 0 L10 10" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '<path d="M0 10 L10 10" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '<path d="M0 1 L10 1" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 2 L10 2" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 3 L10 3" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 4 L10 4" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 5 L10 5" style="fill:none;stroke:#111;stroke-width:0.2;" />',
-  '<path d="M0 6 L10 6" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '<path d="M0 7 L10 7" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '<path d="M0 8 L10 8" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '<path d="M0 9 L10 9" style="fill:none;stroke:#444;stroke-width:1.2;" />',
-  '</g>',
-  '</svg>',
-].join('')
-
-describe('StructuralSvgPseudo3D', () => {
+describe('StructuralSvgPseudo3D (rebuilt)', () => {
   it('renders in flat mode when requested', () => {
     const { container } = render(<StructuralSvgPseudo3D rawSvg={RAW} mode="flat" />)
     const scene = container.querySelector('[data-structural-scene="true"]')
@@ -70,63 +33,130 @@ describe('StructuralSvgPseudo3D', () => {
     const root = container.querySelector('[data-structural-3d="true"]') as HTMLElement
     const scene = container.querySelector('[data-structural-scene="true"]') as HTMLElement
     const before = scene.style.transform
-    fireEvent.mouseDown(root, { clientX: 10, clientY: 10, button: 0 })
-    fireEvent.mouseMove(root, { clientX: 50, clientY: 40, buttons: 1 })
+    fireEvent.mouseDown(root, { clientX: 10, clientY: 10, button: 2 })
+    fireEvent.mouseMove(root, { clientX: 50, clientY: 40, buttons: 2 })
     fireEvent.mouseUp(root)
     expect(scene.style.transform).not.toBe(before)
   })
 
-  it('renders z-axis frame pillars in 3d mode', () => {
-    const { container } = render(<StructuralSvgPseudo3D rawSvg={RAW} mode="3d" />)
-    const frame = container.querySelector('[data-structural-frame="true"]')
-    expect(frame).not.toBeNull()
-  })
-
-  it('renders z-links between matching vertices across layers', () => {
-    const { container } = render(<StructuralSvgPseudo3D rawSvg={RAW_MULTI} mode="3d" />)
-    const links = container.querySelectorAll('[data-structural-z-link="true"]')
-    expect(links.length).toBeGreaterThan(0)
-  })
-
-  it('renders z-links as true z-axis bars in scene 3d space', () => {
-    const { container } = render(<StructuralSvgPseudo3D rawSvg={RAW_MULTI} mode="3d" />)
-    const frame = container.querySelector('[data-structural-frame="true"]') as HTMLElement | null
-    const link = container.querySelector('[data-structural-z-link="true"]') as HTMLElement | null
-    expect(frame).not.toBeNull()
-    expect(frame?.style.transformStyle).toBe('preserve-3d')
-    expect(link).not.toBeNull()
-    expect(link?.style.transform).toContain('translateZ(')
-    expect(link?.style.transform).toContain('rotateX(90deg)')
-  })
-
-  it('renders endpoint markers for z-links', () => {
-    const { container } = render(<StructuralSvgPseudo3D rawSvg={RAW_MULTI} mode="3d" />)
-    const starts = container.querySelectorAll('[data-structural-z-point="start"]')
-    const ends = container.querySelectorAll('[data-structural-z-point="end"]')
-    expect(starts.length).toBeGreaterThan(0)
-    expect(ends.length).toBeGreaterThan(0)
-  })
-
-  it('renders walls layer when mode is 3d and showWalls is true', () => {
+  it('renders shape solid walls from shapeFaces', () => {
     const { container } = render(
-      <StructuralSvgPseudo3D rawSvg={RAW} mode="3d" showWalls />
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        shapeFaces={[
+          { id: 'face-a', pathIndices: [0, 1], height: 24, color: '#22c55e' },
+        ]}
+      />,
     )
-    const wallsLayer = container.querySelector('[data-walls-layer="true"]')
-    expect(wallsLayer).not.toBeNull()
+
+    const walls = container.querySelectorAll('[data-shape-solid-wall="face-a"]')
+    expect(walls.length).toBeGreaterThan(0)
   })
 
-  it('does not render walls layer in flat mode even with showWalls', () => {
+  it('renders top edges at assigned height', () => {
     const { container } = render(
-      <StructuralSvgPseudo3D rawSvg={RAW} mode="flat" showWalls />
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        shapeFaces={[
+          { id: 'face-a', pathIndices: [0, 1], baseZ: 12, height: 24, color: '#22c55e' },
+        ]}
+      />,
     )
-    const wallsLayer = container.querySelector('[data-walls-layer="true"]')
-    expect(wallsLayer).toBeNull()
+
+    const top = container.querySelector('[data-shape-solid-top]') as HTMLElement | null
+    expect(top).not.toBeNull()
+    expect(top?.style.transform).toContain('translateZ(36px)')
   })
 
-  it('renders layer toggle controls when showLayerToggles is true', () => {
+  it('applies zScale only to Z direction', () => {
     const { container } = render(
-      <StructuralSvgPseudo3D rawSvg={RAW} mode="3d" showWalls showLayerToggles />
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        zScale={8}
+        shapeFaces={[
+          { id: 'face-a', pathIndices: [0, 1], baseZ: 2, height: 4, color: '#22c55e' },
+        ]}
+      />,
     )
-    expect(container.querySelector('[data-layer-toggles]')).not.toBeNull()
+
+    const base = container.querySelector('[data-shape-solid-base]') as HTMLElement | null
+    const top = container.querySelector('[data-shape-solid-top]') as HTMLElement | null
+    expect(base).not.toBeNull()
+    expect(top).not.toBeNull()
+    expect(base?.style.transform).toContain('translateZ(16px)')
+    expect(top?.style.transform).toContain('translateZ(48px)')
+  })
+
+  it('renders only base planes in layer-floor mode', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        renderAsLayerFloors
+        shapeFaces={[
+          { id: 'face-a', pathIndices: [0, 1], baseZ: 2, height: 10, color: '#22c55e' },
+        ]}
+      />,
+    )
+
+    expect(container.querySelector('[data-shape-solid-base]')).not.toBeNull()
+    expect(container.querySelector('[data-shape-solid-top]')).toBeNull()
+  })
+
+  it('renders transition guides between two layer heights', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        shapeTransitions={[
+          {
+            id: 'tr-1',
+            kind: 'stairs',
+            fromZ: 0,
+            toZ: 20,
+            lowerPathIndices: [0],
+            upperPathIndices: [1],
+            stepCount: 4,
+          },
+        ]}
+      />,
+    )
+    expect(container.querySelector('[data-shape-transition-lower="tr-1"]')).not.toBeNull()
+    expect(container.querySelector('[data-shape-transition-upper="tr-1"]')).not.toBeNull()
+    expect(container.querySelectorAll('[data-shape-transition-step="tr-1"]').length).toBe(3)
+  })
+
+  it('filters base plane to only visiblePathIndices when provided', () => {
+    const { container } = render(
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        visiblePathIndices={[0, 1]}
+      />,
+    )
+    const style = container.querySelector('svg style')?.textContent ?? ''
+    expect(style).toContain('display:none')
+    expect(style).toContain('[data-sp="0"]')
+    expect(style).toContain('[data-sp="1"]')
+    expect(style).toContain('text')
+  })
+
+  it('emits onPathSelect when clicking a rendered 3d path', () => {
+    const onPathSelect = vi.fn()
+    const { container } = render(
+      <StructuralSvgPseudo3D
+        rawSvg={RAW}
+        mode="3d"
+        onPathSelect={onPathSelect}
+        shapeFaces={[{ id: 'face-a', pathIndices: [0, 1], baseZ: 2, height: 4, color: '#22c55e' }]}
+      />,
+    )
+    const path = container.querySelector('svg[data-plane-id] [data-sp="0"]') as SVGElement | null
+    expect(path).not.toBeNull()
+    fireEvent.click(path as Element)
+    expect(onPathSelect).toHaveBeenCalledWith(0, { additive: false, toggle: false })
   })
 })

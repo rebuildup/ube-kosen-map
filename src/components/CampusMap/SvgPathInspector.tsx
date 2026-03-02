@@ -1,7 +1,9 @@
 // src/components/CampusMap/SvgPathInspector.tsx
 import React, { useMemo, useState, useRef, useCallback, useEffect, memo } from 'react'
 import { groupSvgPaths } from '../../importer/svg/groupSvgPaths'
-import type { Page1InspectConfig, PathStatus, CustomShape } from './page1InspectTypes'
+import { applyShapeEdits } from './page1ShapeEdits'
+import { buildBridgeSegments, buildPathEndpointMap, collectShapeVertexStats } from './shapeVertexEditor'
+import type { Page1InspectConfig, PathStatus, CustomShape, ShapeEditConfig, ShapeVertexRef } from './page1InspectTypes'
 
 export interface SvgPathInspectorProps {
   rawSvg: string
@@ -63,9 +65,15 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
   }, [groups, keepGroupSet])
 
   const baseConfig = useMemo(
-    () => initialConfig ?? { keepGroups: keepGroups ?? [], hiddenPathRanges: hiddenPathRanges ?? [], pathStatus: {}, customShapes: [] },
+    () => initialConfig ?? { keepGroups: keepGroups ?? [], hiddenPathRanges: hiddenPathRanges ?? [], pathStatus: {}, shapeStatus: {}, customShapes: [], hiddenShapeIds: [], shapeEdits: { bridges: [], relations: [], merges: [], splits: [] } },
     [initialConfig, keepGroups, hiddenPathRanges],
   )
+  const emptyShapeEdits = useMemo<ShapeEditConfig>(() => ({
+    bridges: baseConfig.shapeEdits?.bridges ?? [],
+    relations: baseConfig.shapeEdits?.relations ?? [],
+    merges: baseConfig.shapeEdits?.merges ?? [],
+    splits: baseConfig.shapeEdits?.splits ?? [],
+  }), [baseConfig.shapeEdits])
 
   const initialEntry = useMemo(() => ({
     pathStatus: baseConfig.pathStatus ?? {},
@@ -77,6 +85,29 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
 
   const pathStatus = historyState.history[historyState.index]?.pathStatus ?? initialEntry.pathStatus
   const customShapes = historyState.history[historyState.index]?.customShapes ?? initialEntry.customShapes
+  const [shapeEdits, setShapeEdits] = useState<ShapeEditConfig>(emptyShapeEdits)
+  const [shapeStatus, setShapeStatus] = useState<Record<string, PathStatus>>(baseConfig.shapeStatus ?? {})
+  const [shapeHeights, setShapeHeights] = useState<Record<string, number>>(baseConfig.shapeHeights ?? {})
+  const [editorMode, setEditorMode] = useState<'path' | 'shape'>('path')
+  const [selectedVertices, setSelectedVertices] = useState<Array<{ shapeId: string; key: string; ref: ShapeVertexRef }>>([])
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null)
+  const [heightDraft, setHeightDraft] = useState<string>('0')
+  const effectiveShapes = useMemo(
+    () => applyShapeEdits(customShapes, shapeEdits),
+    [customShapes, shapeEdits],
+  )
+  const pathEndpointMap = useMemo(() => buildPathEndpointMap(groups), [groups])
+  const bridgeSegments = useMemo(
+    () => buildBridgeSegments(shapeEdits.bridges ?? [], pathEndpointMap),
+    [shapeEdits.bridges, pathEndpointMap],
+  )
+  const shapeVertexInfo = useMemo(() => {
+    const out = new Map<string, ReturnType<typeof collectShapeVertexStats>>()
+    for (const shape of effectiveShapes) {
+      out.set(shape.id, collectShapeVertexStats(shape, pathEndpointMap, shapeEdits.bridges ?? []))
+    }
+    return out
+  }, [effectiveShapes, pathEndpointMap, shapeEdits.bridges])
 
   const setPathStatus = useCallback((updater: (prev: Record<number, PathStatus>) => Record<number, PathStatus>) => {
     setHistoryState(prev => {
@@ -119,6 +150,14 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
     if (initialConfig.hiddenShapeIds != null) {
       setHiddenShapes(new Set(initialConfig.hiddenShapeIds))
     }
+    setShapeStatus(initialConfig.shapeStatus ?? {})
+    setShapeHeights(initialConfig.shapeHeights ?? {})
+    setShapeEdits({
+      bridges: initialConfig.shapeEdits?.bridges ?? [],
+      relations: initialConfig.shapeEdits?.relations ?? [],
+      merges: initialConfig.shapeEdits?.merges ?? [],
+      splits: initialConfig.shapeEdits?.splits ?? [],
+    })
   }, [initialConfig])
   const [hoveredGroup, setHoveredGroup] = useState<number | null>(null)
   const [hoveredPath, setHoveredPath] = useState<number | null>(null)
@@ -138,6 +177,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
   const [pathListTab, setPathListTab] = useState<'incomplete' | 'completed'>('incomplete')
   const [confirmedSectionOpen, setConfirmedSectionOpen] = useState(false)
   const [shapesSectionOpen, setShapesSectionOpen] = useState(false)
+  const [vertexSectionOpen, setVertexSectionOpen] = useState(true)
   const [selectedListOpen, setSelectedListOpen] = useState(true)
   const [zoom, setZoom] = useState(1)
   const [panX, setPanX] = useState(0)
@@ -186,8 +226,8 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
   }, [pendingShapePaths])
 
   const confirmedShapes = useMemo(
-    () => customShapes.filter(s => s.isClosed && s.hasFill),
-    [customShapes],
+    () => effectiveShapes.filter(s => s.isClosed && s.hasFill),
+    [effectiveShapes],
   )
 
   const buildExportConfig = useCallback((): Page1InspectConfig => ({
@@ -195,9 +235,12 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
     keepGroups: baseConfig.keepGroups,
     hiddenPathRanges: baseConfig.hiddenPathRanges,
     pathStatus: { ...pathStatus },
+    shapeStatus: { ...shapeStatus },
+    shapeHeights: { ...shapeHeights },
     customShapes: [...customShapes],
     hiddenShapeIds: [...hiddenShapes],
-  }), [baseConfig, pathStatus, customShapes, hiddenShapes])
+    shapeEdits,
+  }), [baseConfig, pathStatus, shapeStatus, shapeHeights, customShapes, hiddenShapes, shapeEdits])
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'error'>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -361,8 +404,8 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
     for (const idx of hiddenGroups) rules.push(`[data-sg="${idx}"]{display:none}`)
     for (const pidx of hiddenPaths) rules.push(`[data-sp="${pidx}"]{display:none}`)
     for (const key of hiddenShapes) rules.push(`[data-ss="${key}"]{display:none}`)
-    for (const s of customShapes) {
-      if (!hiddenShapes.has(s.id)) continue
+    for (const s of effectiveShapes) {
+      if (!hiddenShapes.has(s.id) && (shapeStatus[s.id] ?? 'incomplete') !== 'deleted') continue
       for (const pid of s.pathIndices) {
         rules.push(`path[data-sp="${pid}"]{display:none!important;pointer-events:none!important}`)
       }
@@ -379,8 +422,8 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
       }
     }
     if (excludeText) rules.push('text,tspan,use,image{display:none}')
-    for (const s of customShapes) {
-      if (hiddenShapes.has(s.id)) continue
+    for (const s of effectiveShapes) {
+      if (hiddenShapes.has(s.id) || (shapeStatus[s.id] ?? 'incomplete') === 'deleted') continue
       if (s.hasFill && s.fillColor) {
         const color = s.fillColor.trim()
         for (const pid of s.pathIndices) {
@@ -391,14 +434,14 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
       }
     }
     return rules.join('\n')
-  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, hiddenShapes, hiddenPathRanges, excludeText, pathStatus, customShapes])
+  }, [groups, keepGroupSet, hiddenGroups, hiddenPaths, hiddenShapes, hiddenPathRanges, excludeText, pathStatus, shapeStatus, effectiveShapes])
 
   const highlightCssText = useMemo(() => {
     const rules: string[] = []
     if (hoveredGroup !== null) rules.push(`[data-sg="${hoveredGroup}"]{stroke:orange!important;stroke-width:1.5!important;opacity:1!important}`)
     if (hoveredPath !== null) rules.push(`[data-sp="${hoveredPath}"]{stroke:cyan!important;stroke-width:1.5!important;opacity:1!important}`)
     if (hoveredShape !== null) {
-      const cs = customShapes.find(s => s.id === hoveredShape)
+      const cs = effectiveShapes.find(s => s.id === hoveredShape)
       if (cs) for (const pid of cs.pathIndices) rules.push(`path[data-sp="${pid}"]{stroke:yellow!important;stroke-width:2!important;opacity:1!important}`)
       else rules.push(`[data-ss="${hoveredShape}"]{stroke:yellow!important;stroke-width:2!important;opacity:1!important}`)
     }
@@ -406,13 +449,71 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
       rules.push(`path[data-sp="${pid}"]{stroke:rgb(239,68,68)!important;opacity:1!important}`)
     }
     return rules.join('\n')
-  }, [hoveredGroup, hoveredPath, hoveredShape, customShapes, selectedPaths])
+  }, [hoveredGroup, hoveredPath, hoveredShape, effectiveShapes, selectedPaths])
 
   const togglePath = useCallback((pidx: number) => {
     setHiddenPaths(prev => { const n = new Set(prev); if (n.has(pidx)) n.delete(pidx); else n.add(pidx); return n })
   }, [])
   const toggleShape = useCallback((shapeId: string) => {
     setHiddenShapes(prev => { const n = new Set(prev); if (n.has(shapeId)) n.delete(shapeId); else n.add(shapeId); return n })
+  }, [])
+  const cycleShapeStatus = useCallback((shapeId: string) => {
+    setShapeStatus(prev => {
+      const current = prev[shapeId] ?? 'incomplete'
+      const idx = STATUS_ORDER.indexOf(current)
+      const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]!
+      return { ...prev, [shapeId]: next }
+    })
+  }, [])
+  const visibleShapes = useMemo(
+    () => effectiveShapes.filter(s => (shapeStatus[s.id] ?? 'incomplete') !== 'deleted'),
+    [effectiveShapes, shapeStatus],
+  )
+  const shapeRows = useMemo(
+    () => visibleShapes.map(shape => ({
+      shape,
+      status: shapeStatus[shape.id] ?? 'incomplete',
+      height: shapeHeights[shape.id] ?? 0,
+      vertices: shapeVertexInfo.get(shape.id) ?? { isClosed: false, all: [], dangling: [] },
+    })),
+    [visibleShapes, shapeStatus, shapeHeights, shapeVertexInfo],
+  )
+  const selectedShapeRow = useMemo(
+    () => shapeRows.find((r) => r.shape.id === selectedShapeId) ?? null,
+    [shapeRows, selectedShapeId],
+  )
+  const handleVertexClick = useCallback((shapeId: string, key: string, ref: ShapeVertexRef) => {
+    setSelectedVertices(prev => {
+      const exists = prev.find(v => v.shapeId === shapeId && v.key === key)
+      if (exists) return prev.filter(v => !(v.shapeId === shapeId && v.key === key))
+      const next = [...prev, { shapeId, key, ref }]
+      return next.length > 2 ? next.slice(next.length - 2) : next
+    })
+  }, [])
+  const addBridgeFromSelection = useCallback(() => {
+    if (selectedShapeId == null || selectedVertices.length !== 2) return
+    const [a, b] = selectedVertices
+    if (a == null || b == null) return
+    if (a.shapeId !== selectedShapeId || b.shapeId !== selectedShapeId) return
+    if (a.shapeId === b.shapeId && a.key === b.key) return
+    const id = `bridge-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    setShapeEdits(prev => ({
+      ...prev,
+      bridges: [...(prev.bridges ?? []), { id, from: a.ref, to: b.ref, kind: 'manual-bridge' }],
+    }))
+    setSelectedVertices([])
+  }, [selectedVertices, selectedShapeId])
+  const applyShapeHeight = useCallback(() => {
+    if (selectedShapeId == null) return
+    const next = Number(heightDraft)
+    if (!Number.isFinite(next)) return
+    setShapeHeights(prev => ({ ...prev, [selectedShapeId]: Math.max(0, next) }))
+  }, [selectedShapeId, heightDraft])
+  const removeBridge = useCallback((bridgeId: string) => {
+    setShapeEdits(prev => ({
+      ...prev,
+      bridges: (prev.bridges ?? []).filter(b => b.id !== bridgeId),
+    }))
   }, [])
   const hideAll = useCallback(() => {
     setHiddenPaths(new Set(allPaths.map(p => p.pathIndex)))
@@ -432,7 +533,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
     () => Object.entries(pathStatus).filter(([, s]) => s === 'deleted').map(([k]) => Number(k)),
     [pathStatus],
   )
-  const shapesContainingPath = useCallback((pathIndex: number) => customShapes.filter(s => s.pathIndices.includes(pathIndex)), [customShapes])
+  const shapesContainingPath = useCallback((pathIndex: number) => effectiveShapes.filter(s => s.pathIndices.includes(pathIndex)), [effectiveShapes])
   const onMouseLeave = useCallback(() => {
     if (hoverPathTimerRef.current != null) {
       clearTimeout(hoverPathTimerRef.current)
@@ -445,6 +546,24 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
       setSelectionBox(null)
     }
   }, [])
+  useEffect(() => {
+    if (selectedShapeId == null) return
+    const row = shapeRows.find((r) => r.shape.id === selectedShapeId)
+    if (row == null) {
+      setSelectedShapeId(null)
+      setSelectedVertices([])
+      return
+    }
+    setHeightDraft(String(shapeHeights[selectedShapeId] ?? 0))
+  }, [selectedShapeId, shapeRows, shapeHeights])
+  useEffect(() => {
+    if (editorMode === 'shape') {
+      setSelectedPaths(new Set())
+    } else {
+      setSelectedVertices([])
+      setSelectedShapeId(null)
+    }
+  }, [editorMode])
 
   const section = (label: string, open: boolean, setOpen: (v: boolean) => void, bg: string, content: React.ReactNode) => (
     <div style={{ borderBottom: '1px solid var(--border-1)' }}>
@@ -481,6 +600,46 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
           <style data-inspector-style="base">{baseCssText}</style>
           <style data-inspector-style="highlight">{highlightCssText}</style>
           <g dangerouslySetInnerHTML={{ __html: svgInnerHTML }} />
+          {editorMode === 'shape' && (
+            <g data-shape-editor-overlay="true">
+              {bridgeSegments.map(seg => (
+                <line
+                  key={seg.id}
+                  x1={seg.x1}
+                  y1={seg.y1}
+                  x2={seg.x2}
+                  y2={seg.y2}
+                  stroke="rgb(16,185,129)"
+                  strokeWidth={1.2}
+                  strokeDasharray="2 2"
+                  opacity={0.9}
+                />
+              ))}
+              {(selectedShapeRow?.vertices.dangling ?? []).map(v => {
+                const shapeId = selectedShapeRow?.shape.id ?? ''
+                const selected = selectedVertices.some(sel => sel.shapeId === shapeId && sel.key === v.key)
+                const ref = v.refs[0]
+                if (ref == null) return null
+                return (
+                  <circle
+                    key={`${shapeId}:${v.key}`}
+                    data-dangling-vertex={`${shapeId}:${v.key}`}
+                    cx={v.x}
+                    cy={v.y}
+                    r={selected ? 2.8 : 2.2}
+                    fill={selected ? 'rgb(239,68,68)' : 'rgb(59,130,246)'}
+                    stroke="white"
+                    strokeWidth={0.4}
+                    style={{ cursor: 'pointer' }}
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleVertexClick(shapeId, v.key, ref)
+                    }}
+                  />
+                )
+              })}
+            </g>
+          )}
         </svg>
         {selectionBox && (() => {
           const canvas = canvasRef.current
@@ -501,15 +660,57 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
       <div style={{ width: 260, flexShrink: 0, borderLeft: '1px solid var(--border-1)', background: 'var(--bg-2)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Toolbar */}
         <div style={{ padding: '5px 8px', borderBottom: '1px solid var(--border-1)', display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              type="button"
+              data-editor-mode="path"
+              onClick={() => setEditorMode('path')}
+              style={{
+                flex: 1,
+                fontFamily: 'var(--font-mono)',
+                fontSize: 8,
+                padding: '3px 6px',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: editorMode === 'path' ? 'var(--accent)' : 'var(--border-2)',
+                background: editorMode === 'path' ? 'var(--accent-bg)' : 'transparent',
+                color: editorMode === 'path' ? 'var(--accent)' : 'var(--text-3)',
+                cursor: 'pointer',
+              }}
+            >
+              パス編集
+            </button>
+            <button
+              type="button"
+              data-editor-mode="shape"
+              onClick={() => setEditorMode('shape')}
+              style={{
+                flex: 1,
+                fontFamily: 'var(--font-mono)',
+                fontSize: 8,
+                padding: '3px 6px',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: editorMode === 'shape' ? 'var(--accent)' : 'var(--border-2)',
+                background: editorMode === 'shape' ? 'var(--accent-bg)' : 'transparent',
+                color: editorMode === 'shape' ? 'var(--accent)' : 'var(--text-3)',
+                cursor: 'pointer',
+              }}
+            >
+              シェイプ編集
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-2)', flex: 1 }}>{visiblePathCount}/{allPaths.length}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-2)', flex: 1 }}>
+              {editorMode === 'path' ? `${visiblePathCount}/${allPaths.length}` : `${visibleShapes.length}/${effectiveShapes.length}`}
+            </span>
             <button type="button" onClick={undo} disabled={historyState.index <= 0} title="元に戻す" style={{ fontFamily: 'var(--font-mono)', fontSize: 8, padding: '2px 5px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: historyState.index <= 0 ? 'var(--text-4)' : 'var(--text-3)', cursor: historyState.index <= 0 ? 'not-allowed' : 'pointer', opacity: historyState.index <= 0 ? 0.5 : 1 }}>元に戻す</button>
             <button type="button" onClick={redo} disabled={historyState.index >= historyState.history.length - 1} title="やり直す" style={{ fontFamily: 'var(--font-mono)', fontSize: 8, padding: '2px 5px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: historyState.index >= historyState.history.length - 1 ? 'var(--text-4)' : 'var(--text-3)', cursor: historyState.index >= historyState.history.length - 1 ? 'not-allowed' : 'pointer', opacity: historyState.index >= historyState.history.length - 1 ? 0.5 : 1 }}>やり直す</button>
             {(['HIDE ALL', 'SHOW ALL'] as const).map(l => (
               <button key={l} type="button" onClick={l === 'HIDE ALL' ? hideAll : showAll} style={{ fontFamily: 'var(--font-mono)', fontSize: 8, padding: '2px 5px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-3)', cursor: 'pointer' }}>{l}</button>
             ))}
           </div>
-          {selectedPaths.size > 0 && (
+          {editorMode === 'path' && selectedPaths.size > 0 && (
             <div style={{ display: 'flex', gap: 4 }}>
               <button type="button" onClick={openShapeModal} style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 8, padding: '4px 8px', borderRadius: 2, border: '1px solid rgb(34,197,94)', background: 'rgba(34,197,94,0.2)', color: 'rgb(34,197,94)', cursor: 'pointer' }}>
                 シェイプ化 ({selectedPaths.size})
@@ -528,7 +729,7 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
           </div>
         </div>
 
-        {selectedPaths.size > 0 && section('選択中', selectedListOpen, setSelectedListOpen, 'rgba(239,68,68,0.15)', (
+        {editorMode === 'path' && selectedPaths.size > 0 && section('選択中', selectedListOpen, setSelectedListOpen, 'rgba(239,68,68,0.15)', (
           <div style={{ maxHeight: 120, overflowY: 'auto' }}>
             {[...selectedPaths].sort((a, b) => a - b).map(pid => {
               const inShapes = shapesContainingPath(pid)
@@ -556,20 +757,43 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
               {confirmedShapes.map(s => <div key={s.id}>[{s.pathIndices.join(',')}] {s.fillColor ?? ''}</div>)}
             </div>
           ) : <div style={{ padding: '4px 20px 8px', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>閉合+塗りで確定</div>)}
-          {section('シェイプ', shapesSectionOpen, setShapesSectionOpen, 'rgba(100,116,139,0.2)', customShapes.length > 0 ? (
+          {section('シェイプ', shapesSectionOpen, setShapesSectionOpen, 'rgba(100,116,139,0.2)', effectiveShapes.length > 0 ? (
             <div style={{ maxHeight: 160, overflowY: 'auto' }}>
-              {customShapes.map((s, i) => {
+              {shapeRows.map(({ shape: s, status, height, vertices }) => {
                 const isHidden = hiddenShapes.has(s.id)
                 const label = `p${s.pathIndices.join(',p')}`
                 return (
                   <div
                     key={s.id}
                     data-shape-row={s.id}
+                    data-shape-selected={selectedShapeId === s.id ? 'true' : undefined}
                     onMouseEnter={() => setHoveredShape(s.id)}
                     onMouseLeave={() => setHoveredShape(null)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', borderLeft: hoveredShape === s.id ? '3px solid rgb(234,179,8)' : '3px solid transparent', background: hoveredShape === s.id ? 'rgba(234,179,8,0.12)' : 'transparent', opacity: isHidden ? 0.4 : 1 }}
+                    onClick={() => {
+                      if (editorMode === 'shape') {
+                        setSelectedShapeId(s.id)
+                        setSelectedVertices([])
+                        setHeightDraft(String(shapeHeights[s.id] ?? 0))
+                      }
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', borderLeft: selectedShapeId === s.id ? '3px solid rgb(16,185,129)' : hoveredShape === s.id ? '3px solid rgb(234,179,8)' : '3px solid transparent', background: selectedShapeId === s.id ? 'rgba(16,185,129,0.14)' : hoveredShape === s.id ? 'rgba(234,179,8,0.12)' : 'transparent', opacity: isHidden ? 0.4 : 1, cursor: editorMode === 'shape' ? 'pointer' : 'default' }}
                   >
                     <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 8, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={label}>{label}</span>
+                    {editorMode === 'shape' && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 6, color: vertices.isClosed ? 'rgb(34,197,94)' : 'rgb(234,179,8)', flexShrink: 0 }}>
+                        {vertices.isClosed ? '閉合' : `穴:${vertices.dangling.length}`}
+                      </span>
+                    )}
+                    {editorMode === 'shape' && (
+                      <button type="button" onClick={() => cycleShapeStatus(s.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 7, padding: '0px 3px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-3)', cursor: 'pointer' }}>
+                        {pathStatusLabel(status)}
+                      </button>
+                    )}
+                    {editorMode === 'shape' && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 6, color: 'rgb(34,197,94)', flexShrink: 0 }}>
+                        z:{Math.round(height)}
+                      </span>
+                    )}
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 6, color: 'var(--text-3)', flexShrink: 0 }}>{s.pathIndices.length}本</span>
                     <button type="button" onClick={() => toggleShape(s.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 7, padding: '0px 4px', borderRadius: 2, border: `1px solid ${isHidden ? 'var(--border-2)' : 'rgba(100,116,139,0.6)'}`, background: isHidden ? 'transparent' : 'rgba(100,116,139,0.15)', color: isHidden ? 'var(--text-3)' : 'rgb(148,163,184)', cursor: 'pointer' }}>{isHidden ? '表示' : '非表示'}</button>
                   </div>
@@ -577,14 +801,91 @@ export const SvgPathInspector: React.FC<SvgPathInspectorProps> = ({
               })}
             </div>
           ) : <div style={{ padding: '4px 20px 8px', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>グループ結合でシェイプ化</div>)}
+          {editorMode === 'shape' && section('頂点接続', vertexSectionOpen, setVertexSectionOpen, 'rgba(14,165,233,0.12)', (
+            <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-2)' }}>
+                シェイプ選択後、穴頂点を2つ選択して接続線を作成
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: selectedShapeId ? 'rgb(16,185,129)' : 'var(--text-3)' }}>
+                選択シェイプ: {selectedShapeId ?? 'なし'}
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>
+                選択: {selectedVertices.length}/2
+              </div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)' }}>高さ</span>
+                <input
+                  data-shape-height-input="true"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={heightDraft}
+                  onChange={(e) => setHeightDraft(e.target.value)}
+                  style={{ width: 64, fontFamily: 'var(--font-mono)', fontSize: 8, padding: '2px 4px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-2)' }}
+                />
+                <button
+                  type="button"
+                  data-apply-shape-height="true"
+                  onClick={applyShapeHeight}
+                  disabled={selectedShapeId == null}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 8,
+                    padding: '3px 6px',
+                    borderRadius: 2,
+                    border: '1px solid var(--border-2)',
+                    background: selectedShapeId == null ? 'transparent' : 'rgba(34,197,94,0.15)',
+                    color: selectedShapeId == null ? 'var(--text-4)' : 'rgb(34,197,94)',
+                    cursor: selectedShapeId == null ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  高さ適用
+                </button>
+              </div>
+              <button
+                type="button"
+                data-add-bridge="true"
+                onClick={addBridgeFromSelection}
+                disabled={selectedShapeId == null || selectedVertices.length !== 2}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 8,
+                  padding: '4px 6px',
+                  borderRadius: 2,
+                  border: '1px solid rgb(16,185,129)',
+                  background: selectedShapeId != null && selectedVertices.length === 2 ? 'rgba(16,185,129,0.2)' : 'transparent',
+                  color: selectedShapeId != null && selectedVertices.length === 2 ? 'rgb(16,185,129)' : 'var(--text-4)',
+                  cursor: selectedShapeId != null && selectedVertices.length === 2 ? 'pointer' : 'not-allowed',
+                }}
+              >
+                接続線を追加
+              </button>
+              {(shapeEdits.bridges ?? []).length > 0 && (
+                <div style={{ maxHeight: 96, overflowY: 'auto', borderTop: '1px solid var(--border-1)', paddingTop: 4 }}>
+                  {(shapeEdits.bridges ?? []).map(b => (
+                    <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                      <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--text-3)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {b.from.pathIndex}:{b.from.endpoint} → {b.to.pathIndex}:{b.to.endpoint}
+                      </span>
+                      <button type="button" onClick={() => removeBridge(b.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 7, padding: '0px 4px', borderRadius: 2, border: '1px solid var(--border-2)', background: 'transparent', color: 'var(--text-3)', cursor: 'pointer' }}>
+                        削除
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
-        <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--border-1)', display: 'flex', fontFamily: 'var(--font-mono)', fontSize: 9 }}>
-          <button type="button" onClick={() => setPathListTab('incomplete')} style={{ flex: 1, padding: '4px 8px', border: 'none', borderBottom: pathListTab === 'incomplete' ? '2px solid var(--accent)' : '2px solid transparent', background: pathListTab === 'incomplete' ? 'var(--accent-bg)' : 'transparent', color: pathListTab === 'incomplete' ? 'var(--accent)' : 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>未完了</button>
-          <button type="button" onClick={() => setPathListTab('completed')} style={{ flex: 1, padding: '4px 8px', border: 'none', borderBottom: pathListTab === 'completed' ? '2px solid var(--accent)' : '2px solid transparent', background: pathListTab === 'completed' ? 'var(--accent-bg)' : 'transparent', color: pathListTab === 'completed' ? 'var(--accent)' : 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>完了</button>
-        </div>
+        {editorMode === 'path' && (
+          <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--border-1)', display: 'flex', fontFamily: 'var(--font-mono)', fontSize: 9 }}>
+            <button type="button" onClick={() => setPathListTab('incomplete')} style={{ flex: 1, padding: '4px 8px', border: 'none', borderBottom: pathListTab === 'incomplete' ? '2px solid var(--accent)' : '2px solid transparent', background: pathListTab === 'incomplete' ? 'var(--accent-bg)' : 'transparent', color: pathListTab === 'incomplete' ? 'var(--accent)' : 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>未完了</button>
+            <button type="button" onClick={() => setPathListTab('completed')} style={{ flex: 1, padding: '4px 8px', border: 'none', borderBottom: pathListTab === 'completed' ? '2px solid var(--accent)' : '2px solid transparent', background: pathListTab === 'completed' ? 'var(--accent-bg)' : 'transparent', color: pathListTab === 'completed' ? 'var(--accent)' : 'var(--text-3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>完了</button>
+          </div>
+        )}
 
-        {(
+        {editorMode === 'path' && (
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {allPaths.map(({ pathIndex, groupIndex }) => {
               const status = getPathStatus(pathIndex)
