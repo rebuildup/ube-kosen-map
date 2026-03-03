@@ -1,0 +1,12 @@
+// src/map/index.ts — public export barrel for the map module
+export type { CampusMapProps } from './CampusMap'
+export { default as CampusMap } from './CampusMap'
+export type { FloorTabsProps } from './FloorTabs'
+export { default as FloorTabs } from './FloorTabs'
+export type { ParsedMap } from './parseLayers'
+export { parseLayers } from './parseLayers'
+export type { InteractivePoint, PointCluster, MapLayer, Coordinate, ViewBox, LabelPosition } from './types'
+export { clusterPoints } from './clustering'
+export { computeLabelLayout } from './labelLayout'
+export { getPointColor, MapPin, ClusterPin, HighlightPin } from './MapPin'
+export { default as ZoomControls } from './ZoomControls'

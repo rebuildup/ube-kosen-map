@@ -1,19 +1,60 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { TraceEditor } from './editor'
 import { CampusViewer } from './viewer'
 import type { CampusGraph } from './core/schema'
 import page1GraphJson from '../data/derived/page_1.graph.json'
+import { CampusMap, parseLayers } from './map'
+import type { ParsedMap } from './map'
+import './map/theme.css'
+import page1SvgRaw from '../docs/reference/page_1.svg?raw'
 
-type AppMode = 'editor' | 'viewer'
+type AppMode = 'editor' | 'viewer' | 'map'
 
 const MODES: { key: AppMode; label: string; tag: string }[] = [
   { key: 'editor', label: 'エディター', tag: 'EDITOR' },
   { key: 'viewer', label: 'ビューアー', tag: 'VIEWER' },
+  { key: 'map', label: 'マップ v2', tag: 'MAP-V2' },
 ]
+
+// ---- MapDemo ----
+
+const MapDemo: React.FC = () => {
+  const parsedMap = useMemo<ParsedMap>(() => {
+    try {
+      return parseLayers(page1SvgRaw)
+    } catch (err) {
+      // Fallback: wrap raw SVG content in a single layer
+      console.error('parseLayers failed:', err)
+      return {
+        viewBox: { x: 0, y: 0, width: 595.276, height: 841.89 },
+        styles: '',
+        layers: [{ id: 'surface1', index: 0, label: 'Page 1', svgContent: '' }],
+      }
+    }
+  }, [])
+
+  return (
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <CampusMap
+        parsedMap={parsedMap}
+        height="100%"
+        showControls
+        enableFullscreen
+      />
+    </div>
+  )
+}
+
+// ---- App ----
 
 function App() {
   const [mode, setMode] = useState<AppMode>('viewer')
   const page1Graph = page1GraphJson as unknown as CampusGraph
+
+  const statusLabel =
+    mode === 'editor' ? 'EDIT MODE' : mode === 'map' ? 'MAP-V2' : 'VIEW MODE'
+  const statusColor =
+    mode === 'editor' ? 'var(--amber)' : mode === 'map' ? 'var(--accent)' : 'var(--green)'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-1)' }}>
@@ -34,7 +75,7 @@ function App() {
 
         {/* Mode toggle */}
         <div style={{ display: 'flex', gap: 2 }}>
-          {MODES.map(({ key, label, tag }) => (
+          {MODES.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setMode(key)}
@@ -58,25 +99,21 @@ function App() {
 
         {/* Right status */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: mode === 'editor' ? 'var(--amber)' : 'var(--green)',
-          }} />
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor }} />
           <span style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.06em',
           }}>
-            {mode === 'editor' ? 'EDIT MODE' : 'VIEW MODE'}
+            {statusLabel}
           </span>
         </div>
       </div>
 
       {/* ── Content area ───────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        {mode === 'editor'
-          ? <TraceEditor />
-          : <CampusViewer graph={page1Graph} />
-        }
+        {mode === 'editor' && <TraceEditor />}
+        {mode === 'viewer' && <CampusViewer graph={page1Graph} />}
+        {mode === 'map' && <MapDemo />}
       </div>
     </div>
   )
