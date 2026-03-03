@@ -16,18 +16,8 @@ import type { Coordinate, ViewBox, InteractivePoint, PointCluster } from './type
 import type { ParsedMap } from './parseLayers'
 
 // ---- Map geometry constants ----
-const MAP_WIDTH = 470.53
-const MAP_HEIGHT = 710.52
 const MARGIN_X = 50
 const MARGIN_Y = 40
-
-const INITIAL_VB: ViewBox = {
-  x: -MARGIN_X,
-  y: -MARGIN_Y,
-  width: MAP_WIDTH + MARGIN_X * 2,
-  height: MAP_HEIGHT + MARGIN_Y * 2,
-}
-
 const CLUSTER_THRESHOLD = 25
 
 export interface CampusMapProps {
@@ -102,13 +92,23 @@ const CampusMap: React.FC<CampusMapProps> = ({
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Derive map geometry from parsedMap.viewBox
+  const mapGeom = useMemo(() => {
+    const { x, y, width, height } = parsedMap.viewBox
+    const fullW = width + MARGIN_X * 2
+    const fullH = height + MARGIN_Y * 2
+    return { x: x - MARGIN_X, y: y - MARGIN_Y, width: fullW, height: fullH, aspectRatio: fullH / fullW }
+  }, [parsedMap.viewBox.x, parsedMap.viewBox.y, parsedMap.viewBox.width, parsedMap.viewBox.height]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const initialVB: ViewBox = useMemo((): ViewBox => {
-    if (initialZoom <= 0 || initialZoom === 1) return INITIAL_VB
-    const w = (MAP_WIDTH + MARGIN_X * 2) / initialZoom
-    const h = (MAP_HEIGHT + MARGIN_Y * 2) / initialZoom
+    if (initialZoom <= 0 || initialZoom === 1) {
+      return { x: mapGeom.x, y: mapGeom.y, width: mapGeom.width, height: mapGeom.height }
+    }
+    const w = mapGeom.width / initialZoom
+    const h = w * mapGeom.aspectRatio
     return {
-      x: (MAP_WIDTH + MARGIN_X * 2) / 2 - w / 2 - MARGIN_X,
-      y: (MAP_HEIGHT + MARGIN_Y * 2) / 2 - h / 2 - MARGIN_Y,
+      x: mapGeom.x + (mapGeom.width - w) / 2,
+      y: mapGeom.y + (mapGeom.height - h) / 2,
       width: w,
       height: h,
     }
@@ -138,12 +138,12 @@ const CampusMap: React.FC<CampusMapProps> = ({
 
   // Zoom level = ratio of full-map width to current viewBox width
   const currentZoomLevel = useMemo(
-    () => (MAP_WIDTH + MARGIN_X * 2) / viewBox.width,
-    [viewBox.width],
+    () => mapGeom.width / viewBox.width,
+    [mapGeom.width, viewBox.width],
   )
 
-  const minVbWidth = (MAP_WIDTH + MARGIN_X * 2) / maxZoom
-  const maxVbWidth = (MAP_WIDTH + MARGIN_X * 2) / minZoom
+  const minVbWidth = mapGeom.width / maxZoom
+  const maxVbWidth = mapGeom.width / minZoom
 
   // ---- Coordinate transforms ----
 
@@ -193,11 +193,10 @@ const CampusMap: React.FC<CampusMapProps> = ({
   const clampViewBox = useCallback(
     (vb: ViewBox): ViewBox => {
       const w = Math.max(minVbWidth, Math.min(maxVbWidth, vb.width))
-      const aspectRatio = INITIAL_VB.height / INITIAL_VB.width
-      const h = w * aspectRatio
+      const h = w * mapGeom.aspectRatio
       return { ...vb, width: w, height: h }
     },
-    [minVbWidth, maxVbWidth],
+    [minVbWidth, maxVbWidth, mapGeom.aspectRatio],
   )
 
   const zoomAroundPoint = useCallback(
@@ -236,9 +235,8 @@ const CampusMap: React.FC<CampusMapProps> = ({
 
   const zoomToPoint = useCallback(
     (point: Coordinate, zoomLevel: number) => {
-      const targetWidth = (MAP_WIDTH + MARGIN_X * 2) / zoomLevel
-      const aspectRatio = INITIAL_VB.height / INITIAL_VB.width
-      const targetHeight = targetWidth * aspectRatio
+      const targetWidth = mapGeom.width / zoomLevel
+      const targetHeight = targetWidth * mapGeom.aspectRatio
       setViewBox({
         x: point.x - targetWidth / 2,
         y: point.y - targetHeight / 2,
@@ -246,7 +244,7 @@ const CampusMap: React.FC<CampusMapProps> = ({
         height: targetHeight,
       })
     },
-    [],
+    [mapGeom.width, mapGeom.aspectRatio],
   )
 
   // ---- Fullscreen ----
@@ -691,7 +689,7 @@ const CampusMap: React.FC<CampusMapProps> = ({
 
         {highlightPoint && (
           <HighlightPin
-            position={svgToScreen(highlightPoint.x, highlightPoint.y) ?? { x: 0, y: 0 }}
+            position={svgToScreen(highlightPoint.x, highlightPoint.y)}
           />
         )}
       </div>

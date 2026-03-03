@@ -3,7 +3,7 @@ import { TraceEditor } from './editor'
 import { CampusViewer } from './viewer'
 import type { CampusGraph } from './core/schema'
 import page1GraphJson from '../data/derived/page_1.graph.json'
-import { CampusMap, parseLayers } from './map'
+import { CampusMap, FloorTabs, parseLayers } from './map'
 import type { ParsedMap } from './map'
 import './map/theme.css'
 import page1SvgRaw from '../docs/reference/page_1.svg?raw'
@@ -33,13 +33,23 @@ const MapDemo: React.FC = () => {
     }
   }, [])
 
+  const [visibleLayers, setVisibleLayers] = useState<string[]>(() =>
+    parsedMap.layers.map((l) => l.id),
+  )
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <CampusMap
         parsedMap={parsedMap}
+        visibleLayers={visibleLayers}
         height="100%"
         showControls
         enableFullscreen
+      />
+      <FloorTabs
+        layers={parsedMap.layers}
+        visibleLayers={visibleLayers}
+        onVisibleLayersChange={setVisibleLayers}
       />
     </div>
   )
