@@ -27,4 +27,34 @@ describe('parseLayers', () => {
     expect(result.viewBox.width).toBeCloseTo(470.53)
     expect(result.viewBox.height).toBeCloseTo(710.52)
   })
+
+  it('handles empty SVG with no groups', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"></svg>`
+    const result = parseLayers(svg)
+    expect(result.layers).toHaveLength(0)
+    expect(result.styles).toBe('')
+  })
+
+  it('throws when root svg element missing', () => {
+    expect(() => parseLayers('<root></root>')).toThrow('root <svg>')
+  })
+
+  it('throws when viewBox is missing', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><g id="_00"></g></svg>`
+    expect(() => parseLayers(svg)).toThrow('viewBox')
+  })
+
+  it('throws when viewBox has invalid values', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 abc 100"><g id="_00"></g></svg>`
+    expect(() => parseLayers(svg)).toThrow('viewBox')
+  })
+
+  it('joins multiple style blocks', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs><style>.a{fill:red}</style><style>.b{fill:blue}</style></defs>
+      <g id="_00"></g></svg>`
+    const result = parseLayers(svg)
+    expect(result.styles).toContain('.a')
+    expect(result.styles).toContain('.b')
+  })
 })

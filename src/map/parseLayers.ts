@@ -10,11 +10,23 @@ export interface ParsedMap {
 export function parseLayers(rawSvg: string): ParsedMap {
   const parser = new DOMParser()
   const doc = parser.parseFromString(rawSvg, 'image/svg+xml')
-  const svgEl = doc.querySelector('svg')!
 
-  // Parse viewBox
-  const vb = svgEl.getAttribute('viewBox')?.split(/\s+/).map(Number) ?? [0, 0, 470.53, 710.52]
-  const viewBox: ViewBox = { x: vb[0], y: vb[1], width: vb[2], height: vb[3] }
+  // Detect XML parse errors
+  if (doc.querySelector('parsererror')) {
+    throw new Error('parseLayers: invalid SVG — XML parsing failed')
+  }
+
+  const svgEl = doc.querySelector('svg')
+  if (!svgEl) throw new Error('parseLayers: root <svg> element not found')
+
+  // Parse and validate viewBox
+  const vbStr = svgEl.getAttribute('viewBox')
+  if (!vbStr) throw new Error('parseLayers: missing viewBox attribute')
+  const parts = vbStr.trim().split(/\s+/).map(Number)
+  if (parts.length !== 4 || parts.some(n => isNaN(n))) {
+    throw new Error(`parseLayers: invalid viewBox "${vbStr}"`)
+  }
+  const viewBox: ViewBox = { x: parts[0], y: parts[1], width: parts[2], height: parts[3] }
 
   // Extract styles from <defs><style>
   const styleEls = svgEl.querySelectorAll('defs style')
@@ -26,7 +38,7 @@ export function parseLayers(rawSvg: string): ParsedMap {
   const layers: MapLayer[] = Array.from(groups).map((g, index) => {
     const id = g.getAttribute('id') ?? `layer_${index}`
     const label = id.startsWith('_') ? id.slice(1) : id
-    // Serialize children (innerHTML equivalent for XML)
+    // Serialize child nodes (innerHTML equivalent for XML)
     const svgContent = Array.from(g.childNodes)
       .map(node => serializer.serializeToString(node))
       .join('')
