@@ -5,6 +5,8 @@ const LABEL_W = 160
 const LABEL_H = 24
 const PIN_W = 24
 const PIN_H = 32
+const PIN_OFFSET_X = 32  // horizontal distance from pin center to label edge
+const OVERLAP_MARGIN = 5  // pixel margin for overlap checks
 
 interface PinPosition { x: number; y: number; index: number }
 interface LayoutOptions { viewportWidth: number; viewportHeight: number }
@@ -12,7 +14,7 @@ export interface LabelResult { index: number; direction: LabelPosition | null }
 interface Rect { x: number; y: number; width: number; height: number }
 interface Placed { index: number; direction: LabelPosition; rect: Rect }
 
-function overlap(a: Rect, b: Rect, margin = 5): boolean {
+function overlap(a: Rect, b: Rect, margin = OVERLAP_MARGIN): boolean {
   return (
     a.x < b.x + b.width + margin &&
     a.x + a.width > b.x - margin &&
@@ -23,7 +25,7 @@ function overlap(a: Rect, b: Rect, margin = 5): boolean {
 
 function labelRect(pin: PinPosition, dir: LabelPosition): Rect {
   return {
-    x: dir === 'right' ? pin.x + 32 : pin.x - 32 - LABEL_W,
+    x: dir === 'right' ? pin.x + PIN_OFFSET_X : pin.x - PIN_OFFSET_X - LABEL_W,
     y: pin.y - LABEL_H / 2,
     width: LABEL_W,
     height: LABEL_H,
@@ -94,6 +96,7 @@ export function computeLabelLayout(
   })
 
   const placed: Placed[] = []
+  const placedMap = new Map<number, number>()  // index → placed[] position
   const resultMap = new Map<number, LabelPosition | null>()
 
   for (const pin of sorted) {
@@ -103,6 +106,7 @@ export function computeLabelLayout(
     // 1. Try default direction
     let rect = labelRect(pin, defDir)
     if (isValid(rect, pin.index, pins, placed)) {
+      placedMap.set(pin.index, placed.length)
       placed.push({ index: pin.index, direction: defDir, rect })
       resultMap.set(pin.index, defDir)
       continue
@@ -111,6 +115,7 @@ export function computeLabelLayout(
     // 2. Try opposite
     rect = labelRect(pin, oppDir)
     if (isValid(rect, pin.index, pins, placed)) {
+      placedMap.set(pin.index, placed.length)
       placed.push({ index: pin.index, direction: oppDir, rect })
       resultMap.set(pin.index, oppDir)
       continue
@@ -121,9 +126,10 @@ export function computeLabelLayout(
     if (chain) {
       const newLabel = chain.at(-1)!
       for (const upd of chain.slice(0, -1)) {
-        const idx = placed.findIndex(p => p.index === upd.index)
-        if (idx !== -1) { placed[idx] = upd; resultMap.set(upd.index, upd.direction) }
+        const idx = placedMap.get(upd.index)
+        if (idx !== undefined) { placed[idx] = upd; resultMap.set(upd.index, upd.direction) }
       }
+      placedMap.set(newLabel.index, placed.length)
       placed.push(newLabel)
       resultMap.set(pin.index, newLabel.direction)
       continue
@@ -134,9 +140,10 @@ export function computeLabelLayout(
     if (chain) {
       const newLabel = chain.at(-1)!
       for (const upd of chain.slice(0, -1)) {
-        const idx = placed.findIndex(p => p.index === upd.index)
-        if (idx !== -1) { placed[idx] = upd; resultMap.set(upd.index, upd.direction) }
+        const idx = placedMap.get(upd.index)
+        if (idx !== undefined) { placed[idx] = upd; resultMap.set(upd.index, upd.direction) }
       }
+      placedMap.set(newLabel.index, placed.length)
       placed.push(newLabel)
       resultMap.set(pin.index, newLabel.direction)
       continue
