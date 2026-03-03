@@ -97,11 +97,25 @@ const CampusMap: React.FC<CampusMapProps> = ({
   isFullscreen: isFullscreenProp,
   maxZoom = 10,
   minZoom = 0.1,
+  initialZoom = 1,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [viewBox, setViewBox] = useState<ViewBox>(INITIAL_VB)
+  const initialVB: ViewBox = useMemo((): ViewBox => {
+    if (initialZoom <= 0 || initialZoom === 1) return INITIAL_VB
+    const w = (MAP_WIDTH + MARGIN_X * 2) / initialZoom
+    const h = (MAP_HEIGHT + MARGIN_Y * 2) / initialZoom
+    return {
+      x: (MAP_WIDTH + MARGIN_X * 2) / 2 - w / 2 - MARGIN_X,
+      y: (MAP_HEIGHT + MARGIN_Y * 2) / 2 - h / 2 - MARGIN_Y,
+      width: w,
+      height: h,
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // only compute once on mount
+
+  const [viewBox, setViewBox] = useState<ViewBox>(initialVB)
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null)
   const [dragStartViewBox, setDragStartViewBox] = useState<ViewBox | null>(null)
@@ -150,7 +164,7 @@ const CampusMap: React.FC<CampusMapProps> = ({
   )
 
   const svgToScreen = useCallback(
-    (svgX: number, svgY: number): { x: number; y: number } | null => {
+    (svgX: number, svgY: number): { x: number; y: number } => {
       const svg = svgRef.current
       const container = containerRef.current
       if (!svg || !container) return { x: 0, y: 0 }
@@ -217,8 +231,8 @@ const CampusMap: React.FC<CampusMapProps> = ({
   }, [viewBox, zoomAroundPoint])
 
   const resetView = useCallback(() => {
-    setViewBox(INITIAL_VB)
-  }, [])
+    setViewBox(initialVB)
+  }, [initialVB])
 
   const zoomToPoint = useCallback(
     (point: Coordinate, zoomLevel: number) => {
@@ -522,7 +536,7 @@ const CampusMap: React.FC<CampusMapProps> = ({
   const labelResults = useMemo(() => {
     if (allClusters.length === 0) return []
     const pinPositions = allClusters.map((c, i) => {
-      const screen = svgToScreen(c.coordinates.x, c.coordinates.y) ?? { x: 0, y: 0 }
+      const screen = svgToScreen(c.coordinates.x, c.coordinates.y)
       return { index: i, x: screen.x, y: screen.y }
     })
     return computeLabelLayout(pinPositions, {
@@ -600,7 +614,6 @@ const CampusMap: React.FC<CampusMapProps> = ({
         {allClusters.map((cluster, i) => {
           const labelResult = labelResults[i]
           const screenPos = svgToScreen(cluster.coordinates.x, cluster.coordinates.y)
-          if (!screenPos) return null
 
           if (cluster.count === 1) {
             const point = cluster.points[0]
