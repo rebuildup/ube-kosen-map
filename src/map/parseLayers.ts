@@ -33,11 +33,18 @@ export function parseLayers(rawSvg: string): ParsedMap {
   const styles = Array.from(styleEls).map(el => el.textContent ?? '').join('\n')
 
   // Extract layers (top-level <g> elements with id)
-  const groups = svgEl.querySelectorAll(':scope > g[id]')
+  // Prefer inkscape:groupmode="layer" groups; fall back to any top-level <g id>
+  const inkscapeNS = 'http://www.inkscape.org/namespaces/inkscape'
+  const allGroups = Array.from(svgEl.querySelectorAll(':scope > g[id]'))
+  const layerGroups = allGroups.filter(g =>
+    g.getAttributeNS(inkscapeNS, 'groupmode') === 'layer'
+  )
+  const groups = layerGroups.length > 0 ? layerGroups : allGroups
   const serializer = new XMLSerializer()
-  const layers: MapLayer[] = Array.from(groups).map((g, index) => {
+  const layers: MapLayer[] = groups.map((g, index) => {
     const id = g.getAttribute('id') ?? `layer_${index}`
-    const label = id.startsWith('_') ? id.slice(1) : id
+    const inkscapeLabel = g.getAttributeNS(inkscapeNS, 'label')
+    const label = inkscapeLabel ?? (id.startsWith('_') ? id.slice(1) : id)
     // Serialize child nodes (innerHTML equivalent for XML)
     const svgContent = Array.from(g.childNodes)
       .map(node => serializer.serializeToString(node))

@@ -6,7 +6,7 @@ import page1GraphJson from '../data/derived/page_1.graph.json'
 import { CampusMap, FloorTabs, parseLayers } from './map'
 import type { ParsedMap } from './map'
 import './map/theme.css'
-import page1SvgRaw from '../docs/reference/page_1.svg?raw'
+import campusMapSvgRaw from '../docs/reference/ube-k-map-layers.svg?raw'
 
 type AppMode = 'editor' | 'viewer' | 'map'
 
@@ -21,14 +21,14 @@ const MODES: { key: AppMode; label: string; tag: string }[] = [
 const MapDemo: React.FC = () => {
   const parsedMap = useMemo<ParsedMap>(() => {
     try {
-      return parseLayers(page1SvgRaw)
+      return parseLayers(campusMapSvgRaw)
     } catch (err) {
       // Fallback: wrap raw SVG content in a single layer
       console.error('parseLayers failed:', err)
       return {
-        viewBox: { x: 0, y: 0, width: 595.276, height: 841.89 },
+        viewBox: { x: 0, y: 0, width: 793.70135, height: 1122.52 },
         styles: '',
-        layers: [{ id: 'surface1', index: 0, label: 'Page 1', svgContent: '' }],
+        layers: [{ id: 'surface1', index: 0, label: 'campus', svgContent: '' }],
       }
     }
   }, [])
