@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo } from "react";
+import type { CSSProperties } from "react";
 
 interface ZoomControlsProps {
   onZoomIn: () => void;
@@ -19,7 +20,7 @@ interface ZoomControlsProps {
 }
 
 // Shared button base style
-const buttonBase: React.CSSProperties = {
+const buttonBase: CSSProperties = {
   width: 44,
   height: 44,
   display: "flex",
@@ -32,12 +33,12 @@ const buttonBase: React.CSSProperties = {
   touchAction: "manipulation",
 };
 
-const buttonDisabled: React.CSSProperties = {
+const buttonDisabled: CSSProperties = {
   opacity: 0.4,
   cursor: "not-allowed",
 };
 
-const buttonGroup: React.CSSProperties = {
+const buttonGroup: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   borderRadius: 6,
