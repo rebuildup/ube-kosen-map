@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  <g id="_11" data-name="11">
+    <path class="cls-4" d="M144.99,573.57v-4.42h4.37,0s7.7,0,7.7,0v4.81l-.02.16h4.24v21.35h0s-16.28,0-16.28,0l.04-.25s0-16.2,0-16.2c0,0-2.96,0-2.96,0v16.2l-.02.25h-12.11v-26.32h0s10.95,0,10.95,0c0,0,0,4.42,0,4.42h0s4.1,0,4.1,0Z"/>
+    <path class="cls-4" d="M113.81,600.05h-18.5v-31.07h0s7.39,0,7.39,0c0,0,0,3.94,0,3.94h0s11.11,0,11.11,0c0,0,0,27.13,0,27.13h0Z"/>
+    <polygon class="cls-9" points="101.38 602.23 104.81 602.23 104.85 602.5 104.85 600.08 101.21 600 101.21 602.42 101.38 602.23"/>
+    <path class="cls-4" d="M268.55,632.25h1.08,0v21.79h0s-19.14,0-19.14,0h0v-17.75h0s4.42,0,4.42,0l.3.07h5.39v-3.8l-.14-.31v-3.99h0s-9.98,0-9.98,0h0v-17.74h19.14s0,17.8,0,17.8h0-1.08v3.94Z"/>
+    <path class="cls-4" d="M250.38,462.84h19.96,0v26.05h0s-8.52,0-8.52,0h0v3.45h0s8.52,0,8.52,0v53.88h0s-17.9,0-17.9,0h0v-5.66h0s2.21,0,2.21,0h0v-8.68h0s-2.21,0-2.21,0h0v-25.3s2.21,0,2.21,0h0v-9.22s-2.21,0-2.21,0h0v-5.02h0s6.42,0,6.42,0h0v-3.45h0s-8.47,0-8.47,0h0v-26.05h0Z"/>
+    </g>
+</svg>

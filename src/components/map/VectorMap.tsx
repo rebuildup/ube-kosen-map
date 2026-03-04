@@ -253,6 +253,17 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const [activeBuilding, setActiveBuilding] = useState<BuildingFloorConfig | null>(null);
   const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
 
+  // campus-map.svg をインラインSVGとして保持（建物ハイライト用）
+  const [campusMapInner, setCampusMapInner] = useState<string>("");
+  useEffect(() => {
+    fetch("/campus-map.svg")
+      .then((r) => r.text())
+      .then((text) => {
+        const m = text.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
+        if (m) setCampusMapInner(m[1]);
+      });
+  }, []);
+
   // Free rotation mode state
   const [isRotateMode, setIsRotateMode] = useState(false);
   const rotatePivotScreenRef = useRef<{ x: number; y: number } | null>(null);
@@ -2234,102 +2245,41 @@ const VectorMap: React.FC<VectorMapProps> = ({
           }}
         >
           <title>Icon</title>
-          {/* グレースケール + ハイライトフィルター定義 */}
-          <defs>
-            <filter id="grayscale-map" colorInterpolationFilters="sRGB">
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <filter id="building-highlight" colorInterpolationFilters="sRGB">
-              {/* フロアSVGの描画済みピクセルをそのまま青くハイライト */}
-              <feFlood floodColor="#60a5fa" floodOpacity="0.45" result="flood" />
-              <feComposite in="flood" in2="SourceGraphic" operator="in" />
-            </filter>
-          </defs>
-          {/* デバッググリッド（マップ画像より上に表示） */}
-          {showGrid && gridElements}
-          {showGrid && buildingZoneOverlay}
-          {/* Campus Map SVG */}
-          {mapRotation === 0 ? (
-            <image
-              href="/campus-map.svg"
-              x="0"
-              y="0"
-              width={CAMPUS_MAP_BOUNDS.width}
-              height={CAMPUS_MAP_BOUNDS.height}
-              preserveAspectRatio="xMidYMid meet"
-              filter="url(#grayscale-map)"
-            />
-          ) : (
-            <g transform={getImageTransform()}>
-              <image
-                href="/campus-map.svg"
-                x="0"
-                y="0"
-                width={CAMPUS_MAP_BOUNDS.width}
-                height={CAMPUS_MAP_BOUNDS.height}
-                preserveAspectRatio="xMidYMid meet"
-                filter="url(#grayscale-map)"
-              />
-              {activeBuilding && selectedFloorId && (
-                <>
-                  <image
-                    href={`/floors/${selectedFloorId}.svg`}
-                    x="0"
-                    y="0"
-                    width={CAMPUS_MAP_BOUNDS.width}
-                    height={CAMPUS_MAP_BOUNDS.height}
-                    preserveAspectRatio="xMidYMid meet"
-                    filter="url(#grayscale-map)"
-                  />
-                  <image
-                    href={`/floors/${selectedFloorId}.svg`}
-                    x="0"
-                    y="0"
-                    width={CAMPUS_MAP_BOUNDS.width}
-                    height={CAMPUS_MAP_BOUNDS.height}
-                    preserveAspectRatio="xMidYMid meet"
-                    filter="url(#building-highlight)"
-                  />
-                </>
-              )}
-            </g>
-          )}
-          {mapRotation === 0 && activeBuilding && selectedFloorId && (
-            <>
-              <image
-                href={`/floors/${selectedFloorId}.svg`}
-                x="0"
-                y="0"
-                width={CAMPUS_MAP_BOUNDS.width}
-                height={CAMPUS_MAP_BOUNDS.height}
-                preserveAspectRatio="xMidYMid meet"
-                filter="url(#grayscale-map)"
-              />
-              <image
-                href={`/floors/${selectedFloorId}.svg`}
-                x="0"
-                y="0"
-                width={CAMPUS_MAP_BOUNDS.width}
-                height={CAMPUS_MAP_BOUNDS.height}
-                preserveAspectRatio="xMidYMid meet"
-                filter="url(#building-highlight)"
-              />
-            </>
-          )}
-
-          {/* アクティブ建物ハイライト: フロアなし建物は中心に円を表示 */}
-          {activeBuilding && !selectedFloorId && (() => {
-            const cp = transformPinCoord(activeBuilding.center.x, activeBuilding.center.y);
+          {/* ube-k-map-layers-2.svgの着色fillをグレースケールに変換 + 部屋割り線を常時非表示 */}
+          <style>{`
+.cls-1{fill:#717171!important}.cls-2,.cls-16{fill:#626262!important}
+.cls-4,.cls-9,.cls-18{fill:#616161!important}.cls-5{fill:#E8E8E8!important}
+.cls-6{fill:#1B1B1B!important}.cls-8,.cls-11{fill:#DADADA!important}
+.cls-10,.cls-12{fill:#303030!important}.cls-13,.cls-17{fill:#717171!important}
+.cls-19{fill:#404040!important}
+.cls-3,.cls-7,.cls-14,.cls-15{display:none!important}
+          `}</style>
+          {/* アクティブ建物のfillハイライト（選択フロアがあればそのグループ、なければ建物グループ） */}
+          {(() => {
+            const floorGid = activeBuilding?.floors.find(f => f.id === selectedFloorId)?.svgGroupId;
+            const gid = floorGid ?? activeBuilding?.svgGroupId;
+            if (!gid) return null;
             return (
-              <circle
-                cx={cp.x} cy={cp.y}
-                r={activeBuilding.center.radius}
-                fill="rgba(96,165,250,0.12)"
-                stroke="rgba(96,165,250,0.6)"
-                strokeWidth={viewBox.width / 300}
-              />
+              <style>{`
+[id="${gid}"]>path,[id="${gid}"]>polygon,[id="${gid}"]>rect{fill:rgba(96,165,250,0.55)!important}
+[id="${gid}"] .cls-3,[id="${gid}"] .cls-7,[id="${gid}"] .cls-14,[id="${gid}"] .cls-15{display:initial!important}
+              `}</style>
             );
           })()}
+          {/* Campus Map SVG (inline, no overlay) */}
+          {mapRotation === 0 ? (
+            <>
+              {/* SVG座標は0-470なのでscale(10)でプロジェクトの0-4705座標系に合わせる */}
+              <g transform="scale(10)" dangerouslySetInnerHTML={{ __html: campusMapInner }} />
+            </>
+          ) : (
+            <g transform={getImageTransform()}>
+              <g transform="scale(10)" dangerouslySetInnerHTML={{ __html: campusMapInner }} />
+            </g>
+          )}
+          {/* デバッググリッド */}
+          {showGrid && gridElements}
+          {showGrid && buildingZoneOverlay}
 
           {/* ピンはSVG外部にレンダリング - SVG内には何も表示しない */}
         </svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  <g id="_寮食堂" data-name="寮食堂">
+      <path class="cls-13" d="M125.41,368.67l-11.11-10.46h0s4.04-4.21,4.04-4.21h0s-2.32-2.27-2.32-2.27h0s14.73-15.21,14.73-15.21h0s23.73,22.92,23.73,22.92h0s-10.3,10.68-10.3,10.68h0s-10.46-10.09-10.46-10.09h0s-8.3,8.63-8.3,8.63h0Z"/>
+      <path class="cls-13" d="M124.06,371.8l3.94-4.05h0s3.77,3.67,3.77,3.67h0s4.26-4.37,4.26-4.37h0s6.26,6.04,6.26,6.04c0,0-8.14,8.41-8.14,8.41h0s-10.09-9.71-10.09-9.71h0Z"/>
+    </g>
+</svg>
