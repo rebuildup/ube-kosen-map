@@ -1,0 +1,65 @@
+[
+  {
+    "id": "toilet-1",
+    "name": "経営棟トイレ",
+    "type": "toilet",
+    "x": 400,
+    "y": 390
+  },
+  {
+    "id": "toilet-2",
+    "name": "第一体育館トイレ 男",
+    "type": "toilet",
+    "x": 985,
+    "y": 972
+  },
+  {
+    "id": "toilet-2-2",
+    "name": "第一体育館トイレ 女",
+    "type": "toilet",
+    "x": 1045,
+    "y": 972
+  },
+  {
+    "id": "toilet-3",
+    "name": "学生会館トイレ",
+    "type": "toilet",
+    "x": 590,
+    "y": 700
+  },
+  {
+    "id": "toilet-4",
+    "name": "図書館棟トイレ",
+    "type": "toilet",
+    "x": 530,
+    "y": 560
+  },
+  {
+    "id": "toilet-5",
+    "name": "一般棟トイレ",
+    "type": "toilet",
+    "x": 730,
+    "y": 950
+  },
+  {
+    "id": "toilet-6",
+    "name": "物質棟トイレ",
+    "type": "toilet",
+    "x": 590,
+    "y": 1090
+  },
+  {
+    "id": "trash-1",
+    "name": "学生会館 ゴミ箱",
+    "type": "trash",
+    "x": 540,
+    "y": 700
+  },
+  {
+    "id": "trash-2",
+    "name": "学生会館 ゴミ箱",
+    "type": "trash",
+    "x": 520,
+    "y": 826
+  }
+]

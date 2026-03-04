@@ -1,106 +1,1686 @@
-/* ── Design Tokens ─────────────────────────────────────────────────────────── */
-:root {
-  /* Backgrounds */
-  --bg-0:      #060d1a;   /* deepest: canvas */
-  --bg-1:      #0a1628;   /* app base */
-  --bg-2:      #0f1e38;   /* sidebar/panel */
-  --bg-3:      #162642;   /* elevated / hover */
+@import "tailwindcss";
 
-  /* Borders */
-  --border-1:  #1a2e47;   /* subtle */
-  --border-2:  #23406e;   /* visible */
+/* Instagram風ライトモード & X風ダークモード テーマ実装 */
+@layer base {
+  /* Instagram風ライトモード（デフォルト） */
+  :root {
+    /* Instagram Light Mode Colors */
+    --primary-color: #405de6;
+    --accent-purple: #833ab4;
+    --accent-pink: #c13584;
+    --accent-red: #e1306c;
+    --accent-orange: #f56040;
+    --accent-yellow: #fcaf45;
+    --accent-blue: #3897f0;
+    --accent-teal: #00c4cc;
 
-  /* Accent */
-  --accent:      #22d3ee;
-  --accent-dim:  #0e7490;
-  --accent-bg:   rgba(34, 211, 238, 0.08);
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --text-primary: #262626;
+    --text-secondary: #8e8e8e;
+    --border-color: #dbdbdb;
 
-  /* Semantic */
-  --amber:  #fbbf24;
-  --green:  #10b981;
-  --red:    #f87171;
-  --orange: #fb923c;
+    /* 統一変数（レガシー対応） */
+    --color-bg: #fafafa;
+    --color-main: #262626;
+    --color-accent: #405de6;
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #fafafa;
+    --color-bg-tertiary: #f5f5f5;
+    --color-text-primary: #262626;
+    --color-text-secondary: #8e8e8e;
+    --color-text-tertiary: #8e8e8e;
+    --color-border-primary: #dbdbdb;
+    --color-border-secondary: #efefef;
 
-  /* Text */
-  --text-1:  #dde9f7;   /* primary */
-  --text-2:  #6a96bb;   /* secondary */
-  --text-3:  #2e4a65;   /* disabled */
+    /* 状態カラー */
+    --success-color: #00ba7c;
+    --error-color: #e1306c;
+    --warning-color: #fcaf45;
 
-  /* Typography */
-  --font-mono: 'JetBrains Mono', 'Consolas', 'SF Mono', monospace;
-  --font-ui:   system-ui, -apple-system, 'Noto Sans JP', sans-serif;
+    /* Instagram グラデーション */
+    --instagram-gradient: linear-gradient(
+      45deg,
+      #405de6,
+      #833ab4,
+      #c13584,
+      #e1306c,
+      #f56040,
+      #fcaf45
+    );
+    --instagram-gradient-subtle: linear-gradient(
+      45deg,
+      rgba(64, 93, 230, 0.1),
+      rgba(131, 58, 180, 0.1),
+      rgba(193, 53, 132, 0.1)
+    );
+  }
+
+  /* X風ダークモード */
+  :root[data-theme="dark"] {
+    /* X Dark Mode Colors */
+    --primary-color: #1da1f2;
+    --accent-purple: #1da1f2;
+    --accent-pink: #0084c7;
+    --accent-red: #1da1f2;
+    --accent-orange: #0084c7;
+    --accent-yellow: #1da1f2;
+    --accent-blue: #1da1f2;
+    --accent-teal: #0084c7;
+
+    --bg-primary: #000000;
+    --bg-secondary: #0a0a0a;
+    --bg-tertiary: #161616;
+
+    --text-primary: #ffffff;
+    --text-secondary: #8899ac;
+    --border-color: #1a1a1a;
+
+    /* 統一変数（レガシー対応） */
+    --color-bg: #000000;
+    --color-main: #ffffff;
+    --color-accent: #1da1f2;
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #0a0a0a;
+    --color-bg-tertiary: #161616;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #8899ac;
+    --color-text-tertiary: #657786;
+    --color-border-primary: #1a1a1a;
+    --color-border-secondary: #2a2a2a;
+
+    /* 状態カラー */
+    --success-color: #00ba7c;
+    --error-color: #f4212e;
+    --warning-color: #ffd400;
+
+    /* X グラデーション */
+    --instagram-gradient: linear-gradient(45deg, #1da1f2, #0084c7);
+    --instagram-gradient-subtle: linear-gradient(
+      45deg,
+      rgba(29, 161, 242, 0.1),
+      rgba(0, 132, 199, 0.1)
+    );
+  }
+
+  /* システム設定に基づくダークモード */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      /* X Dark Mode Colors */
+      --primary-color: #1da1f2;
+      --accent-purple: #1da1f2;
+      --accent-pink: #0084c7;
+      --accent-red: #1da1f2;
+      --accent-orange: #0084c7;
+      --accent-yellow: #1da1f2;
+
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-tertiary: #161616;
+
+      --text-primary: #ffffff;
+      --text-secondary: #8899ac;
+      --border-color: #1a1a1a;
+
+      /* 統一変数（レガシー対応） */
+      --color-bg: #000000;
+      --color-main: #ffffff;
+      --color-accent: #1da1f2;
+      --color-bg-primary: #000000;
+      --color-bg-secondary: #0a0a0a;
+      --color-bg-tertiary: #161616;
+      --color-text-primary: #ffffff;
+      --color-text-secondary: #8899ac;
+      --color-text-tertiary: #657786;
+      --color-border-primary: #1a1a1a;
+      --color-border-secondary: #2a2a2a;
+
+      /* 状態カラー */
+      --success-color: #00ba7c;
+      --error-color: #f4212e;
+      --warning-color: #ffd400;
+
+      /* X グラデーション */
+      --instagram-gradient: linear-gradient(45deg, #1da1f2, #0084c7);
+      --instagram-gradient-subtle: linear-gradient(
+        45deg,
+        rgba(29, 161, 242, 0.1),
+        rgba(0, 132, 199, 0.1)
+      );
+    }
+  }
+
+  * {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family:
+      "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Adobeフォント追加設定 */
+  .font-serif {
+    font-family: "Noto Sans JP", "Hiragino Mincho ProN", "Hiragino Mincho Pro", serif;
+  }
+
+  .font-sans {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  /* フォントローディングの簡易フォールバック（Typekit 依存の wf-* クラスは削除） */
+  /* Ensure text remains visible during font load using font-display=swap provided by Google Fonts */
+
+  /* フォーカス管理（アクセシビリティ対応） */
+  *:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
 }
 
-/* ── Reset ─────────────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* カスタムコンポーネントクラス */
+@layer components {
+  .card {
+    @apply relative overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
 
-html, body {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  background: var(--bg-1);
-  color: var(--text-1);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  .card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  :root[data-theme="dark"] .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .card-image-container {
+    @apply relative overflow-hidden;
+  }
+
+  .card-image {
+    @apply aspect-video w-full object-cover transition-transform duration-300;
+  }
+
+  .card:hover .card-image {
+    @apply scale-105;
+  }
+
+  .card-gradient-overlay {
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.9) 0%,
+      /* Slightly darker */ rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0.15) 80%,
+      transparent 100%
+    );
+  }
+
+  .card:hover .card-gradient-overlay {
+    @apply opacity-100;
+  }
+
+  .card-text-overlay {
+    @apply absolute right-0 bottom-0 left-0 p-4 text-white opacity-0 transition-all duration-300;
+    transform: translateY(10px);
+  }
+
+  .card:hover .card-text-overlay {
+    @apply opacity-100;
+    transform: translateY(0);
+  }
+
+  .card-content {
+    @apply p-4;
+  }
+
+  .card-title {
+    @apply mb-2 line-clamp-2 text-lg font-semibold;
+    color: var(--text-primary);
+  }
+
+  .card-description {
+    @apply mb-3 line-clamp-3 text-sm;
+    color: var(--text-secondary);
+  }
+
+  .card-meta {
+    @apply mb-2 flex items-center gap-2 text-sm;
+    color: var(--text-secondary);
+  }
+
+  .card-meta-icon {
+    @apply h-4 w-4 flex-shrink-0;
+  }
+
+  .card-type-badge {
+    @apply absolute top-3 left-3 z-10 rounded-full px-2 py-1 text-xs font-medium transition-all duration-200;
+    background: var(--instagram-gradient);
+    color: white;
+  }
+
+  .card-bookmark-button {
+    @apply absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-lg transition-all duration-200;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+  }
+
+  .card-bookmark-button:hover {
+    background-color: var(--primary-color);
+    transform: scale(1.1);
+  }
+
+  .card-bookmark-button.bookmarked {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  /* ボタンスタイル */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none;
+  }
+
+  .btn-primary {
+    background: var(--instagram-gradient);
+    color: white;
+    @apply shadow-sm hover:opacity-90 hover:shadow-md focus:ring-2;
+    border: none;
+  }
+
+  .btn-secondary {
+    @apply border hover:opacity-90 focus:ring-2;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
+
+  /* タグスタイル */
+  .tag {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors;
+  }
+
+  .tag-default {
+    @apply hover:opacity-80;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .tag-accent {
+    background: var(--instagram-gradient-subtle);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    @apply hover:opacity-80;
+  }
+
+  /* セクションスタイル */
+  .section {
+    @apply px-4 py-12 sm:px-6 lg:px-8;
+    background-color: var(--bg-primary);
+  }
+
+  .section-title {
+    @apply mb-4 text-2xl font-bold;
+    color: var(--text-primary);
+  }
+
+  .section-subtitle {
+    @apply mb-6 text-lg;
+    color: var(--text-secondary);
+  }
+
+  /* レイアウト */
+  .main-content-container {
+    @apply mx-auto max-w-7xl;
+  }
+
+  .balanced-layout {
+    @apply grid grid-cols-1 gap-8 lg:grid-cols-4;
+  }
+
+  .content-area {
+    @apply space-y-8 lg:col-span-3;
+    background-color: var(--bg-primary);
+  }
+
+  .main-content {
+    @apply space-y-6;
+    background-color: var(--bg-primary);
+  }
+
+  .main-content > * {
+    @apply w-full;
+  }
+
+  /* スケジュールカード */
+  .schedule-card {
+    @apply relative overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-lg;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .schedule-card-image {
+    @apply h-48 w-full object-cover;
+  }
+
+  .schedule-card-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent;
+  }
+
+  .schedule-card-text-shadow {
+    /* text-shadow removed for better readability */
+  }
+
+  .schedule-card-content {
+    @apply absolute right-0 bottom-0 left-0 p-4 text-white;
+  }
+
+  .schedule-card-time {
+    @apply mb-1 text-sm font-medium;
+  }
+
+  .schedule-card-title {
+    @apply text-lg font-bold;
+  }
+
+  /* サイドバー */
+  .sidebar {
+    @apply space-y-6 lg:col-span-1;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .sidebar-heading {
+    @apply mb-3 text-lg font-semibold;
+    color: var(--text-primary);
+  }
+
+  .sidebar-text {
+    @apply text-sm;
+    color: var(--text-secondary);
+  }
+
+  .sidebar-link {
+    @apply block rounded-lg px-3 py-2 text-sm transition-colors;
+    color: var(--text-primary);
+  }
+
+  .sidebar-link:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--primary-color);
+  }
+
+  .sidebar-button {
+    @apply w-full rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200;
+    background: var(--instagram-gradient);
+    color: white;
+  }
+
+  .sidebar-button:hover {
+    @apply scale-105 transform opacity-90;
+  }
+
+  /* ヘッダー */
+  .header {
+    @apply sticky top-0 z-50 transition-all duration-200;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .nav-link {
+    @apply relative px-3 py-2 text-sm font-medium transition-all duration-200;
+    color: var(--text-primary);
+  }
+
+  .nav-link::after {
+    content: "";
+    @apply absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-200;
+    background: var(--instagram-gradient);
+  }
+
+  .nav-link:hover {
+    color: var(--primary-color);
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .nav-link-active {
+    color: var(--primary-color);
+  }
+
+  .nav-link-active::after {
+    @apply w-full;
+  }
+
+  /* マップコンテナ */
+  .map-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    /* タッチデバイス対応 */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    /* デフォルトカーソル */
+    cursor: grab;
+    /* スムーズなトランジション */
+    transition: border-color 0.2s ease;
+
+    /* スマホ対応の追加設定 */
+    -webkit-touch-callout: none; /* iOS長押しメニューを無効化 */
+    -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを無効化 */
+    -webkit-user-drag: none; /* 画像ドラッグを無効化 */
+    -webkit-overflow-scrolling: touch; /* スムーズスクロール */
+    overscroll-behavior: none; /* スクロールチェーンを防ぐ */
+  }
+
+  .map-container:hover {
+    border-color: var(--color-accent);
+  }
+
+  .map-container.dragging {
+    cursor: grabbing;
+  }
+
+  .map-container svg {
+    /* ハードウェアアクセラレーション */
+    will-change: transform;
+
+    /* 最高品質レンダリング設定 */
+    shape-rendering: geometricPrecision;
+    text-rendering: optimizeLegibility;
+    image-rendering: auto;
+
+    /* フォント最適化 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    font-variant-numeric: lining-nums;
+    font-optical-sizing: auto;
+
+    /* 高DPI対応 */
+    vector-effect: non-scaling-stroke;
+
+    /* タッチイベント対応 */
+    touch-action: none;
+    /* 選択無効化 */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* マップ内の要素の基本設定 */
+  .map-container * {
+    box-sizing: border-box;
+  }
+
+  .map-container > * {
+    pointer-events: auto;
+  }
+
+  /* ズームコントロール */
+  .map-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    border: 1px solid var(--color-border-primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  /* マップレジェンド */
+  .map-legend {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    z-index: 10;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    border: 1px solid var(--color-border-primary);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  /* モバイルフッター */
+  .mobile-footer {
+    @apply fixed right-0 bottom-0 left-0 z-50 border-t;
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--border-color);
+    backdrop-filter: blur(16px) saturate(180%) brightness(105%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(105%);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  :root[data-theme="dark"] .mobile-footer {
+    background: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .mobile-footer {
+      background: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .mobile-footer-nav {
+    @apply flex items-center justify-around px-2 py-1;
+  }
+
+  .mobile-footer-item {
+    @apply flex min-w-0 flex-1 flex-col items-center justify-center rounded-lg p-2 transition-all duration-200;
+    color: var(--text-primary);
+    opacity: 0.7;
+  }
+
+  .mobile-footer-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--primary-color);
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .mobile-footer-item-active {
+    color: var(--primary-color);
+    background: var(--instagram-gradient-subtle);
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  /* ダークモード用のホバー効果 */
+  :root[data-theme="dark"] .mobile-footer-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .mobile-footer-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .mobile-footer-icon {
+    @apply mb-1 h-6 w-6 transition-all duration-200;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  .mobile-footer-item:hover .mobile-footer-icon {
+    @apply scale-110 transform;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  }
+
+  .mobile-footer-label {
+    @apply truncate text-xs font-medium;
+    max-width: 60px;
+    /* text-shadow removed for better readability */
+  }
+
+  /* モバイルメニュー */
+  .mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+
+  .mobile-menu-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-menu-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 320px;
+    max-width: 90vw;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .mobile-menu-panel::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .mobile-menu-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(8px);
+  }
+
+  .mobile-menu-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .mobile-menu-close-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-close-button:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+    transform: scale(1.05);
+  }
+
+  .mobile-menu-content {
+    padding: 1.5rem;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .mobile-menu-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .mobile-menu-section {
+    margin-bottom: 2rem;
+  }
+
+  .mobile-menu-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-menu-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mobile-menu-nav-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+  }
+
+  .mobile-menu-nav-item-active {
+    background: var(--instagram-gradient-subtle);
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobile-menu-nav-item-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--instagram-gradient);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .mobile-menu-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-menu-nav-item:hover .mobile-menu-nav-icon {
+    transform: scale(1.1);
+  }
+
+  .mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-menu-link-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-link-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+  }
+
+  .mobile-menu-link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-menu-link-item:hover .mobile-menu-link-icon {
+    transform: scale(1.1);
+  }
+
+  .mobile-menu-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.375rem;
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.625rem;
+    margin-left: auto;
+  }
+
+  .mobile-menu-nav-item-active .mobile-menu-badge {
+    background: var(--instagram-gradient);
+  }
+
+  .mobile-menu-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-menu-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-setting-item:hover {
+    background: var(--bg-tertiary);
+    border-radius: 0.5rem;
+  }
+
+  .mobile-menu-setting-label {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  /* Festival info card in mobile menu */
+  .mobile-menu-info-card {
+    background: linear-gradient(135deg, var(--accent-purple) / 10, var(--accent-pink) / 10);
+    border: 1px solid var(--primary-color) / 20;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .mobile-menu-info-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-menu-info-content {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* Mobile menu animations */
+  @keyframes menuSlideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes menuFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-menu-nav-item,
+  .mobile-menu-link-item,
+  .mobile-menu-setting-item {
+    animation: menuFadeIn 0.3s ease forwards;
+  }
+
+  /* Responsive mobile menu */
+  @media (max-width: 320px) {
+    .mobile-menu-panel {
+      width: 100vw;
+    }
+  }
+
+  /* ヘッダーブラー効果 */
+  .header-blur {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  :root[data-theme="dark"] .header-blur {
+    background-color: rgba(21, 32, 43, 0.8);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .header-blur {
+      background-color: rgba(21, 32, 43, 0.8);
+    }
+  }
+
+  /* アニメーション */
+  @keyframes marquee {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 10s linear infinite;
+  }
+
+  /* Card enter animation for smooth layout transitions */
+  @keyframes cardEnter {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-card-enter {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    animation: cardEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* List view specific animation - wave effect */
+  @keyframes cardEnterList {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px) scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  .animate-card-enter-list {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.98);
+    animation: cardEnterList 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* Smooth category change animation */
+  @keyframes categoryChange {
+    0% {
+      opacity: 0;
+      transform: translateY(15px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-category-change {
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+    animation: categoryChange 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* カスタムスクロールバー */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+  }
+
+  /* ===============================================
+     BOOKMARK BUTTON
+     =============================================== */
+
+  .bookmark-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bookmark-button:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .bookmark-button:active {
+    transform: translateY(0);
+  }
+
+  .bookmark-button.bookmarked {
+    background: var(--instagram-gradient-subtle);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .bookmark-button.bookmarked::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--instagram-gradient);
+    opacity: 0.1;
+    border-radius: inherit;
+  }
+
+  .bookmark-button.bookmarked:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .bookmark-button-small {
+    padding: 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .bookmark-button-medium {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .bookmark-button-large {
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+  }
+
+  .bookmark-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  .bookmark-button:hover .bookmark-icon {
+    transform: scale(1.1);
+  }
+
+  .bookmark-button.bookmarked .bookmark-icon {
+    color: var(--primary-color);
+  }
+
+  .bookmark-button.bookmarked:hover .bookmark-icon {
+    color: white;
+    transform: scale(1.2);
+  }
+
+  .bookmark-text {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ===============================================
+     GLASSMORPHISM EFFECTS
+     =============================================== */
+
+  /* 基本的なガラス効果 */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* ダークモード用のガラス効果 */
+  :root[data-theme="dark"] .glass-effect {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* システムダークモード対応 */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .glass-effect {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* ガラス効果のバリエーション */
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(6px) saturate(130%);
+    -webkit-backdrop-filter: blur(6px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-bold {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(18px) saturate(170%) brightness(105%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%) brightness(105%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.06), inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* ダークモード用のバリエーション */
+  :root[data-theme="dark"] .glass-subtle {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :root[data-theme="dark"] .glass-bold {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .glass-subtle {
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    :root:not([data-theme]) .glass-bold {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  /* ガラス効果にホバーアニメーション */
+  .glass-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .glass-interactive:hover {
+    backdrop-filter: blur(20px) saturate(200%) brightness(115%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(115%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.08), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* ボタン専用のガラス効果 */
+  .glass-button {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.01), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-button:hover {
+    backdrop-filter: blur(12px) saturate(140%) brightness(105%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(105%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ダークモード用のボタンガラス効果 */
+  :root[data-theme="dark"] .glass-button {
+    background: rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  :root[data-theme="dark"] .glass-button:hover {
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .glass-button {
+      background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    :root:not([data-theme]) .glass-button:hover {
+      box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  /* カード専用のガラス効果 */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 5px 18px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* タッチデバイス用の最適化 */
+  @media (hover: none) and (pointer: coarse) {
+    .glass-interactive:hover,
+    .glass-button:hover {
+      transform: none;
+    }
+  }
+
+  /* パフォーマンス最適化
+     NOTE: will-change / contain をここで一律に付与すると、子要素の
+     mix-blend-mode が期待どおり動作しない（新しい合成コンテキストが作られる）
+     問題があるため、デフォルトでこれらを外します。必要な箇所では個別に
+     will-change を付けるか、パフォーマンス計測に基づいて戻してください。 */
+  .glass-effect,
+  .glass-subtle,
+  .glass-bold,
+  .glass-button,
+  .glass-card {
+    /* removed will-change/contain to allow mix-blend-mode on child elements */
+  }
+
+  /* スクロールバーを完全に隠すユーティリティクラス */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* 薄いスクロールバーユーティリティクラス */
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Firefox */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 4px; /* 横スクロールバーの高さ（調整: 通常サイズに合わせる） */
+    width: 4px; /* 縦スクロールバーの幅（調整: 通常サイズに合わせる） */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  /* ダークモード対応 */
+  :root[data-theme="dark"] .scrollbar-thin {
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  :root[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  :root[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .scrollbar-thin {
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    :root:not([data-theme]) .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    :root:not([data-theme]) .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  /* モバイル向けスムーズスクロール */
+  .mobile-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* レガシーブラウザ対応 */
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass-effect,
+    .glass-subtle,
+    .glass-bold,
+    .glass-button,
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    :root[data-theme="dark"] .glass-effect,
+    :root[data-theme="dark"] .glass-subtle,
+    :root[data-theme="dark"] .glass-bold,
+    :root[data-theme="dark"] .glass-button,
+    :root[data-theme="dark"] .glass-card {
+      background: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    /* モバイルSafari対応 */
+    .header {
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    :root[data-theme="dark"] .header {
+      background: rgba(0, 0, 0, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
 }
 
-#root {
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+/* 🎯 マップ専用 Ultra High Quality レンダリング */
+@layer utilities {
+  /* マップテキスト専用最適化 */
+  .map-text-ultra-quality {
+    font-family: "SF Pro Display", "Segoe UI Variable Text", "Inter Variable", system-ui,
+      -apple-system, sans-serif;
+    font-weight: 700;
+    font-stretch: 100%;
+    font-style: normal;
+    letter-spacing: -0.01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+    font-variant-numeric: lining-nums;
+    font-optical-sizing: auto;
+    paint-order: stroke fill;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
 
-/* ── Canvas grid (dot pattern) ──────────────────────────────────────────────── */
-.canvas-grid {
-  background-color: var(--bg-0) !important;
-  background-image:
-    radial-gradient(circle, var(--border-1) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
+  /* マップマーカー専用最適化 */
+  .map-marker-ultra-quality {
+    shape-rendering: geometricPrecision;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    paint-order: normal;
+  }
 
-/* ── Scrollbars ─────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar             { width: 4px; height: 4px; }
-::-webkit-scrollbar-track       { background: transparent; }
-::-webkit-scrollbar-thumb       { background: var(--border-2); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+  /* 高DPI環境での特別最適化 */
+  @media (min-resolution: 192dpi) {
+    .map-text-ultra-quality {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* text-shadow removed for better readability */
+    }
 
-/* ── Form elements ──────────────────────────────────────────────────────────── */
-input, select, textarea {
-  background: var(--bg-1);
-  color: var(--text-1);
-  border: 1px solid var(--border-2);
-  border-radius: 3px;
-  font-family: var(--font-ui);
-  font-size: 12px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent-dim);
-}
+    /* mix-blend-mode utility for icons and text that should invert over varied backgrounds */
+    .mix-diff {
+      mix-blend-mode: difference;
+      /* Reasonable default color to ensure contrast; components can override */
+      color: white;
+    }
+    /* Fallback and testing helpers
+       - .mix-diff-fallback : explicit fallback which inverts colors (useful when blending doesn't produce visible change)
+       - body.mix-diff-use-fallback : toggle to use filter-based fallback across the app for quick testing
+    */
+    .mix-diff-fallback {
+      filter: invert(1) hue-rotate(180deg);
+    }
 
-/* ── App bar label ──────────────────────────────────────────────────────────── */
-.app-brand {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  text-transform: uppercase;
-  user-select: none;
-}
+    body.mix-diff-use-fallback .mix-diff {
+      mix-blend-mode: normal;
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .map-marker-ultra-quality {
+      shape-rendering: geometricPrecision;
+    }
 
-/* ── Section label ──────────────────────────────────────────────────────────── */
-.panel-label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  padding: 6px 10px 4px;
+    /* Ensure card images are not inverted even when fallback toggles exist */
+    .card-image-no-invert {
+      filter: none;
+    }
+
+    /* Protect img.card-image-no-invert from the global fallback inversion rule */
+    body.mix-diff-use-fallback img.card-image-no-invert {
+      filter: none;
+      mix-blend-mode: normal;
+    }
+  }
+
+  /* Ensure mix-diff utility is available on all devices (not only high-DPI) */
+  /* This duplicates the high-DPI rules so PC/low-DPI environments also get the same behavior */
+  .mix-diff {
+    mix-blend-mode: difference;
+    color: white;
+  }
+
+  /* Centralized card foreground helper
+     - Apply this to text/icon containers inside cards so the mix-blend and
+       foreground color are controlled from one place. This reduces the need
+       to sprinkle `mix-diff` all over the codebase. */
+  .card-foreground {
+    mix-blend-mode: difference;
+    color: #eeeeee;
+  }
+
+  .mix-diff-fallback {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  body.mix-diff-use-fallback .mix-diff {
+    mix-blend-mode: normal;
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  .card-image-no-invert {
+    filter: none;
+  }
+
+  body.mix-diff-use-fallback img.card-image-no-invert {
+    filter: none;
+    mix-blend-mode: normal;
+  }
+
+  /* Bookmark fallback helpers ------------------------------------------------- */
+  /* If mix-blend-mode is blocked by a stacking context, these rules make the
+     bookmark icon readable using an outline/shadow fallback. The .bookmark-mix
+     class is applied to bookmark wrappers and .bookmark-icon to the inner glyph. */
+  .bookmark-mix .bookmark-icon {
+    /* Try to keep mix-blend-mode when available */
+    mix-blend-mode: difference;
+    color: white;
+    /* Fallback outline for environments where mixing is blocked */
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.6);
+    /* text-shadow removed for better readability */
+  }
+
+  /* Diagnostic helper: enable this class on body to force a visible outline
+     only used for debugging stacking-context issues. */
+  body.show-blend-debug .bookmark-mix {
+    outline: 2px dashed rgba(255, 0, 0, 0.6);
+  }
+
+  /* 4K/8K環境での超高解像度最適化 */
+  @media (min-resolution: 288dpi) {
+    .map-text-ultra-quality {
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      /* text-shadow removed for better readability */
+    }
+  }
+
+  /* スマホ・タブレット専用のマップ最適化 */
+  @media (hover: none) and (pointer: coarse) {
+    .map-container {
+      /* タッチデバイス向けのボーダーとパディング */
+      border-width: 2px;
+      border-radius: 12px;
+      /* タッチ感度向上 */
+      touch-action: pan-x pan-y pinch-zoom;
+    }
+
+    .map-container:hover {
+      /* タッチデバイスではホバー効果を無効化 */
+      border-color: var(--color-border-primary);
+    }
+
+    .map-container svg {
+      /* タッチデバイス向けのレンダリング最適化 */
+      image-rendering: optimize-contrast;
+    }
+
+    /* ズームコントロールのタッチ対応 */
+    .map-controls {
+      right: 12px;
+      top: 12px;
+      padding: 12px 8px;
+    }
+
+    .map-controls button {
+      min-height: 44px; /* タッチターゲットの推奨サイズ */
+      min-width: 44px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 2px solid var(--color-border-primary);
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      touch-action: manipulation;
+    }
+
+    .map-controls button:active {
+      transform: scale(0.95);
+      background: var(--color-bg-secondary);
+    }
+  }
+
+  /* 小さな画面向けの調整 */
+  @media (max-width: 480px) {
+    .map-container {
+      border-radius: 8px;
+      border-width: 1px;
+    }
+
+    .map-controls {
+      right: 8px;
+      top: 8px;
+      padding: 8px 6px;
+      gap: 6px;
+    }
+
+    .map-controls button {
+      min-height: 40px;
+      min-width: 40px;
+      font-size: 16px;
+    }
+
+    /* マップテキストのモバイル最適化 */
+    .map-text-ultra-quality {
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    /* マーカーサイズのモバイル調整 */
+    .map-marker-ultra-quality {
+      stroke-width: 2;
+    }
+  }
+
+  /* 超小型画面 (iPhone SE等) 向けの調整 */
+  @media (max-width: 375px) {
+    .map-controls {
+      right: 6px;
+      top: 6px;
+      padding: 6px 4px;
+      gap: 4px;
+    }
+
+    .map-controls button {
+      min-height: 36px;
+      min-width: 36px;
+      font-size: 14px;
+    }
+  }
+
+  /* ヒーロー画像/トップの透かし切り替え用フェード */
+  .hero-image-fade {
+    opacity: 0;
+    transition: opacity 0.45s ease-in-out;
+  }
+
+  .hero-image-fade.show {
+    opacity: 1;
+  }
+
+  @keyframes imageFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .image-fade-anim {
+    animation: imageFadeIn 0.5s ease-in-out both;
+  }
+
+  /* テーマ変更を滑らかにする基本トランジション（大きなレイアウトトランスフォームは避ける） */
+  :root,
+  body,
+  .header,
+  .card,
+  .mobile-footer,
+  .sidebar {
+    transition: background-color 260ms ease, color 260ms ease, border-color 260ms ease, box-shadow
+      260ms ease;
+  }
 }

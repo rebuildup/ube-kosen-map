@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  </defs>
+  <g id="_第2体育館" data-name="第2体育館">
+      <path class="cls-4" d="M45.86,619.79v41.59h36.03s0-17.69,0-17.69h0s-1.57,0-1.57,0h0v-6.15h1.57s0-17.75,0-17.75h0s-36.03,0-36.03,0h0Z"/>
+      <g>
+        <line class="cls-3" x1="76.28" y1="661.25" x2="76.28" y2="619.79"/>
+        <line class="cls-3" x1="78.19" y1="627.23" x2="78.19" y2="619.79"/>
+        <line class="cls-3" x1="79.12" y1="637.7" x2="79.12" y2="633.62"/>
+        <line class="cls-3" x1="79.25" y1="647.18" x2="79.25" y2="643.68"/>
+        <line class="cls-3" x1="79.25" y1="653.22" x2="79.25" y2="649.72"/>
+        <line class="cls-3" x1="78.19" y1="661.27" x2="78.19" y2="653.41"/>
+        <line class="cls-3" x1="76.49" y1="649.53" x2="81.89" y2="649.53"/>
+        <line class="cls-3" x1="78.19" y1="653.41" x2="81.89" y2="653.41"/>
+        <line class="cls-3" x1="79.25" y1="647.23" x2="81.96" y2="647.23"/>
+        <line class="cls-3" x1="79.12" y1="633.62" x2="81.82" y2="633.62"/>
+        <line class="cls-3" x1="76.28" y1="643.68" x2="77.86" y2="643.68"/>
+        <line class="cls-3" x1="76.32" y1="637.54" x2="77.9" y2="637.54"/>
+        <line class="cls-3" x1="78.29" y1="623.59" x2="81.78" y2="623.59"/>
+        <line class="cls-3" x1="77.97" y1="645.14" x2="79.19" y2="645.14"/>
+        <line class="cls-3" x1="77.9" y1="635.74" x2="79.12" y2="635.74"/>
+        <line class="cls-3" x1="78.19" y1="657.47" x2="81.89" y2="657.47"/>
+        <line class="cls-3" x1="76.28" y1="631.33" x2="81.88" y2="631.34"/>
+        <line class="cls-3" x1="76.28" y1="627.45" x2="81.86" y2="627.45"/>
+      </g>
+    </g>
+</svg>

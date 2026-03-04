@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  </defs>
+  <g id="_2F-2" data-name="2F">
+      <path class="cls-15" d="M152.93,389.39l-4.81,5.03"/>
+      <path class="cls-15" d="M154.95,391.33l-3.46,3.61"/>
+      <path class="cls-15" d="M157.36,393.5l-7.53,7.83"/>
+      <path class="cls-15" d="M148.91,395.69l-.99,1.03"/>
+      <path class="cls-15" d="M148.42,395.27l-.99,1.03"/>
+      <path class="cls-15" d="M147.92,394.75l-.99,1.03"/>
+      <path class="cls-15" d="M147.43,394.42l-.99,1.03"/>
+      <path class="cls-15" d="M147.17,393.91l-.99,1.03"/>
+      <path class="cls-15" d="M146.81,393.6l-.99,1.03"/>
+      <path class="cls-15" d="M147.73,396.91l-.99,1.03"/>
+      <path class="cls-15" d="M147.23,396.48l-.99,1.03"/>
+      <path class="cls-15" d="M146.73,395.97l-.99,1.03"/>
+      <path class="cls-15" d="M146.24,395.64l-.99,1.03"/>
+      <path class="cls-15" d="M145.98,395.12l-.99,1.03"/>
+      <path class="cls-15" d="M145.63,394.82l-.99,1.03"/>
+      <path class="cls-15" d="M152.33,398.83l4.15,4"/>
+      <path class="cls-15" d="M145.64,394.72l2.07,2"/>
+      <path class="cls-15" d="M149.54,392.98l4.3,4.14"/>
+      <path class="cls-15" d="M145.82,392.51l4.01,3.87"/>
+    </g>
+</svg>

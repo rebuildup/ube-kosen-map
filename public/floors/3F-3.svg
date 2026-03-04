@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  </defs>
+  <g id="_3F-3" data-name="3F">
+      <line class="cls-7" x1="101.3" y1="600.08" x2="101.3" y2="573.11"/>
+      <polygon class="cls-9" points="104.93 600.08 104.93 602.5 101.3 602.42 101.3 600 104.93 600.08"/>
+      <line class="cls-7" x1="96.88" y1="572.95" x2="96.88" y2="571.06"/>
+      <line class="cls-7" x1="97.62" y1="572.95" x2="97.62" y2="571.07"/>
+      <line class="cls-7" x1="98.23" y1="572.95" x2="98.23" y2="571.07"/>
+      <line class="cls-7" x1="98.96" y1="572.95" x2="98.96" y2="571.07"/>
+      <line class="cls-7" x1="99.59" y1="572.95" x2="99.59" y2="571.07"/>
+      <line class="cls-7" x1="100.23" y1="572.95" x2="100.23" y2="571.07"/>
+      <line class="cls-7" x1="96.88" y1="571.06" x2="96.88" y2="569.01"/>
+      <line class="cls-7" x1="97.62" y1="571.06" x2="97.62" y2="569.02"/>
+      <line class="cls-7" x1="98.23" y1="571.06" x2="98.23" y2="569.02"/>
+      <line class="cls-7" x1="98.96" y1="571.06" x2="98.96" y2="569.02"/>
+      <line class="cls-7" x1="99.59" y1="571.06" x2="99.59" y2="569.02"/>
+      <line class="cls-7" x1="100.23" y1="571.06" x2="100.23" y2="569.02"/>
+      <line class="cls-7" x1="104.95" y1="600.08" x2="104.95" y2="573.11"/>
+      <line class="cls-7" x1="95.72" y1="572.95" x2="101.3" y2="572.95"/>
+      <line class="cls-7" x1="96.88" y1="571.06" x2="100.23" y2="571.06"/>
+      <line class="cls-7" x1="105" y1="589.05" x2="113.84" y2="589.05"/>
+      <line class="cls-7" x1="104.89" y1="577.82" x2="113.72" y2="577.82"/>
+      <line class="cls-7" x1="95.46" y1="577.82" x2="101.3" y2="577.82"/>
+      <line class="cls-7" x1="101.46" y1="601.74" x2="104.89" y2="601.74"/>
+      <line class="cls-7" x1="101.46" y1="601.29" x2="104.89" y2="601.29"/>
+      <line class="cls-7" x1="101.46" y1="600.68" x2="104.89" y2="600.68"/>
+      <line class="cls-7" x1="101.46" y1="602.23" x2="104.89" y2="602.23"/>
+    </g>
+</svg>

@@ -1,0 +1,681 @@
+[
+  {
+    "id": "stall-1",
+    "type": "stall",
+    "title": "3E じゃがバター",
+    "description": "3Eによる美味しいじゃがバターをご提供！",
+    "imageUrl": "./images/stalls/stall-1.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 380,
+      "y": 1030
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "じゃがバター",
+      "管理棟"
+    ],
+    "organizer": "3E",
+    "products": [
+      "じゃがバター"
+    ]
+  },
+  {
+    "id": "stall-2",
+    "type": "stall",
+    "title": "弓道部 ベビーカステラ",
+    "description": "弓道部の露店です",
+    "imageUrl": "./images/stalls/stall-2.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 410,
+      "y": 1030
+    },
+    "tags": [
+      "露店",
+      "飲み物",
+      "スイーツ",
+      "管理棟"
+    ],
+    "organizer": "弓道部",
+    "products": [
+      "ベビーカステラ"
+    ]
+  },
+  {
+    "id": "stall-3",
+    "type": "stall",
+    "title": "後援会 フライドポテト&フランクフルト",
+    "description": "後援会の露店です",
+    "imageUrl": "./images/stalls/stall-3.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 380,
+      "y": 1000
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "洋食",
+      "管理棟"
+    ],
+    "organizer": "後援会",
+    "products": [
+      "フランクフルト",
+      "フライドポテト",
+      "コンボセット"
+    ]
+  },
+  {
+    "id": "stall-4",
+    "type": "stall",
+    "title": "山崎一家の焼き芋屋",
+    "description": "山崎一家の焼き芋屋です",
+    "imageUrl": "./images/stalls/stall-4.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 410,
+      "y": 1000
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "洋食",
+      "管理棟"
+    ],
+    "organizer": "山崎一家の焼き芋屋",
+    "products": [
+      "焼き芋"
+    ]
+  },
+  {
+    "id": "stall-5",
+    "type": "stall",
+    "title": "バドミントン部 うどん",
+    "description": "バドミントン部の露店です",
+    "imageUrl": "./images/stalls/stall-5.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 420,
+      "y": 1000
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "うどん",
+      "管理棟"
+    ],
+    "organizer": "バドミントン部",
+    "products": [
+      "うどん"
+    ]
+  },
+  {
+    "id": "stall-6",
+    "type": "stall",
+    "title": "男子バレー パンケーキ",
+    "description": "男子バレー部の露店です",
+    "imageUrl": "./images/stalls/stall-6.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟前",
+    "coordinates": {
+      "x": 498.5,
+      "y": 904.8
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "パンケーキ",
+      "管理棟"
+    ],
+    "organizer": "男子バレー",
+    "products": [
+      "パンケーキ"
+    ]
+  },
+  {
+    "id": "stall-7",
+    "type": "stall",
+    "title": "大地製菓 ドーナツ",
+    "description": "大地製菓の露店です",
+    "imageUrl": "./images/stalls/stall-7.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟外",
+    "coordinates": {
+      "x": 410,
+      "y": 864
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "ドーナツ",
+      "一般棟"
+    ],
+    "organizer": "大地製菓",
+    "products": [
+      "ドーナツ"
+    ]
+  },
+  {
+    "id": "stall-8",
+    "type": "stall",
+    "title": "吹奏楽部 チーズチョコカリカリ",
+    "description": "吹奏楽部の露店です",
+    "imageUrl": "./images/stalls/stall-8.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟 付近",
+    "coordinates": {
+      "x": 380,
+      "y": 864
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "チーズチョコカリカリ",
+      "管理棟"
+    ],
+    "organizer": "吹奏楽部",
+    "products": [
+      "チーズチョコカリカリ"
+    ]
+  },
+  {
+    "id": "stall-9",
+    "type": "stall",
+    "title": "囲碁将棋部 たこ焼き",
+    "description": "囲碁将棋部の露店です",
+    "imageUrl": "./images/stalls/stall-9.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "管理棟 付近",
+    "coordinates": {
+      "x": 350,
+      "y": 810
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "たこ焼き",
+      "管理棟"
+    ],
+    "organizer": "囲碁将棋部",
+    "products": [
+      "たこ焼き"
+    ]
+  },
+  {
+    "id": "stall-10",
+    "type": "stall",
+    "title": "バナナ隊 もみじ饅頭",
+    "description": "バナナ隊の露店です",
+    "imageUrl": "./images/stalls/stall-10.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "機電棟 付近",
+    "coordinates": {
+      "x": 410,
+      "y": 820
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "もみじ饅頭",
+      "機電棟"
+    ],
+    "organizer": "バナナ隊",
+    "products": [
+      "もみじ饅頭"
+    ]
+  },
+  {
+    "id": "stall-11",
+    "type": "stall",
+    "title": "Advanced course 豚汁",
+    "description": "Advanced courseの露店です",
+    "imageUrl": "./images/stalls/stall-11.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "機電棟 付近",
+    "coordinates": {
+      "x": 450,
+      "y": 750
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "豚汁",
+      "機電棟"
+    ],
+    "organizer": "Advanced course",
+    "products": [
+      "豚汁"
+    ]
+  },
+  {
+    "id": "stall-12",
+    "type": "stall",
+    "title": "藤田研究室 油そば",
+    "description": "藤田研究室の露店です",
+    "imageUrl": "./images/stalls/stall-12.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "機電棟 付近",
+    "coordinates": {
+      "x": 530,
+      "y": 884
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "油そば",
+      "機電棟"
+    ],
+    "organizer": "藤田研究室",
+    "products": [
+      "油そば"
+    ]
+  },
+  {
+    "id": "stall-13",
+    "type": "stall",
+    "title": "ハンド部 焼きそば",
+    "description": "ハンド部の露店です",
+    "imageUrl": "./images/stalls/stall-13.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 600,
+      "y": 882
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "焼きそば",
+      "一般棟"
+    ],
+    "organizer": "ハンド部",
+    "products": [
+      "焼きそば"
+    ]
+  },
+  {
+    "id": "stall-14",
+    "type": "stall",
+    "title": "アメリカンダイナー ホットドッグ",
+    "description": "アメリカンダイナーの露店です",
+    "imageUrl": "./images/stalls/stall-14.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 640,
+      "y": 882
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "ホットドッグ",
+      "一般棟"
+    ],
+    "organizer": "アメリカンダイナー",
+    "products": [
+      "ホットドッグ"
+    ]
+  },
+  {
+    "id": "stall-15",
+    "type": "stall",
+    "title": "学生会 焼き鳥",
+    "description": "学生会の露店です",
+    "imageUrl": "./images/stalls/stall-15.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 680,
+      "y": 886
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "焼き鳥",
+      "一般棟"
+    ],
+    "organizer": "学生会",
+    "products": [
+      "焼き鳥"
+    ]
+  },
+  {
+    "id": "stall-16",
+    "type": "stall",
+    "title": "チーム優勝 チャーシュー丼",
+    "description": "チーム優勝の露店です",
+    "imageUrl": "./images/stalls/stall-16.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 720,
+      "y": 886
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "チャーシュー丼",
+      "一般棟"
+    ],
+    "organizer": "チーム優勝",
+    "products": [
+      "チャーシュー丼"
+    ]
+  },
+  {
+    "id": "stall-17",
+    "type": "stall",
+    "title": "5B男児 揚げパン",
+    "description": "5B男児の露店です",
+    "imageUrl": "./images/stalls/stall-17.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 708,
+      "y": 830
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "揚げパン",
+      "一般棟"
+    ],
+    "organizer": "5B男児",
+    "products": [
+      "揚げパン"
+    ]
+  },
+  {
+    "id": "stall-18",
+    "type": "stall",
+    "title": "ほぼ3S ポップコーン",
+    "description": "ほぼ3Sの露店です",
+    "imageUrl": "./images/stalls/stall-18.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "食堂 横",
+    "coordinates": {
+      "x": 730,
+      "y": 830
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "ポップコーン",
+      "食堂"
+    ],
+    "organizer": "ほぼ3S",
+    "products": [
+      "ポップコーン"
+    ]
+  },
+  {
+    "id": "stall-19",
+    "type": "stall",
+    "title": "地域教育 天ぷら",
+    "description": "地域教育の露店です",
+    "imageUrl": "./images/stalls/stall-19.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟 前",
+    "coordinates": {
+      "x": 810,
+      "y": 910
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "天ぷら",
+      "一般棟"
+    ],
+    "organizer": "地域教育",
+    "products": [
+      "天ぷら"
+    ]
+  },
+  {
+    "id": "stall-20",
+    "type": "stall",
+    "title": "ソフトテニス部 たい焼き",
+    "description": "ソフトテニス部の露店です",
+    "imageUrl": "./images/stalls/stall-20.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 840,
+      "y": 910
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "たい焼き",
+      "一般棟"
+    ],
+    "organizer": "ソフトテニス部",
+    "products": [
+      "たい焼き"
+    ]
+  },
+  {
+    "id": "stall-21",
+    "type": "stall",
+    "title": "卓球部 からあげ",
+    "description": "卓球部の露店です",
+    "imageUrl": "./images/stalls/stall-21.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 898,
+      "y": 910
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "からあげ",
+      "一般棟"
+    ],
+    "organizer": "卓球部",
+    "products": [
+      "からあげ"
+    ]
+  },
+  {
+    "id": "stall-22",
+    "type": "stall",
+    "title": "2D タピオカ",
+    "description": "2Dの露店です",
+    "imageUrl": "./images/stalls/stall-22.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 898,
+      "y": 930
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "タピオカ",
+      "一般棟"
+    ],
+    "organizer": "2D",
+    "products": [
+      "タピオカ"
+    ]
+  },
+  {
+    "id": "stall-23",
+    "type": "stall",
+    "title": "たきべん からあげ",
+    "description": "たきべんの露店です",
+    "imageUrl": "./images/stalls/stall-23.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 790,
+      "y": 832
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "からあげ",
+      "一般棟"
+    ],
+    "organizer": "たきべん",
+    "products": [
+      "からあげ"
+    ]
+  },
+  {
+    "id": "stall-24",
+    "type": "stall",
+    "title": "河村醤油 焼きおにぎり",
+    "description": "河村醤油の露店です (9日のみ)",
+    "imageUrl": "./images/stalls/stall-24.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "一般棟前",
+    "coordinates": {
+      "x": 820,
+      "y": 832
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "焼きおにぎり",
+      "一般棟"
+    ],
+    "organizer": "河村醤油",
+    "products": [
+      "焼きおにぎり"
+    ]
+  },
+  {
+    "id": "stall-25",
+    "type": "stall",
+    "title": "専攻科1年 コーヒー",
+    "description": "専攻科1年の露店です",
+    "imageUrl": "./images/stalls/stall-25.webp",
+    "date": "2025-11-09",
+    "time": "10:00 - 18:00",
+    "location": "講義室12番(一般棟 1階)",
+    "coordinates": {
+      "x": 610,
+      "y": 940
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "コーヒー",
+      "一般棟",
+      "1階"
+    ],
+    "organizer": "専攻科1年",
+    "products": [
+      "コーヒー"
+    ]
+  },
+  {
+    "id": "stall-26",
+    "type": "stall",
+    "title": "3C チヂミ",
+    "description": "3Cの露店です",
+    "imageUrl": "./images/stalls/stall-26.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "講義室13番(一般棟 1階)",
+    "coordinates": {
+      "x": 770,
+      "y": 940
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "チヂミ",
+      "一般棟",
+      "1階"
+    ],
+    "organizer": "3C",
+    "products": [
+      "チヂミ"
+    ]
+  },
+  {
+    "id": "stall-27",
+    "type": "stall",
+    "title": "水泳部 アイスクリーム",
+    "description": "水泳部の露店です",
+    "imageUrl": "./images/stalls/stall-27.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "講義室14番(一般棟 1階)",
+    "coordinates": {
+      "x": 830,
+      "y": 940
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "アイスクリーム",
+      "一般棟",
+      "1階"
+    ],
+    "organizer": "水泳部",
+    "products": [
+      "アイスクリーム"
+    ]
+  },
+  {
+    "id": "stall-28",
+    "type": "stall",
+    "title": "茶道部 茶道部お茶席",
+    "description": "茶道部の露店です",
+    "imageUrl": "./images/stalls/stall-28.webp",
+    "date": "2025-11-08",
+    "time": "10:00 - 18:00",
+    "location": "学生交流室(学生会館/食堂 1階)",
+    "coordinates": {
+      "x": 540,
+      "y": 770
+    },
+    "tags": [
+      "露店",
+      "食べ物",
+      "お茶席",
+      "学生会館",
+      "食堂",
+      "1階"
+    ],
+    "organizer": "茶道部",
+    "products": [
+      "お茶席"
+    ]
+  }
+]

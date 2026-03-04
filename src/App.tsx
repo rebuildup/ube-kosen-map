@@ -1,132 +1,90 @@
-import React, { useState, useMemo } from 'react'
-import { TraceEditor } from './editor'
-import { CampusViewer } from './viewer'
-import type { CampusGraph } from './core/schema'
-import page1GraphJson from '../data/derived/page_1.graph.json'
-import { CampusMap, FloorTabs, parseLayers } from './map'
-import type { ParsedMap } from './map'
-import './map/theme.css'
-import campusMapSvgRaw from '../docs/reference/ube-k-map-layers.svg?raw'
+import { useMemo } from "react";
 
-type AppMode = 'editor' | 'viewer' | 'map'
+import VectorMap from "./components/map/VectorMap";
+import { LanguageProvider } from "./context/LanguageContext";
+import eventsJson from "./data/events.json";
+import exhibitsJson from "./data/exhibits.json";
+import amenitiesJson from "./data/mapAmenities.json";
+import stallsJson from "./data/stalls.json";
+import type { Event, Exhibit, Stall } from "./types/common";
 
-const MODES: { key: AppMode; label: string; tag: string }[] = [
-  { key: 'editor', label: 'エディター', tag: 'EDITOR' },
-  { key: 'viewer', label: 'ビューアー', tag: 'VIEWER' },
-  { key: 'map', label: 'マップ v2', tag: 'MAP-V2' },
-]
+const events = eventsJson as Event[];
+const exhibits = exhibitsJson as Exhibit[];
+const stalls = stallsJson as Stall[];
+const amenities = amenitiesJson as Array<{
+  id: string;
+  type: "toilet" | "trash" | "water" | "info";
+  name?: string;
+  x: number;
+  y: number;
+}>;
 
-// ---- MapDemo ----
+type NonSponsorItem = Event | Exhibit | Stall;
 
-const MapDemo: React.FC = () => {
-  const parsedMap = useMemo<ParsedMap>(() => {
-    try {
-      return parseLayers(campusMapSvgRaw)
-    } catch (err) {
-      // Fallback: wrap raw SVG content in a single layer
-      console.error('parseLayers failed:', err)
-      return {
-        viewBox: { x: 0, y: 0, width: 793.70135, height: 1122.52 },
-        styles: '',
-        layers: [{ id: 'surface1', index: 0, label: 'campus', svgContent: '' }],
-      }
-    }
-  }, [])
+const MapPage = () => {
+  const mapHeight = "90vh";
 
-  const [visibleLayers, setVisibleLayers] = useState<string[]>(() =>
-    parsedMap.layers.map((l) => l.id),
-  )
+  const mapEvents = useMemo(() => events.filter((event) => event.showOnMap), []);
+  const items = useMemo<NonSponsorItem[]>(
+    () => [...mapEvents, ...exhibits, ...stalls],
+    [mapEvents],
+  );
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <CampusMap
-        parsedMap={parsedMap}
-        visibleLayers={visibleLayers}
-        height="100%"
-        showControls
-        enableFullscreen
-      />
-      <FloorTabs
-        layers={parsedMap.layers}
-        visibleLayers={visibleLayers}
-        onVisibleLayersChange={setVisibleLayers}
-      />
-    </div>
-  )
-}
-
-// ---- App ----
-
-function App() {
-  const [mode, setMode] = useState<AppMode>('viewer')
-  const page1Graph = page1GraphJson as unknown as CampusGraph
-
-  const statusLabel =
-    mode === 'editor' ? 'EDIT MODE' : mode === 'map' ? 'MAP-V2' : 'VIEW MODE'
-  const statusColor =
-    mode === 'editor' ? 'var(--amber)' : mode === 'map' ? 'var(--accent)' : 'var(--green)'
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-1)' }}>
-
-      {/* ── Global app bar ─────────────────────────────────────────────────── */}
-      <div style={{
-        height: 36, flexShrink: 0,
-        display: 'flex', alignItems: 'center',
-        padding: '0 14px', gap: 16,
-        background: 'var(--bg-2)',
-        borderBottom: '1px solid var(--border-1)',
-      }}>
-        {/* Logo */}
-        <span className="app-brand">UBE-KOSEN MAP</span>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 16, background: 'var(--border-2)' }} />
-
-        {/* Mode toggle */}
-        <div style={{ display: 'flex', gap: 2 }}>
-          {MODES.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setMode(key)}
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10, letterSpacing: '0.08em',
-                padding: '3px 12px', borderRadius: 2,
-                border: '1px solid',
-                borderColor: mode === key ? 'var(--accent)' : 'var(--border-2)',
-                background: mode === key ? 'var(--accent-bg)' : 'transparent',
-                color: mode === key ? 'var(--accent)' : 'var(--text-2)',
-                cursor: 'pointer',
-                transition: 'all 0.12s',
-              }}
-              title={label}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Right status */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: statusColor }} />
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.06em',
-          }}>
-            {statusLabel}
-          </span>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--color-bg-primary)" }}>
+      <div className="mx-auto max-w-7xl px-4 py-4">
+        <div
+          className="relative overflow-hidden rounded-lg"
+          style={{ backgroundColor: "var(--color-bg-secondary)" }}
+        >
+          <VectorMap
+            mode="display"
+            points={[
+              ...items
+                .filter(
+                  (item): item is typeof item & { coordinates: NonNullable<typeof item.coordinates> } =>
+                    item.coordinates !== undefined,
+                )
+                .map((item) => ({
+                  contentItem: item,
+                  coordinates: item.coordinates,
+                  id: item.id,
+                  isHovered: false,
+                  isSelected: false,
+                  onClick: () => {},
+                  onHover: () => {},
+                  title: item.title,
+                  type: item.type as "event" | "exhibit" | "stall" | "location",
+                })),
+              ...amenities.map((amenity) => ({
+                coordinates: { x: amenity.x, y: amenity.y },
+                id: amenity.id,
+                isHovered: false,
+                isSelected: false,
+                onClick: () => {},
+                onHover: () => {},
+                title: "",
+                type: amenity.type as "toilet" | "trash",
+              })),
+            ]}
+            height={mapHeight}
+            className="rounded-lg"
+            maxZoom={8}
+            minZoom={0.3}
+            showControls={true}
+            initialZoom={2}
+            showGrid={true}
+          />
         </div>
       </div>
-
-      {/* ── Content area ───────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        {mode === 'editor' && <TraceEditor />}
-        {mode === 'viewer' && <CampusViewer graph={page1Graph} />}
-        {mode === 'map' && <MapDemo />}
-      </div>
     </div>
-  )
-}
+  );
+};
 
-export default App
+const App = () => (
+  <LanguageProvider>
+    <MapPage />
+  </LanguageProvider>
+);
+
+export default App;

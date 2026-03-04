@@ -1,8 +1,0 @@
-export { CampusMap } from './CampusMap'
-export type { CampusMapProps } from './CampusMap'
-export { StructuralSvgPseudo3D } from './StructuralSvgPseudo3D'
-export type { StructuralSvgPseudo3DProps } from './StructuralSvgPseudo3D'
-export { SvgPathInspector } from './SvgPathInspector'
-export type { SvgPathInspectorProps } from './SvgPathInspector'
-export { ShapeLayerEditor } from './ShapeLayerEditor'
-export type { ShapeLayerEditorProps } from './ShapeLayerEditor'

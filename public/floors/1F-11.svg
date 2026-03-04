@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470.53 710.52">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #616161;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke: #323232;
+        stroke-width: .25px;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-8, .cls-10, .cls-11, .cls-12, .cls-13, .cls-15, .cls-16, .cls-17, .cls-18, .cls-19 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-8, .cls-10, .cls-13, .cls-14, .cls-18, .cls-19 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2, .cls-16 {
+        fill: #626262;
+      }
+
+      .cls-3, .cls-7, .cls-14, .cls-15 {
+        fill: none;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7, .cls-9, .cls-11, .cls-12, .cls-15, .cls-16, .cls-17 {
+        stroke-linejoin: round;
+      }
+
+      .cls-4, .cls-9, .cls-18 {
+        fill: #616161;
+      }
+
+      .cls-5 {
+        fill: #E8E8E8;
+      }
+
+      .cls-6 {
+        fill: #1B1B1B;
+      }
+
+      .cls-7, .cls-9 {
+        stroke-linecap: round;
+      }
+
+      .cls-8, .cls-11 {
+        fill: #DADADA;
+      }
+
+      .cls-10, .cls-12 {
+        fill: #303030;
+      }
+
+      .cls-13, .cls-17 {
+        fill: #717171;
+      }
+
+      .cls-19 {
+        fill: #404040;
+      }
+    </style>
+  </defs>
+  <g id="_寮D棟" data-name="寮D棟">
+      <path class="cls-16" d="M200.92,347.75l10.25-10.68h-.05s12.4,11.92,12.4,11.92h0s-10.25,10.68-10.25,10.68h0s-12.35-11.92-12.35-11.92h0Z"/>
+      <g>
+        <line class="cls-3" x1="210.95" y1="357.44" x2="214.07" y2="354.32"/>
+        <line class="cls-3" x1="212.99" y1="357.44" x2="214.55" y2="355.88"/>
+        <line class="cls-3" x1="208.2" y1="354.61" x2="211.48" y2="351.34"/>
+        <line class="cls-3" x1="206.44" y1="352.97" x2="209.71" y2="349.69"/>
+        <line class="cls-3" x1="203.35" y1="349.68" x2="206.62" y2="346.41"/>
+        <line class="cls-3" x1="208.2" y1="344.82" x2="213.53" y2="339.49"/>
+        <line class="cls-3" x1="204.44" y1="350.78" x2="206.56" y2="348.66"/>
+        <line class="cls-3" x1="212.91" y1="349.64" x2="218.28" y2="344.2"/>
+        <line class="cls-3" x1="205.86" y1="342.64" x2="212.81" y2="349.5"/>
+        <line class="cls-3" x1="205.5" y1="347.68" x2="206.48" y2="348.66"/>
+        <line class="cls-3" x1="213.44" y1="357.1" x2="214.42" y2="358.08"/>
+        <line class="cls-3" x1="213.77" y1="356.8" x2="214.75" y2="357.78"/>
+        <line class="cls-3" x1="213.16" y1="357.44" x2="214.14" y2="358.42"/>
+        <line class="cls-3" x1="214.14" y1="356.61" x2="215.12" y2="357.59"/>
+        <line class="cls-3" x1="214.55" y1="356.17" x2="215.53" y2="357.15"/>
+        <line class="cls-3" x1="212.37" y1="355.98" x2="213.35" y2="356.96"/>
+        <line class="cls-3" x1="212.7" y1="355.68" x2="213.68" y2="356.66"/>
+        <line class="cls-3" x1="212.09" y1="356.31" x2="213.07" y2="357.29"/>
+        <line class="cls-3" x1="213.07" y1="355.49" x2="214.05" y2="356.47"/>
+        <line class="cls-3" x1="213.48" y1="355.05" x2="214.46" y2="356.03"/>
+        <line class="cls-3" x1="204.41" y1="344.2" x2="211.37" y2="351.16"/>
+      </g>
+    </g>
+</svg>
