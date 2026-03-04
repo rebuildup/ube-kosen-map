@@ -268,18 +268,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const [isRotateMode, setIsRotateMode] = useState(false);
   const rotatePivotScreenRef = useRef<{ x: number; y: number } | null>(null);
   const rotatePivotOrigRef = useRef<{ x: number; y: number } | null>(null);
+  // Normalized SVG-viewport fraction of pivot (used for viewBox adjustment)
+  const rotatePivotFracRef = useRef<{ x: number; y: number } | null>(null);
   const rotateStartRef = useRef<{ mouseAngle: number; mapAngle: number } | null>(null);
 
   const getImageTransform = (): string =>
     `translate(${rotTx}, ${rotTy}) rotate(${mapRotation})`;
-
-  const rotateCW = useCallback(() => {
-    setMapRotation(prev => (prev + 90) % 360);
-  }, []);
-
-  const rotateCCW = useCallback(() => {
-    setMapRotation(prev => (prev - 90 + 360) % 360);
-  }, []);
 
   // Floor detection: check which building (if any) the viewport is zoomed into
   useEffect(() => {
@@ -331,6 +325,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
         setIsRotateMode(prev => !prev);
         rotatePivotScreenRef.current = null;
         rotatePivotOrigRef.current = null;
+        rotatePivotFracRef.current = null;
         rotateStartRef.current = null;
       }
     };
@@ -771,6 +766,11 @@ const VectorMap: React.FC<VectorMapProps> = ({
         const origCoord = inverseTransformPinCoord(svgCoord.x, svgCoord.y);
         rotatePivotScreenRef.current = { x: localX, y: localY };
         rotatePivotOrigRef.current = { x: origCoord.x, y: origCoord.y };
+        // Store normalized SVG-viewport fraction for accurate viewBox adjustment
+        rotatePivotFracRef.current = {
+          x: (svgCoord.x - viewBox.x) / viewBox.width,
+          y: (svgCoord.y - viewBox.y) / viewBox.height,
+        };
         rotateStartRef.current = null; // set on first mousemove
         setIsDragging(true);
         e.preventDefault();
@@ -806,7 +806,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
         if (!containerRef.current || !svgRef.current) return;
 
         // 回転モード
-        if (isRotateMode && rotatePivotScreenRef.current && rotatePivotOrigRef.current) {
+        if (isRotateMode && rotatePivotScreenRef.current && rotatePivotOrigRef.current && rotatePivotFracRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
           const localX = e.clientX - rect.left;
           const localY = e.clientY - rect.top;
@@ -826,9 +826,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
           // ピボット座標を新しい回転で再計算し、画面上の同じ位置に保つ
           const origPivot = rotatePivotOrigRef.current;
+          const frac = rotatePivotFracRef.current;
+          if (!frac) return;
           const newSvgPivot = applyRotation(origPivot.x, origPivot.y, newMapRotation);
-          const newViewBoxX = newSvgPivot.x - (pivot.x / rect.width) * viewBox.width;
-          const newViewBoxY = newSvgPivot.y - (pivot.y / rect.height) * viewBox.height;
+          // Use SVG-viewport fraction (computed via screenToSVG at mousedown) for correct viewBox shift
+          const newViewBoxX = newSvgPivot.x - frac.x * viewBox.width;
+          const newViewBoxY = newSvgPivot.y - frac.y * viewBox.height;
 
           setMapRotation(newMapRotation);
           setViewBox(prev => ({ ...prev, x: newViewBoxX, y: newViewBoxY }));
@@ -891,14 +894,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     endInteraction();
-    if (isRotateMode) {
-      // 回転モード終了
-      setIsRotateMode(false);
-      rotatePivotScreenRef.current = null;
-      rotatePivotOrigRef.current = null;
-      rotateStartRef.current = null;
-    }
-  }, [endInteraction, isRotateMode]);
+    // Keep rotate mode active; just reset per-drag state so next click sets a new pivot
+    rotatePivotScreenRef.current = null;
+    rotatePivotOrigRef.current = null;
+    rotatePivotFracRef.current = null;
+    rotateStartRef.current = null;
+  }, [endInteraction]);
 
   // SVGの実際の描画領域を計算する関数
   // 注意：Content Areaは元のviewBoxサイズ（2000x1343）に基づいて計算する必要がある
@@ -2199,13 +2200,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
             minScale={0.001}
             maxScale={100000}
             rotation={mapRotation}
-            onRotateCW={rotateCW}
-            onRotateCCW={rotateCCW}
             isRotateMode={isRotateMode}
             onToggleRotateMode={() => {
               setIsRotateMode(prev => !prev);
               rotatePivotScreenRef.current = null;
               rotatePivotOrigRef.current = null;
+              rotatePivotFracRef.current = null;
               rotateStartRef.current = null;
             }}
           />
@@ -2252,21 +2252,32 @@ const VectorMap: React.FC<VectorMapProps> = ({
 .cls-6{fill:#1B1B1B!important}.cls-8,.cls-11{fill:#DADADA!important}
 .cls-10,.cls-12{fill:#303030!important}.cls-13,.cls-17{fill:#717171!important}
 .cls-19{fill:#404040!important}
-.cls-3,.cls-7,.cls-14,.cls-15{display:none!important}
+.cls-3,.cls-7,.cls-14,.cls-15{visibility:hidden!important}
           `}</style>
-          {/* アクティブ建物のfillハイライト（選択フロアがあればそのグループ、なければ建物グループ） */}
+          {/* フォーカス中グループ: 非選択フロアを非表示・選択フロアのfillをハイライト＋部屋割り線表示 */}
           {(() => {
-            const floorGid = activeBuilding?.floors.find(f => f.id === selectedFloorId)?.svgGroupId;
-            const gid = floorGid ?? activeBuilding?.svgGroupId;
+            if (!activeBuilding) return null;
+            const floorGid = activeBuilding.floors.find(f => f.id === selectedFloorId)?.svgGroupId;
+            const gid = floorGid ?? activeBuilding.svgGroupId;
             if (!gid) return null;
+
+            // 選択フロア以外のフロアグループを非表示
+            const hiddenGids = activeBuilding.floors
+              .map(f => f.svgGroupId)
+              .filter(fgid => fgid !== gid);
+            const hideRule = hiddenGids.length > 0
+              ? `${hiddenGids.map(fgid => `[id="${fgid}"]`).join(',')}{visibility:hidden!important}`
+              : '';
+
             return (
               <style>{`
-[id="${gid}"]>path,[id="${gid}"]>polygon,[id="${gid}"]>rect{fill:rgba(96,165,250,0.55)!important}
-[id="${gid}"] .cls-3,[id="${gid}"] .cls-7,[id="${gid}"] .cls-14,[id="${gid}"] .cls-15{display:initial!important}
+${hideRule}
+[id="${gid}"]>path,[id="${gid}"]>g>path{fill:rgba(96,165,250,0.7)!important}
+[id="${gid}"] .cls-3,[id="${gid}"] .cls-7,[id="${gid}"] .cls-14,[id="${gid}"] .cls-15{visibility:visible!important}
               `}</style>
             );
           })()}
-          {/* Campus Map SVG (inline, no overlay) */}
+          {/* Campus Map SVG (inline) */}
           {mapRotation === 0 ? (
             <>
               {/* SVG座標は0-470なのでscale(10)でプロジェクトの0-4705座標系に合わせる */}

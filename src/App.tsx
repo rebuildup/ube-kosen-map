@@ -73,7 +73,7 @@ const MapPage = () => {
             minZoom={0.3}
             showControls={true}
             initialZoom={2}
-            showGrid={true}
+            showGrid={false}
           />
         </div>
       </div>
