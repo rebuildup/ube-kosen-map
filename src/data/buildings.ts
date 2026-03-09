@@ -13,6 +13,41 @@ export interface Building {
   rooms?: string[];
 }
 
+const shouldLogCoordinateResolution =
+  (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") ||
+  (typeof window !== "undefined" &&
+    /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname));
+const GENERIC_LOCATION_TOKENS = new Set(["棟", "館", "室", "a"]);
+
+function normalizeLocationToken(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function canUseLooseMatch(token: string): boolean {
+  return token.length >= 2 && !GENERIC_LOCATION_TOKENS.has(token);
+}
+
+function logCoordinateResolution(
+  level: "error" | "info" | "warn",
+  ...args: unknown[]
+) {
+  if (!shouldLogCoordinateResolution) {
+    return;
+  }
+
+  if (level === "error") {
+    console.error(...args);
+    return;
+  }
+
+  if (level === "warn") {
+    console.warn(...args);
+    return;
+  }
+
+  console.info(...args);
+}
+
 // Calculate polygon center from points string
 function calculatePolygonCenter(points: string): { x: number; y: number } {
   const coords = points.split(" ").map(Number);
@@ -26,6 +61,10 @@ function calculatePolygonCenter(points: string): { x: number; y: number } {
       sumY += coords[i + 1];
       count++;
     }
+  }
+
+  if (count === 0) {
+    return { x: 0, y: 0 };
   }
 
   return {
@@ -98,7 +137,8 @@ const buildingPolygons = [
   {
     id: "_地域共同テクノセンター",
     name: "地域共同テクノセンター",
-    points: "425.708 641.56 307.8605 638.2678 308.815 567.6285 425.708 571.6079 425.708 641.56",
+    points:
+      "425.708 641.56 307.8605 638.2678 308.815 567.6285 425.708 571.6079 425.708 641.56",
     rooms: ["共同研究室", "技術相談室"],
   },
   {
@@ -216,22 +256,65 @@ export const CAMPUS_MAP_BOUNDS = {
 
 // Helper function to get building by name or partial name match
 export function getBuildingByName(locationName: string): Building | undefined {
+  const normalizedInput = normalizeLocationToken(locationName);
+  if (!normalizedInput) {
+    return undefined;
+  }
+
+  const byNameStrict = buildings.find((building) => {
+    const normalizedBuilding = normalizeLocationToken(building.name);
+    return (
+      normalizedBuilding === normalizedInput ||
+      normalizedInput.startsWith(normalizedBuilding) ||
+      normalizedBuilding.startsWith(normalizedInput)
+    );
+  });
+  if (byNameStrict) {
+    return byNameStrict;
+  }
+
+  const byRoomStrict = buildings.find((building) =>
+    building.rooms?.some((room) => {
+      const normalizedRoom = normalizeLocationToken(room);
+      return (
+        normalizedRoom === normalizedInput ||
+        normalizedInput.startsWith(normalizedRoom) ||
+        normalizedRoom.startsWith(normalizedInput)
+      );
+    }),
+  );
+  if (byRoomStrict) {
+    return byRoomStrict;
+  }
+
+  if (!canUseLooseMatch(normalizedInput)) {
+    return undefined;
+  }
+
   return buildings.find(
     (building) =>
-      locationName.includes(building.name) ||
-      building.name.includes(locationName) ||
-      building.rooms?.some((room) => locationName.includes(room)),
+      normalizedInput.includes(normalizeLocationToken(building.name)) ||
+      building.rooms?.some((room) =>
+        normalizedInput.includes(normalizeLocationToken(room)),
+      ),
   );
 }
 
 // Helper function to get building coordinates for a location string
-export function getBuildingCoordinates(locationName: string): { x: number; y: number } | undefined {
+export function getBuildingCoordinates(
+  locationName: string,
+): { x: number; y: number } | undefined {
   if (!locationName || typeof locationName !== "string") {
-    console.warn("Invalid location name provided to getBuildingCoordinates:", locationName);
+    logCoordinateResolution(
+      "warn",
+      "Invalid location name provided to getBuildingCoordinates:",
+      locationName,
+    );
     return undefined;
   }
 
   try {
+    const normalizedLocation = normalizeLocationToken(locationName);
     const building = getBuildingByName(locationName);
     if (building) {
       return { x: building.centerX, y: building.centerY };
@@ -302,9 +385,8 @@ export function getBuildingCoordinates(locationName: string): { x: number; y: nu
       if (
         fallback.patterns.some(
           (pattern) =>
-            locationName.toLowerCase() === pattern.toLowerCase() ||
-            locationName.includes(pattern) ||
-            pattern.includes(locationName),
+            normalizedLocation === normalizeLocationToken(pattern) ||
+            normalizedLocation.includes(normalizeLocationToken(pattern)),
         )
       ) {
         return fallback.coords;
@@ -316,21 +398,39 @@ export function getBuildingCoordinates(locationName: string): { x: number; y: nu
       if (
         fallback.patterns.some((pattern) => {
           // Check if location contains pattern or pattern contains location (case insensitive)
-          const locationLower = locationName.toLowerCase();
-          const patternLower = pattern.toLowerCase();
-          return locationLower.includes(patternLower) || patternLower.includes(locationLower);
+          const locationLower = normalizedLocation;
+          const patternLower = normalizeLocationToken(pattern);
+          if (!canUseLooseMatch(locationLower)) {
+            return false;
+          }
+          return (
+            locationLower.includes(patternLower) ||
+            locationLower.startsWith(patternLower)
+          );
         })
       ) {
-        console.info(`Using fallback coordinates for location: ${locationName}`);
+        logCoordinateResolution(
+          "info",
+          `Using fallback coordinates for location: ${locationName}`,
+        );
         return fallback.coords;
       }
     }
 
     // Final fallback - default central position
-    console.warn(`No coordinates found for location: ${locationName}, using default position`);
+    logCoordinateResolution(
+      "warn",
+      `No coordinates found for location: ${locationName}, using default position`,
+    );
     return { x: 1000, y: 700 }; // Central area of the map
   } catch (error) {
-    console.error("Error in getBuildingCoordinates:", error, "Location:", locationName);
+    logCoordinateResolution(
+      "error",
+      "Error in getBuildingCoordinates:",
+      error,
+      "Location:",
+      locationName,
+    );
     return { x: 1000, y: 700 }; // Fallback to center
   }
 }

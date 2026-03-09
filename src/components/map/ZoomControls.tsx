@@ -1,7 +1,6 @@
 import {
   Maximize2,
   Minimize2,
-  Navigation,
   RotateCcw,
   RotateCw,
   ZoomIn as ZoomInIcon,
@@ -12,7 +11,6 @@ import { useEffect, useMemo } from "react";
 interface ZoomControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
-  onReset: () => void;
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   fullscreenLabel?: string;
@@ -22,21 +20,16 @@ interface ZoomControlsProps {
   rotation?: number;
   onRotateCW?: () => void;
   onRotateCCW?: () => void;
-  isRotateMode?: boolean;
-  onToggleRotateMode?: () => void;
 }
 
 const ZoomControls = ({
   fullscreenLabel,
   isFullscreen = false,
-  isRotateMode = false,
   maxScale,
   minScale,
-  onReset,
   onRotateCCW,
   onRotateCW,
   onToggleFullscreen,
-  onToggleRotateMode,
   onZoomIn,
   onZoomOut,
   scale,
@@ -55,26 +48,51 @@ const ZoomControls = ({
   const utilityGroupClass =
     "flex flex-col overflow-hidden border border-slate-200 shadow-sm rounded-md bg-slate-100";
 
-  // Keyboard shortcuts for zoom/reset
+  // Keyboard shortcuts for zoom
   useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null): boolean => {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+
+      if (target.isContentEditable) {
+        return true;
+      }
+
+      const tagName = target.tagName;
+      return (
+        tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT"
+      );
+    };
+
     const handleKeyboard = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "+") {
+      if (isEditableTarget(e.target)) {
+        return;
+      }
+
+      const hasZoomModifier = e.ctrlKey || e.metaKey;
+      if (!hasZoomModifier) {
+        return;
+      }
+
+      if (
+        (e.key === "+" || e.key === "=" || e.code === "NumpadAdd") &&
+        !zoomInDisabled
+      ) {
         e.preventDefault();
         onZoomIn();
+        return;
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+      if ((e.key === "-" || e.code === "NumpadSubtract") && !zoomOutDisabled) {
         e.preventDefault();
         onZoomOut();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === "0") {
-        e.preventDefault();
-        onReset();
+        return;
       }
     };
 
     document.addEventListener("keydown", handleKeyboard);
     return () => document.removeEventListener("keydown", handleKeyboard);
-  }, [onZoomIn, onZoomOut, onReset]);
+  }, [onZoomIn, onZoomOut, zoomInDisabled, zoomOutDisabled]);
 
   const handleFullscreenToggle = () => {
     if (onToggleFullscreen) {
@@ -87,7 +105,7 @@ const ZoomControls = ({
 
   return (
     <div
-      className="absolute right-4 bottom-4 z-20 flex w-auto flex-col items-end gap-2"
+      className="map-ui-control absolute right-4 bottom-4 z-20 flex w-auto flex-col items-end gap-2"
       style={{
         MozOsxFontSmoothing: "grayscale",
         WebkitFontSmoothing: "antialiased",
@@ -100,12 +118,6 @@ const ZoomControls = ({
           onClick={onZoomIn}
           onTouchStart={(e) => {
             e.stopPropagation();
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            if (!e.currentTarget.disabled) {
-              onZoomIn();
-            }
           }}
           disabled={zoomInDisabled}
           aria-label="ズームイン (Ctrl/Cmd + +)"
@@ -126,12 +138,6 @@ const ZoomControls = ({
           onTouchStart={(e) => {
             e.stopPropagation();
           }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            if (!e.currentTarget.disabled) {
-              onZoomOut();
-            }
-          }}
           disabled={zoomOutDisabled}
           aria-label="ズームアウト (Ctrl/Cmd + -)"
           className={baseZoomButtonClass}
@@ -147,7 +153,7 @@ const ZoomControls = ({
       </div>
 
       {/* Rotation controls */}
-      {(onRotateCW || onRotateCCW || onToggleRotateMode) && (
+      {(onRotateCW || onRotateCCW) && (
         <div className={utilityGroupClass}>
           {onRotateCCW && (
             <button
@@ -181,59 +187,17 @@ const ZoomControls = ({
               />
             </button>
           )}
-          {onToggleRotateMode && (
-            <button
-              type="button"
-              onClick={onToggleRotateMode}
-              aria-label="自由回転 (R)"
-              className={`${baseUtilityButtonClass} ${isRotateMode ? "bg-slate-700 text-white hover:bg-slate-600" : ""}`}
-              title="自由回転 (R)"
-              style={{ touchAction: "manipulation" }}
-            >
-              <Navigation
-                strokeWidth={2.5}
-                className="h-5 w-5"
-                style={{ vectorEffect: "non-scaling-stroke" }}
-              />
-            </button>
-          )}
         </div>
       )}
 
-      {/* Reset & scale */}
+      {/* Utility */}
       <div className={utilityGroupClass}>
-        <button
-          type="button"
-          onClick={onReset}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            onReset();
-          }}
-          aria-label="リセット (Ctrl/Cmd + 0)"
-          className={`${baseUtilityButtonClass} border-b border-slate-100`}
-          title="リセット (Ctrl/Cmd + 0)"
-          style={{ touchAction: "manipulation" }}
-        >
-          <RotateCcw
-            strokeWidth={2.5}
-            className="h-5 w-5"
-            style={{ vectorEffect: "non-scaling-stroke" }}
-          />
-        </button>
-
         {onToggleFullscreen && (
           <button
             type="button"
             onClick={handleFullscreenToggle}
             onTouchStart={(e) => {
               e.stopPropagation();
-            }}
-            onTouchEnd={(e) => {
-              e.stopPropagation();
-              handleFullscreenToggle();
             }}
             aria-label={resolvedFullscreenLabel}
             className={baseUtilityButtonClass}

@@ -1,11 +1,22 @@
 // src/components/map/LocationList.tsx
+import { useMemo } from "react";
+
 import { useLanguage } from "../../context/LanguageContext";
 import UnifiedCard from "../../shared/components/ui/UnifiedCard";
 import type { Event, Exhibit, Stall } from "../../types/common";
-import { EventIcon, ExhibitIcon, PeopleIcon } from "../icons";
+import { EventIcon, ExhibitIcon, StallIcon } from "../icons";
 
 // Type for non-sponsor items
 type NonSponsorItem = Event | Exhibit | Stall;
+type LocationData = {
+  location: string;
+  items: NonSponsorItem[];
+  counts: {
+    event: number;
+    exhibit: number;
+    stall: number;
+  };
+};
 
 interface LocationListProps {
   locations: string[];
@@ -26,19 +37,30 @@ const LocationList = ({
 }: LocationListProps) => {
   const { t } = useLanguage();
 
-  // Keep references to these props to avoid unused variable warnings
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  hoveredLocation;
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  selectedLocation;
+  const sortedLocations = useMemo<LocationData[]>(() => {
+    return locations
+      .map((location) => {
+        const items = getItemsForLocation(location);
+        const counts = items.reduce(
+          (acc, item) => {
+            if (item.type === "event") acc.event += 1;
+            else if (item.type === "exhibit") acc.exhibit += 1;
+            else if (item.type === "stall") acc.stall += 1;
+            return acc;
+          },
+          { event: 0, exhibit: 0, stall: 0 },
+        );
 
-  // Sort locations by number of items (descending), then alphabetically
-  const sortedLocations = [...locations].sort((a: string, b: string) => {
-    const lenA = getItemsForLocation(a).length;
-    const lenB = getItemsForLocation(b).length;
-    if (lenA !== lenB) return lenB - lenA;
-    return a.localeCompare(b);
-  });
+        return { counts, items, location };
+      })
+      .filter(({ items }) => items.length > 0)
+      .sort((a, b) => {
+        if (a.items.length !== b.items.length) {
+          return b.items.length - a.items.length;
+        }
+        return a.location.localeCompare(b.location);
+      });
+  }, [locations, getItemsForLocation]);
 
   return (
     <div
@@ -53,14 +75,18 @@ const LocationList = ({
       </h2>
 
       {sortedLocations.length === 0 ? (
-        <div className="py-8 text-center" style={{ color: "var(--color-text-secondary)" }}>
+        <div
+          className="py-8 text-center"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           {t("map.noLocations")}
         </div>
       ) : (
         <div className="scrollbar-thin overflow-x-auto">
           <div className="flex gap-4 pb-4" style={{ minWidth: "max-content" }}>
-            {sortedLocations.map((location: string) => {
-              const items = getItemsForLocation(location);
+            {sortedLocations.map(({ counts, items, location }) => {
+              const isHovered = hoveredLocation === location;
+              const isSelected = selectedLocation === location;
               // Get the first item for the card display
               const firstItem = items[0];
 
@@ -70,7 +96,14 @@ const LocationList = ({
                 <button
                   type="button"
                   key={location}
-                  className={"w-80 flex-shrink-0 text-left"}
+                  aria-pressed={isSelected}
+                  className={`w-80 flex-shrink-0 rounded-xl text-left transition-shadow ${
+                    isSelected
+                      ? "ring-2 ring-blue-500 ring-offset-2"
+                      : isHovered
+                        ? "ring-1 ring-blue-300"
+                        : ""
+                  }`}
                   onMouseEnter={() => onLocationHover(location)}
                   onMouseLeave={() => onLocationHover(null)}
                   onClick={() => onLocationSelect(location)}
@@ -78,17 +111,16 @@ const LocationList = ({
                   <div className="relative">
                     <UnifiedCard
                       item={firstItem}
-                      variant="default"
                       showTags={false}
                       showDescription={false}
-                      showAnimation={true}
                     />
 
                     {/* Location info overlay */}
                     <div className="absolute top-2 left-2 rounded-lg bg-black/80 px-3 py-1 text-white">
                       <div className="text-sm font-semibold">{location}</div>
                       <div className="text-xs opacity-80">
-                        {items.length} {items.length === 1 ? "項目" : "項目"}
+                        {items.length}{" "}
+                        {items.length === 1 ? t("map.item") : t("map.items")}
                       </div>
                     </div>
 
@@ -96,30 +128,34 @@ const LocationList = ({
                     <div className="absolute right-2 bottom-2 rounded-lg bg-black/80 px-2 py-1">
                       <div className="text-xs text-white">
                         {(() => {
-                          const eventCount = items.filter((item) => item.type === "event").length;
-                          const exhibitCount = items.filter(
-                            (item) => item.type === "exhibit",
-                          ).length;
-                          const stallCount = items.filter((item) => item.type === "stall").length;
+                          const eventCount = counts.event;
+                          const exhibitCount = counts.exhibit;
+                          const stallCount = counts.stall;
 
                           return (
                             <div className="flex items-center gap-3">
                               {eventCount > 0 && (
                                 <div className="flex items-center gap-1">
                                   <EventIcon size={14} />
-                                  <span className="text-xs text-white">{eventCount}</span>
+                                  <span className="text-xs text-white">
+                                    {eventCount}
+                                  </span>
                                 </div>
                               )}
                               {exhibitCount > 0 && (
                                 <div className="flex items-center gap-1">
                                   <ExhibitIcon size={14} />
-                                  <span className="text-xs text-white">{exhibitCount}</span>
+                                  <span className="text-xs text-white">
+                                    {exhibitCount}
+                                  </span>
                                 </div>
                               )}
                               {stallCount > 0 && (
                                 <div className="flex items-center gap-1">
-                                  <PeopleIcon size={14} />
-                                  <span className="text-xs text-white">{stallCount}</span>
+                                  <StallIcon size={14} />
+                                  <span className="text-xs text-white">
+                                    {stallCount}
+                                  </span>
                                 </div>
                               )}
                             </div>

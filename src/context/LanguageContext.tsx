@@ -3,7 +3,10 @@ import type { ComponentType, ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import type { Language, Translations } from "../utils/translations";
-import { getTranslationsForLanguage, getTranslationValue } from "../utils/translations";
+import {
+  getTranslationValue,
+  getTranslationsForLanguage,
+} from "../utils/translations";
 
 interface LanguageContextType {
   language: Language;
@@ -40,14 +43,23 @@ interface LanguageProviderProps {
 export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   // Get initial language from localStorage or browser settings
   const [language, setLanguageState] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem("language") as Language;
-    if (savedLanguage && (savedLanguage === "en" || savedLanguage === "ja")) {
-      return savedLanguage;
+    if (typeof window !== "undefined") {
+      let savedLanguage: string | null = null;
+      try {
+        savedLanguage = window.localStorage.getItem("language");
+      } catch {
+        savedLanguage = null;
+      }
+      if (savedLanguage && (savedLanguage === "en" || savedLanguage === "ja")) {
+        return savedLanguage;
+      }
+
+      // Try to detect browser language
+      const browserLang = window.navigator.language.slice(0, 2);
+      return browserLang === "ja" ? "ja" : "en";
     }
 
-    // Try to detect browser language
-    const browserLang = navigator.language.slice(0, 2);
-    return browserLang === "ja" ? "ja" : "en";
+    return "ja";
   });
 
   // Get translations for the current language
@@ -55,9 +67,17 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
 
   // Set language and save to localStorage
   const setLanguage = (newLanguage: Language) => {
-    localStorage.setItem("language", newLanguage);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem("language", newLanguage);
+      } catch {
+        // Ignore storage write failures in restricted environments.
+      }
+    }
     setLanguageState(newLanguage);
-    document.documentElement.setAttribute("lang", newLanguage);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("lang", newLanguage);
+    }
   };
 
   // Set the initial language attribute on the document
@@ -71,7 +91,9 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, translations }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage, t, translations }}
+    >
       {children}
     </LanguageContext.Provider>
   );

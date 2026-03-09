@@ -39,18 +39,40 @@ function matchBuilding(pos) {
 
 let svg = readFileSync("public/campus-map.svg", "utf8");
 
-svg = svg.replace(/<path(\s[^>]*?)class="(cls-\d+)"([^>]*?)d="([^"]+)"/g, (match, pre, cls, post, d) => {
-  if (noFill.has(cls) || match.includes("data-building=")) return match;
+svg = svg.replace(/<path\b([^>]*?)(\/?)>/g, (match, attrs, selfClosing) => {
+  if (match.includes("data-building=")) return match;
+
+  const classMatch = attrs.match(/\bclass=(["'])(cls-\d+)\1/);
+  if (!classMatch) return match;
+  const cls = classMatch[2];
+  if (noFill.has(cls)) return match;
+
+  const dMatch = attrs.match(/\bd=(["'])([^"']+)\1/);
+  if (!dMatch) return match;
+  const d = dMatch[2];
+
   const bld = matchBuilding(pathAnchor(d));
   if (!bld) return match;
-  return `<path${pre}class="${cls}"${post} data-building="${bld.id}" d="${d}"`;
+
+  return `<path${attrs} data-building="${bld.id}"${selfClosing ? "/" : ""}>`;
 });
 
-svg = svg.replace(/<polygon(\s[^>]*?)class="(cls-\d+)"([^>]*?)points="([^"]+)"/g, (match, pre, cls, post, pts) => {
-  if (noFill.has(cls) || match.includes("data-building=")) return match;
+svg = svg.replace(/<polygon\b([^>]*?)(\/?)>/g, (match, attrs, selfClosing) => {
+  if (match.includes("data-building=")) return match;
+
+  const classMatch = attrs.match(/\bclass=(["'])(cls-\d+)\1/);
+  if (!classMatch) return match;
+  const cls = classMatch[2];
+  if (noFill.has(cls)) return match;
+
+  const pointsMatch = attrs.match(/\bpoints=(["'])([^"']+)\1/);
+  if (!pointsMatch) return match;
+  const pts = pointsMatch[2];
+
   const bld = matchBuilding(polygonAnchor(pts));
   if (!bld) return match;
-  return `<polygon${pre}class="${cls}"${post} data-building="${bld.id}" points="${pts}"`;
+
+  return `<polygon${attrs} data-building="${bld.id}"${selfClosing ? "/" : ""}>`;
 });
 
 writeFileSync("public/campus-map.svg", svg, "utf8");

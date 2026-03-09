@@ -8,8 +8,19 @@ import path from "path";
 const content = fs.readFileSync("public/campus-map.svg", "utf8");
 
 // SVGのviewBoxとstyleを取得
-const vb = content.match(/viewBox="([^"]+)"/)[1];
-const styleBlock = content.match(/<style>([\s\S]*?)<\/style>/)[1];
+const vbMatch = content.match(/viewBox="([^"]+)"/);
+if (!vbMatch) {
+  console.error('Error: viewBox attribute not found in public/campus-map.svg');
+  process.exit(1);
+}
+const styleMatch = content.match(/<style>([\s\S]*?)<\/style>/);
+if (!styleMatch) {
+  console.error('Error: <style> block not found in public/campus-map.svg');
+  process.exit(1);
+}
+
+const vb = vbMatch[1];
+const styleBlock = styleMatch[1];
 
 /**
  * 指定位置のgタグからネストを考慮して終了タグを見つける

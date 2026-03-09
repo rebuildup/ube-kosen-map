@@ -1,8 +1,10 @@
 import type React from "react";
+import { useId } from "react";
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
   color?: string;
+  title?: string;
 }
 
 export const Icon: React.FC<IconProps & { children?: React.ReactNode }> = ({
@@ -10,24 +12,36 @@ export const Icon: React.FC<IconProps & { children?: React.ReactNode }> = ({
   className = "",
   color = "currentColor",
   size = 24,
+  title,
   ...rest
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    {...rest}
-  >
-    <title>Icon</title>
-    {children}
-  </svg>
-);
+}) => {
+  const titleId = useId();
+  const resolvedTitleId = title ? `icon-title-${titleId}` : undefined;
+  const hasAccessibleName = Boolean(
+    title || rest["aria-label"] || rest["aria-labelledby"],
+  );
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden={hasAccessibleName ? undefined : true}
+      aria-labelledby={resolvedTitleId}
+      role={hasAccessibleName ? "img" : undefined}
+      {...rest}
+    >
+      {title ? <title id={resolvedTitleId}>{title}</title> : null}
+      {children}
+    </svg>
+  );
+};
 
 // Re-export lucide icons with the project's previous names so existing imports keep working.
 

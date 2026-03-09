@@ -28,7 +28,9 @@ const LocationItem = ({
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   const eventItems = items.filter((item) => item.type === "event") as Event[];
-  const exhibitItems = items.filter((item) => item.type === "exhibit") as Exhibit[];
+  const exhibitItems = items.filter(
+    (item) => item.type === "exhibit",
+  ) as Exhibit[];
   const stallItems = items.filter((item) => item.type === "stall") as Stall[];
 
   const handleItemHover = (itemId: string | null) => {
@@ -71,7 +73,9 @@ const LocationItem = ({
                     </div>
                     {expandedItem === item.id && (
                       <div>
-                        {item.imageUrl && <img src={item.imageUrl} alt={item.title} />}
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.title} />
+                        )}
                         <p>{item.description}</p>
                       </div>
                     )}
@@ -99,7 +103,9 @@ const LocationItem = ({
                     </div>
                     {expandedItem === item.id && (
                       <div>
-                        {item.imageUrl && <img src={item.imageUrl} alt={item.title} />}
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.title} />
+                        )}
                         <p>{item.description}</p>
                       </div>
                     )}
@@ -127,7 +133,9 @@ const LocationItem = ({
                     </div>
                     {expandedItem === item.id && (
                       <div>
-                        {item.imageUrl && <img src={item.imageUrl} alt={item.title} />}
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.title} />
+                        )}
                         <p>{item.description}</p>
                       </div>
                     )}

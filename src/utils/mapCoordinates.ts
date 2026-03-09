@@ -49,7 +49,10 @@ export const clamp = (value: number, min: number, max: number): number =>
 /**
  * Calculate distance between two points
  */
-export function calculateDistance(point1: Coordinate, point2: Coordinate): number {
+export function calculateDistance(
+  point1: Coordinate,
+  point2: Coordinate,
+): number {
   const dx = point1.x - point2.x;
   const dy = point1.y - point2.y;
   return Math.hypot(dx, dy);
@@ -65,7 +68,11 @@ export function lerp(start: number, end: number, t: number): number {
 /**
  * Linear interpolation between two points
  */
-export function lerpPoint(start: Coordinate, end: Coordinate, t: number): Coordinate {
+export function lerpPoint(
+  start: Coordinate,
+  end: Coordinate,
+  t: number,
+): Coordinate {
   return {
     x: lerp(start.x, end.x, t),
     y: lerp(start.y, end.y, t),
@@ -85,8 +92,18 @@ export function createViewBox(
   zoom: number,
   mapBounds: MapBounds,
 ): ViewBox {
-  const width = mapBounds.width / zoom;
-  const height = mapBounds.height / zoom;
+  const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const safeWidth =
+    Number.isFinite(mapBounds.width) && mapBounds.width > 0
+      ? mapBounds.width
+      : 1;
+  const safeHeight =
+    Number.isFinite(mapBounds.height) && mapBounds.height > 0
+      ? mapBounds.height
+      : 1;
+
+  const width = safeWidth / safeZoom;
+  const height = safeHeight / safeZoom;
 
   return {
     height,
@@ -122,7 +139,13 @@ export function parseViewBox(viewBoxStr: string): ViewBox | null {
 /**
  * Get zoom level from ViewBox
  */
-export function getZoomFromViewBox(viewBox: ViewBox, mapBounds: MapBounds): number {
+export function getZoomFromViewBox(
+  viewBox: ViewBox,
+  mapBounds: MapBounds,
+): number {
+  if (!Number.isFinite(viewBox.width) || viewBox.width <= 0) {
+    return 1;
+  }
   return mapBounds.width / viewBox.width;
 }
 
@@ -169,7 +192,10 @@ export function calculatePanConstraints(
 /**
  * Apply pan constraints to ViewBox
  */
-export function constrainViewBox(viewBox: ViewBox, constraints: PanConstraints): ViewBox {
+export function constrainViewBox(
+  viewBox: ViewBox,
+  constraints: PanConstraints,
+): ViewBox {
   return {
     ...viewBox,
     x: clamp(viewBox.x, constraints.left, constraints.right),
@@ -185,7 +211,26 @@ export function constrainViewBox(viewBox: ViewBox, constraints: PanConstraints):
  * Calculate the actual SVG content rendering area
  * Accounts for preserveAspectRatio="xMidYMid meet" behavior
  */
-export function getSVGContentRect(svgRect: DOMRect, originalViewBox: ViewBox): ContentRect {
+export function getSVGContentRect(
+  svgRect: DOMRect,
+  originalViewBox: ViewBox,
+): ContentRect {
+  if (
+    svgRect.width <= 0 ||
+    svgRect.height <= 0 ||
+    originalViewBox.width <= 0 ||
+    originalViewBox.height <= 0
+  ) {
+    return {
+      height: 0,
+      offsetX: 0,
+      offsetY: 0,
+      width: 0,
+      x: svgRect.left,
+      y: svgRect.top,
+    };
+  }
+
   const originalRatio = originalViewBox.width / originalViewBox.height;
   const svgRatio = svgRect.width / svgRect.height;
 
@@ -233,6 +278,10 @@ export function screenToSVG(
   viewBox: ViewBox,
   contentRect: ContentRect,
 ): Coordinate {
+  if (contentRect.width <= 0 || contentRect.height <= 0) {
+    return { x: viewBox.x, y: viewBox.y };
+  }
+
   // Convert to relative coordinates within SVG element
   const relativeX = screenX - svgRect.left;
   const relativeY = screenY - svgRect.top;
@@ -258,27 +307,42 @@ export function svgToScreen(
   viewBox: ViewBox,
   contentRect: ContentRect,
 ): Coordinate {
+  if (viewBox.width <= 0 || viewBox.height <= 0) {
+    return {
+      x: svgRect.left + contentRect.offsetX,
+      y: svgRect.top + contentRect.offsetY,
+    };
+  }
+
   // Transform from SVG coordinates to relative position in viewBox
   const relativeX = (svgX - viewBox.x) / viewBox.width;
   const relativeY = (svgY - viewBox.y) / viewBox.height;
 
   // Convert to screen coordinates
-  const screenX = svgRect.left + contentRect.offsetX + relativeX * contentRect.width;
-  const screenY = svgRect.top + contentRect.offsetY + relativeY * contentRect.height;
+  const screenX =
+    svgRect.left + contentRect.offsetX + relativeX * contentRect.width;
+  const screenY =
+    svgRect.top + contentRect.offsetY + relativeY * contentRect.height;
 
   return { x: screenX, y: screenY };
 }
 
 /**
- * Validate and clamp coordinates to map bounds
+ * Validate and clamp coordinates to map bounds.
+ *
+ * @param marginFraction Fraction of map width/height allowed outside bounds
+ *   (e.g. 0.02 = 2%).
  */
 export function validateCoordinate(
   coord: Coordinate,
   mapBounds: MapBounds,
-  margin = 2,
+  marginFraction = 0.02,
 ): CoordinateValidation {
-  const marginX = mapBounds.width * margin;
-  const marginY = mapBounds.height * margin;
+  const isValid = Number.isFinite(coord.x) && Number.isFinite(coord.y);
+  const safeCoord = isValid ? coord : { x: 0, y: 0 };
+
+  const marginX = mapBounds.width * marginFraction;
+  const marginY = mapBounds.height * marginFraction;
 
   const minX = -marginX;
   const maxX = mapBounds.width + marginX;
@@ -286,20 +350,19 @@ export function validateCoordinate(
   const maxY = mapBounds.height + marginY;
 
   const isInBounds =
-    coord.x >= 0 && coord.x <= mapBounds.width && coord.y >= 0 && coord.y <= mapBounds.height;
+    safeCoord.x >= 0 &&
+    safeCoord.x <= mapBounds.width &&
+    safeCoord.y >= 0 &&
+    safeCoord.y <= mapBounds.height;
 
   const clamped = {
-    x: clamp(coord.x, minX, maxX),
-    y: clamp(coord.y, minY, maxY),
+    x: clamp(safeCoord.x, minX, maxX),
+    y: clamp(safeCoord.y, minY, maxY),
   };
 
   return {
     clamped,
-    isValid:
-      !Number.isNaN(coord.x) &&
-      !Number.isNaN(coord.y) &&
-      Number.isFinite(coord.x) &&
-      Number.isFinite(coord.y),
+    isValid,
     outOfBounds: !isInBounds,
   };
 }
@@ -332,9 +395,10 @@ export function viewportToWorld(
   zoom: number,
   viewportBounds: ViewportBounds,
 ): Point {
+  const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
   return {
-    x: (viewportPoint.x - viewportBounds.width / 2) / zoom + viewCenter.x,
-    y: (viewportPoint.y - viewportBounds.height / 2) / zoom + viewCenter.y,
+    x: (viewportPoint.x - viewportBounds.width / 2) / safeZoom + viewCenter.x,
+    y: (viewportPoint.y - viewportBounds.height / 2) / safeZoom + viewCenter.y,
   };
 }
 
@@ -347,10 +411,13 @@ export function calculateZoomCenter(
   newZoom: number,
   viewportBounds: ViewportBounds,
 ): Point {
+  const safeZoom = Number.isFinite(newZoom) && newZoom > 0 ? newZoom : 1;
   const newViewCenterX =
-    fixedWorldPoint.x - (fixedViewportPoint.x - viewportBounds.width / 2) / newZoom;
+    fixedWorldPoint.x -
+    (fixedViewportPoint.x - viewportBounds.width / 2) / safeZoom;
   const newViewCenterY =
-    fixedWorldPoint.y - (fixedViewportPoint.y - viewportBounds.height / 2) / newZoom;
+    fixedWorldPoint.y -
+    (fixedViewportPoint.y - viewportBounds.height / 2) / safeZoom;
 
   return {
     x: newViewCenterX,
@@ -373,8 +440,9 @@ export function getVisibleWorldBounds(
   width: number;
   height: number;
 } {
-  const visibleWidth = viewportBounds.width / zoom;
-  const visibleHeight = viewportBounds.height / zoom;
+  const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  const visibleWidth = viewportBounds.width / safeZoom;
+  const visibleHeight = viewportBounds.height / safeZoom;
 
   const left = viewCenter.x - visibleWidth / 2;
   const top = viewCenter.y - visibleHeight / 2;
@@ -419,7 +487,11 @@ export function constrainToMapBounds(
 /**
  * Constrain zoom level to stay within specified bounds
  */
-export function constrainZoom(zoom: number, minZoom: number, maxZoom: number): number {
+export function constrainZoom(
+  zoom: number,
+  minZoom: number,
+  maxZoom: number,
+): number {
   return Math.max(minZoom, Math.min(maxZoom, zoom));
 }
 
@@ -441,7 +513,8 @@ export function calculateTransformParams(
   const baseScale = Math.min(baseScaleX, baseScaleY);
 
   const baseCenterX = (viewportBounds.width - mapBounds.width * baseScale) / 2;
-  const baseCenterY = (viewportBounds.height - mapBounds.height * baseScale) / 2;
+  const baseCenterY =
+    (viewportBounds.height - mapBounds.height * baseScale) / 2;
 
   const targetScreenX = viewportBounds.width / 2;
   const targetScreenY = viewportBounds.height / 2;
@@ -468,10 +541,11 @@ export function calculateSmoothZoom(
   fixedPoint?: Point,
   steps = 60,
 ): MapViewState[] {
+  const safeSteps = Math.max(1, Math.floor(steps));
   const states: MapViewState[] = [];
 
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
+  for (let i = 0; i <= safeSteps; i++) {
+    const t = i / safeSteps;
     const zoom = lerp(currentViewState.zoom, targetZoom, t);
 
     let viewCenter = currentViewState.viewCenter;
