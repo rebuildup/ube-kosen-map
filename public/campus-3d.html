@@ -98,7 +98,7 @@
 <div class="topbar">
   <div class="titlecard">
     <h1>宇部高専キャンパス — 立体模型</h1>
-    <p>正本 <b>campus-map.svg の積層そのもの</b>から組み立てた模型です。地形は<b>ベースレイヤー _00〜_08 の積層</b>がそのまま段差（同じレイヤー＝同じ高さ）で、平滑化はしていません。建物は各階の<b>「塗り」＝床面</b>、<b>「線画」＝壁・間仕切り</b>として読み、壁は精密化のため細くしました。階段は、階高（約3.8m）を1直線で登り切れない階段室では<b>踊り場で折り返すU字型</b>に構成しています。寮地区で図面に無かった <b>E棟・B棟・C棟・浴場棟</b>などは、学生便覧の建物配置図・寮生手帳の棟別平面図・学校HPの建物データから<b>同じ流儀で書き起こして補完</b>しました（各棟のパネルに出典を明記）。座標は学校位置（北緯33.955361・東経131.274861）を原点に、配置図の方位と地理院地図・建面積で較正し、<b>緯度・経度・標高（m）</b>を表示します。標高は SRTM 基準の概算です。</p>
+    <p>正本 <b>campus-map.svg の積層そのもの</b>から組み立てた模型です。地形は<b>ベースレイヤー _00〜_08 の積層</b>がそのまま段差（同じレイヤー＝同じ高さ、<b>1段＝1m</b>）。建物は各階の<b>「塗り」＝床面</b>、<b>「線画」＝壁・間仕切り</b>として読み、全階の外周には<b>閉じた外壁</b>を立てています。<b>高さは水平と同じ物差し（メートル）で統一</b>し、階高は校舎 約3.6m・寮 約3.0m の実寸。各部屋は壁線の区画ごとの<b>個別オブジェクト</b>で、棟を選ぶと天井が透けて<b>部屋単位で選択</b>できます。道路は地表面に沿わせ、コンクリ壇は <b>0.4m</b>、正門・寮側出入口・グラウンドへの抜け道は<b>斜面</b>です。座標は緯度・経度・標高（m、SRTM基準の概算）で表示します。</p>
   </div>
   <div class="spacer"></div>
   <div class="compass" aria-label="方位：北は針の赤い方向">
@@ -1207,7 +1207,7 @@ var GEO_AX=235.27, GEO_AY=355.26;                 /* 原点に対応する図面
 var GEO_E=[GEO_EC, GEO_ES];                        /* 図面座標系で見た「東」方向 */
 var M_PER_UNIT=GEO_S;
 var M_PER_DEG_LAT=110922, M_PER_DEG_LON=92430;
-var FLOOR_M=3.8;                                   /* 階高の実寸（m/階） */
+var FLOOR_M=3.6;                                   /* 階高の実寸（校舎・既定値、m/階）。寮は棟ごとに 3.0m */
 var LAYER_M=1.0, ELEV_BASE=27.4;                   /* 地形1段=1m、レイヤー0の標高。敷地全体の起伏 約8m（SRTM基準の概算） */
 function elevOfLayer(l){ return ELEV_BASE + l*LAYER_M; }
 function latLonOfDraw(dx, dy){
@@ -1218,9 +1218,16 @@ function latLonOfDraw(dx, dy){
 function r1(v){ return Math.round(v*10)/10; }
 /* 建物の長軸フレーム（u=東寄りに向けた長軸、v=uの左手=南寄り）。間仕切り生成用 */
 function frameOf(poly){
-  var best=null, bl=-1;
-  for(var i=0;i<poly.length;i++){ var a=poly[i], b=poly[(i+1)%poly.length]; var L=(b[0]-a[0])*(b[0]-a[0])+(b[1]-a[1])*(b[1]-a[1]); if(L>bl){ bl=L; best=[a,b]; } }
-  var ux=best[1][0]-best[0][0], uy=best[1][1]-best[0][1]; var ul=Math.hypot(ux,uy); ux/=ul; uy/=ul;
+  /* 長軸は「最長の1辺」ではなく、外接矩形が最小になる方向で決める（長辺が複数の線分に分かれた外形でも転置しない） */
+  var best=null;
+  for(var i=0;i<poly.length;i++){ var a=poly[i], b=poly[(i+1)%poly.length];
+    var ex=b[0]-a[0], ey=b[1]-a[1], el=Math.hypot(ex,ey); if(el<0.5) continue; ex/=el; ey/=el;
+    var u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;
+    poly.forEach(function(p){ var du=p[0]*ex+p[1]*ey, dv=p[0]*(-ey)+p[1]*ex; if(du<u0)u0=du; if(du>u1)u1=du; if(dv<v0)v0=dv; if(dv>v1)v1=dv; });
+    var area=(u1-u0)*(v1-v0), ur=u1-u0;
+    if(!best || area<best.area*0.98 || (area<best.area*1.02 && ur>best.ur)) best={ux:ex, uy:ey, area:area, ur:ur};
+  }
+  var ux=best.ux, uy=best.uy;
   if(ux*GEO_E[0]+uy*GEO_E[1]<0){ ux=-ux; uy=-uy; }
   var vx=-uy, vy=ux;
   var cx=0, cy=0; poly.forEach(function(p){ cx+=p[0]; cy+=p[1]; }); cx/=poly.length; cy/=poly.length;
@@ -1285,7 +1292,7 @@ function genPlan(poly, spec){
   });
   return {w:clipWalls(poly, W), st:ST};
 }
-function mkFloor(n, poly, spec){ var g=genPlan(poly, spec); return {n:n, f:[poly], w:g.w, st:g.st}; }
+function mkFloor(n, poly, spec){ var g=genPlan(poly, spec); return {n:n, f:[poly], w:g.w, st:g.st, spec:spec}; }
 /* --- 新規に書き起こした外形（建物配置図トレース） --- */
 var E_POLY=[[159.5,307.3],[134.6,282.8],[144.0,273.1],[205.2,332.1],[195.5,333.9],[196.6,342.9]];
 var B_POLY=[[105.1,323.5],[95.4,313.4],[101.2,308.0],[121.3,327.4],[119.2,330.7],[121.3,333.5],[118.1,337.1],[115.2,334.6],[111.6,338.2],[108.0,331.7],[104.0,328.1],[106.9,324.9]];
@@ -1332,6 +1339,9 @@ DATA.bases.eroom=4; DATA.bases.bbld=4; DATA.bases.cbld=4; DATA.bases.yokujo=4;
     {n:2, f:[sm], w:[], st:[]}
   ]};
 })();
+/* 基底の補正（現地知識による訂正）： 制御棟（techno）と実習工場（jisshu）は足元レイヤーの読みでは _05 になり
+   周囲の校舎地区（_07）から不自然に沈んで見えたため、周囲と自然につながる _07 に引き上げる */
+DATA.bases.techno=7; DATA.bases.jisshu=7;
 /* 学校HP「各種データ」の建物データ（構造・建面積㎡・延面積㎡）— 階数と面積の照合用 */
 var HP_INFO={
  keiei:{s:"RC造 4階",a:427,n:1639}, techno:{s:"RC造 4階（制御棟）＋ RC/SS造（テクノセンター）",a:535,n:1814},
@@ -1344,8 +1354,14 @@ var HP_INFO={
  kaikatu2:{s:"RC造 1階",a:168,n:168}, eroom:{s:"RC造 4階",a:783,n:2839}, bbld:{s:"RC造 4階",a:217,n:832},
  cbld:{s:"RC造 3階",a:470,n:1381}, yokujo:{s:"RC造・SS造 2階建（浴場は1階部分）",a:180,n:180}
 };
-var TSTEP=0.16;
-var S=0.032, CXS=235.27, CYS=355.26, FLOOR_H=0.55;
+var S=0.032, CXS=235.27, CYS=355.26;
+/* 縮尺の統一： 水平・垂直とも同じ物差し（メートル）で作る。水平は較正済みの M_PER_UNIT（0.84m/図面単位）を使い、
+   モデル座標への換算 S から「1モデル単位 = 26.25m」を導き、高さはすべてメートル→この換算で決める。
+   以前の版は階高・段差だけ別の換算になっており、実寸の約4倍に縦へ伸びていた。 */
+var M_PER_MODEL=M_PER_UNIT/S;
+function MU(m){ return m/M_PER_MODEL; }
+var TSTEP=MU(LAYER_M);        /* 地形1段 = 1.0m をそのまま換算（敷地の総起伏は約8m） */
+var FLOOR_H=MU(FLOOR_M);      /* 既定の階高（校舎 3.6m）。寮は棟ごとに 3.0m（b.fh） */
 function W(x,y){ return [(x-CXS)*S,(y-CYS)*S]; }
 
 
@@ -1379,7 +1395,7 @@ var REG=[
  {key:"jisshu2",name:"実習工場2（旧データの表記）",kind:"nodata",cat:"実習",rooms:"—",mergedInto:"jisshu",note:"旧データ（buildings.ts）にだけあった表記です。学生便覧の建物配置図・学内平面図と学校HPの建物一覧を確認しましたが、実習工場は1棟のみで、この名称の建物は実在しません。実習工場に統合しました。"}
 ];
 /* 基底の高さ = 足元を覆う最上位ベースレイヤー × 1段 (TSTEP)。地形の積層から直接決まる */
-REG.forEach(function(b){ b.base=(DATA.bases[b.key]||0)*TSTEP; });
+REG.forEach(function(b){ b.base=(DATA.bases[b.key]||0)*TSTEP; b.floorM=(b.cat.indexOf("寮")===0)?3.0:FLOOR_M; b.fh=MU(b.floorM); });
 var HUB_INFO = {
  room:{label:"居室 5111",title:"E棟 1階 — 居室 5111号室",desc:"白鳥寮 E棟1階、5111号室。あなたの生活・作業の本拠です。E棟は学生便覧の建物配置図と寮生手帳の平面図（E棟東側 1F）から補完し、5111 も部屋として成立させました。ピンは平面図の並び（1F東側・南列 5105〜5112 の7番目）からの書き起こし位置です。"},
  b22:{label:"HR教室 B22",title:"経営情報学科棟 2階 — B22教室",desc:"4S の HR 教室。同じ2階で B21 が手前、B22 が奥という並びです（部屋の同定は本人の説明に基づく。図面に部屋名ラベルはありません）。"},
@@ -1398,7 +1414,7 @@ function pinWorld(pd){
   var bb=pd.bld?byKey(pd.bld):null;
   var base=bb?bb.base:(pd.base||0);
   var w=W(pd.dx,pd.dy);
-  return {x:+w[0].toFixed(3), y:+(base+(pd.floor-1)*FLOOR_H).toFixed(3), z:+w[1].toFixed(3)};
+  return {x:+w[0].toFixed(3), y:+(base+(pd.floor-1)*(bb?bb.fh:FLOOR_H)).toFixed(3), z:+w[1].toFixed(3)};
 }
 function pinXYZText(key){
   var pd=PIN_DEFS[key]; if(!pd) return "";
@@ -1409,7 +1425,8 @@ function pinGeoText(key){
   var pd=PIN_DEFS[key]; if(!pd) return "";
   var ll=latLonOfDraw(pd.dx, pd.dy);
   var bl=pd.bld?(DATA.bases[pd.bld]||0):Math.round((pd.base||0)/TSTEP);
-  var ev=elevOfLayer(bl)+(pd.floor-1)*FLOOR_M;
+  var bb2=pd.bld?byKey(pd.bld):null;
+  var ev=elevOfLayer(bl)+(pd.floor-1)*((bb2&&bb2.floorM)||FLOOR_M);
   return "北緯 "+ll.lat.toFixed(5)+" / 東経 "+ll.lon.toFixed(5)+" / 標高約 "+ev.toFixed(1)+"m（"+pd.floor+"F床・SRTM基準の概算）";
 }
 function byKey(k){ for(var i=0;i<REG.length;i++) if(REG[i].key===k) return REG[i]; return null; }
@@ -1422,16 +1439,17 @@ REG.forEach(function(b){
   if(b.kind==="nodata"){ b.c=null; return; }
   var ol=outlineOf(b); b.c=centroidOf(ol);
   var w=W(b.c[0],b.c[1]); b.cw={x:w[0],z:w[1]};
-  b.totalH=b.floors*FLOOR_H*(b.mul||1);
+  b.totalH=b.floors*b.fh*(b.mul||1);
 });
 function distUnits(a,b){ var dx=a.c[0]-b.c[0], dy=a.c[1]-b.c[1]; return Math.round(Math.sqrt(dx*dx+dy*dy)); }
 
 /* ============ PANEL / LIST ============ */
 var panel=document.getElementById("panel");
-var selected=null, focusFn=null;
+var selected=null, focusFn=null, flyRoomFn=null;
+var selectedRoom=null, selectedRoomMesh=null, ROOM_INDEX={};
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 function showOverview(){
-  selected=null;
+  selected=null; selectedRoom=null; selectedRoomMesh=null;
   var ke=byKey("keiei"), te=byKey("techno"), se=byKey("senkouka");
   var nFloor=REG.filter(function(b){return b.kind==="floor"&&!b.comp;}).length;
   var nComp=REG.filter(function(b){return b.comp||b.compFloors;}).length;
@@ -1439,7 +1457,7 @@ function showOverview(){
   panel.innerHTML =
    "<h2>キャンパス全体</h2>"+
    "<div class='badges'><span class='badge'>フロア図あり "+(nFloor+nComp)+"棟</span><span class='badge est'>輪郭のみ "+nOut+"棟</span><span class='badge'>出典から補完 "+nComp+"棟</span><span class='badge gold'>★ 拠点 4件</span></div>"+
-   "<p>建物をタップ／クリックすると、名前・階数・構造・緯度経度・標高が出ます。金色のピンがあなたの拠点です。寮地区の E棟・B棟・C棟・浴場棟など、元の図面になかった建物は、学生便覧・寮生手帳・学校HPから書き起こして補完しました（各棟のパネルに出典を明記）。</p>"+
+   "<p>建物をタップ／クリックすると、名前・階数・構造・緯度経度・標高が出ます。棟を選ぶと天井・屋根が透けて、<b>部屋を1室ずつ選べます</b>（部屋名・広さ・標高を表示）。金色のピンがあなたの拠点です。寮地区の E棟・B棟・C棟・浴場棟など、元の図面になかった建物は、学生便覧・寮生手帳・学校HPから書き起こして補完しました（各棟のパネルに出典を明記）。</p>"+
    "<div class='hubbtns'>"+
    "<button class='hubbtn' data-hub='room'><span class='dot'></span><span>居室 5111（E棟 1階）<small>生活・作業の本拠 — E棟は出典から補完</small></span></button>"+
    "<button class='hubbtn' data-hub='b22'><span class='dot'></span><span>HR教室 B22（経営情報学科棟 2階・奥）<small>B21 が手前、B22 が奥</small></span></button>"+
@@ -1453,7 +1471,7 @@ function showOverview(){
    "・B22: "+pinGeoText("b22")+"<br>・久保田研究室: "+pinGeoText("lab")+"<br>・制御棟: "+pinGeoText("dept")+"<br>・居室5111: "+pinGeoText("room")+"<br>"+
    "<span class='muted'>緯度経度は、学生便覧の建物配置図の方位（磁針の傾き約15.5°）と国土地理院の航空写真・学校HPの建面積から較正した変換による概算です。登録済みの登下校の目安は約10分です。</span></div>"+
    "<div class='legend'><span><i style='background:#c08552'></i>教室・学科</span><span><i style='background:#d9a441'></i>寮</span><span><i style='background:#9b3d2e'></i>体育</span><span><i style='background:#4f7d6b'></i>厚生</span><span><i style='background:#707a84'></i>実習</span><span><i style='background:#b4532a'></i>階段</span><span><i style='background:#a8a29a'></i>一段上がったコンクリ壇</span><span><i style='background:#b9c0c4'></i>駐輪場の屋根</span></div>"+
-   "<p class='muted'>階段は、フロア図の梯子記号の位置（階段室）の中で構成しています。階高は実寸で約3.8m（蹴上約19cm×20段）あり、1直線では踏面約26cm×19段＋踊り場が要るため、直通にできるのは長い階段室だけです。<span id='stairStats'>このモデルでは階段室ごとに判定しています。</span>それ以外は踊り場で折り返すU字型（往路10段＋踊り場＋復路10段）で、上階の同じ階段室に接続します。地形は元図面のベースレイヤー _00〜_08 の積層そのもので、1レイヤー＝1段＝標高1m（SRTM基準の概算、敷地の起伏は約27〜35m）。建物の下・周囲の線画は、駐車場のラインや道路は地表面の標示として平らに描き、一段上がったコンクリート部分は低い壇として立体化し、C棟北側・F棟南側・国際寮西側の駐輪場は柱＋低い屋根面で表しました。屋外の段もベースレイヤー内の梯子記号から置いています。</p>";
+   "<p class='muted'>階段は、フロア図の梯子記号の位置（階段室）の中で構成しています。階高は実寸（校舎 約3.6m／寮 約3.0m、蹴上約19cm）で、1直線では踏面約26cm×段数＋踊り場が要るため、直通にできるのは長い階段室だけです。<span id='stairStats'>このモデルでは階段室ごとに判定しています。</span>それ以外は踊り場で折り返すU字型で、上階の同じ階段室に接続します。地形は元図面のベースレイヤー _00〜_08 の積層そのもので、1レイヤー＝1段＝標高1m（SRTM基準の概算、敷地の起伏は約27〜35m）——高さは水平と同じ縮尺で換算しています。建物の下・周囲の線画は、駐車場のラインや道路は厚みなしで地表面に沿わせ、一段上がったコンクリート部分は地表から0.4mの低い壇として立体化し、C棟北側・F棟南側・国際寮西側の駐輪場は柱＋低い屋根面（約2.3m）で表しました。正門の参道、寮側出入口（階段＋スロープ）、D・E棟の高さから国際寮と課外活動棟の間を抜けてグラウンドへ下る道は、段ではなく斜面でつないでいます。制御棟と実習工場の基底は、足元レイヤーの読み（_05）ではなく周囲の校舎地区（_07）に合わせて補正しています。</p>";
   bindHubBtns();
 }
 function bindHubBtns(){
@@ -1472,7 +1490,8 @@ function floorRows(b){
     var num=f.n;
     var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     f.f.forEach(function(poly){ var bb=bboxOf(poly); if(bb[0]<x0)x0=bb[0]; if(bb[1]<y0)y0=bb[1]; if(bb[2]>x1)x1=bb[2]; if(bb[3]>y1)y1=bb[3]; });
-    html+="<div class='fr'><b>"+esc(labels[num-1]||(num+"F"))+"</b><span>床 "+f.f.length+"面 "+Math.round(x1-x0)+"×"+Math.round(y1-y0)+" / 壁 "+f.w.length+"本 / 階段 "+f.st.length+"箇所</span></div>";
+    var rc=ROOM_INDEX[b.key+":"+num];
+    html+="<div class='fr'><b>"+esc(labels[num-1]||(num+"F"))+"</b><span>床 "+f.f.length+"面 "+Math.round(x1-x0)+"×"+Math.round(y1-y0)+" / 壁 "+f.w.length+"本 / 階段 "+f.st.length+"箇所"+(rc?" / 部屋 "+rc+"室":"")+"</span></div>";
   });
   html+="</div>";
   return html;
@@ -1501,14 +1520,14 @@ function showBuilding(b){
     body="<dl class='kv'><dt>階数</dt><dd>"+hNote+"</dd><dt>主な部屋</dt><dd>"+esc(b.rooms||"—")+"</dd>"+
      hpRows(b)+
      (b.note?"<dt>備考</dt><dd>"+esc(b.note)+"</dd>":"")+
-     baseRow(b)+posRow(b)+"<dt>内部</dt><dd>元図面に外形しかないため、外壁のみで表示</dd></dl>"+
-     "<p class='muted'>この棟はフロア図（間仕切り・階段の線画）が元図面に含まれていません。外形だけを公式の階数分だけ積んでいます。</p>";
+     baseRow(b)+posRow(b)+"<dt>内部</dt><dd>元図面に外形しかないため間仕切りはありませんが、内部は1室として選択できます</dd></dl>"+
+     "<p class='muted'>この棟はフロア図（間仕切り・階段の線画）が元図面に含まれていません。外壁は全階に立ててあり、棟を選ぶと屋根が透けて内部の1室を選べます。</p>";
   } else {
     body="<dl class='kv'><dt>階数</dt><dd>"+hNote+"</dd><dt>主な部屋</dt><dd>"+esc(b.rooms||"—")+"</dd>"+
      hpRows(b)+
      (b.note?"<dt>備考</dt><dd>"+esc(b.note)+"</dd>":"")+baseRow(b)+posRow(b)+"</dl>"+
      "<p style='margin-bottom:2px'><b>階ごとの図面</b>（外形は図面座標の単位）</p>"+floorRows(b)+
-     "<p class='muted'>各階の床面は、その階グループの「塗り」の形そのもの。壁・間仕切りは線画から起こしていて、塗りの外周を壁として二重には作っていません。形状のスナップ・整列もしていません。階段は階段室の範囲の中で、階高（約3.8m）を登り切れる場合のみ直通、それ以外は踊り場で折り返すU字型に構成しています。</p>";
+     "<p class='muted'>各階の床面は、その階グループの「塗り」の形そのもの。間仕切りは線画から起こし、それとは別に、全階の外周には閉じた外壁を立てています。各部屋は壁線で仕切られた区画ごとに個別のオブジェクトになっていて、棟を選ぶと天井・屋根が透けて部屋をタップで選べます。階高は実寸（この棟は "+b.floorM.toFixed(1)+"m）で、水平と同一の縮尺です。階段は階段室の範囲の中で、階高を登り切れる場合のみ直通、それ以外は踊り場で折り返すU字型に構成しています。</p>";
   }
   panel.innerHTML = "<h2>"+esc(b.name)+"</h2>"+badges+hubHtml+body+
    "<button class='hubbtn' id='backBtn'><span>← 全体表示に戻る</span></button>";
@@ -1516,7 +1535,30 @@ function showBuilding(b){
   var bb2=document.getElementById("backBtn"); if(bb2) bb2.addEventListener("click",function(){ showOverview(); if(focusFn) focusFn(null); refreshSel(); });
   document.querySelectorAll(".bitem").forEach(function(el){ el.classList.toggle("sel", el.getAttribute("data-name")===b.name); });
 }
-function selectBuilding(b,fly){ showBuilding(b); refreshSel(); if(fly&&focusFn) focusFn(b); }
+function selectBuilding(b,fly){ selectedRoom=null; selectedRoomMesh=null; showBuilding(b); refreshSel(); if(fly&&focusFn) focusFn(b); }
+function showRoom(rm){
+  selectedRoom=rm; selected=rm.bld;
+  var b=rm.bld, bl=DATA.bases[b.key]||0;
+  var ll=latLonOfDraw(rm.cx, rm.cy);
+  var ev=elevOfLayer(bl)+(rm.floor-1)*b.floorM;
+  var wpt=W(rm.cx, rm.cy);
+  panel.innerHTML="<h2>"+esc(rm.label)+"</h2>"+
+   "<div class='badges'><span class='badge gold'>部屋単位で選択中</span><span class='badge'>"+esc(b.name)+"</span><span class='badge'>"+rm.floor+"階</span><span class='badge'>"+esc(b.cat)+"</span></div>"+
+   "<dl class='kv'><dt>建物</dt><dd>"+esc(b.name)+" "+rm.floor+"階</dd>"+
+   "<dt>部屋</dt><dd>"+esc(rm.label)+"</dd>"+
+   "<dt>広さ</dt><dd>約 "+rm.wM.toFixed(1)+"m × "+rm.dM.toFixed(1)+"m ・ 約 "+Math.round(rm.areaM2)+"㎡（平面図の壁線から算出）</dd>"+
+   "<dt>階高</dt><dd>"+b.floorM.toFixed(1)+"m（実寸・水平と同じ縮尺）</dd>"+
+   "<dt>位置</dt><dd>北緯 "+ll.lat.toFixed(5)+" / 東経 "+ll.lon.toFixed(5)+"（部屋中心・概算）</dd>"+
+   "<dt>標高</dt><dd>約 "+ev.toFixed(1)+"m（"+rm.floor+"F床・SRTM基準の概算）</dd>"+
+   "<dt>モデル座標</dt><dd>X "+wpt[0].toFixed(2)+" / Y "+(b.base+(rm.floor-1)*b.fh).toFixed(3)+"（床レベル） / Z "+wpt[1].toFixed(2)+"</dd></dl>"+
+   "<p class='muted'>この部屋は、その階の壁・間仕切り線で仕切られた1区画を、そのまま個別のオブジェクトとして保持しています。寮の居室番号は寮生手帳の平面図の並び（棟番号＋階＋通し番号）に従って付けています。</p>"+
+   "<div class='hubbtns'><button class='hubbtn' id='roomBldBtn'><span>"+esc(b.name)+" 全体を表示</span></button>"+
+   "<button class='hubbtn' id='roomBackBtn'><span>← 全体表示に戻る</span></button></div>";
+  var rb=document.getElementById("roomBldBtn"); if(rb) rb.addEventListener("click",function(){ selectBuilding(b,false); });
+  var bk=document.getElementById("roomBackBtn"); if(bk) bk.addEventListener("click",function(){ selectedRoom=null; selectedRoomMesh=null; showOverview(); if(focusFn) focusFn(null); refreshSel(); });
+  document.querySelectorAll(".bitem").forEach(function(el){ el.classList.toggle("sel", el.getAttribute("data-name")===b.name); });
+}
+function selectRoom(mesh,fly){ selectedRoomMesh=mesh; showRoom(mesh.userData.room); refreshSel(); if(fly&&flyRoomFn) flyRoomFn(mesh.userData.room); }
 
 /* building list */
 var blist=document.getElementById("blist");
@@ -1558,8 +1600,24 @@ function refreshSel(){
     if(!b.slabs) return;
     var sel=(selected===b);
     if(b.slabMat) b.slabMat.emissive.setHex(sel?0x3a2a00:0x000000);
-    if(b.edgeTop) b.edgeTop.visible=sel;
+    if(b.edgeTop) b.edgeTop.visible=sel && !selectedRoom;
+    /* 選択中の棟は天井・屋根を透かして、部屋を直接選べるようにする */
+    [b.roofMat, b.capMat].forEach(function(m){
+      if(!m) return;
+      var want=sel?0.13:1;
+      if(Math.abs(m.opacity-want)>0.01){
+        m.transparent=sel; m.opacity=want; m.depthWrite=!sel; m.needsUpdate=true;
+      }
+    });
   });
+  if(typeof roomMeshes!=="undefined"){
+    roomMeshes.forEach(function(m){
+      m.visible=!!(selected && m.userData.b===selected);
+      m.material=(m===selectedRoomMesh)?selRoomMat:m.userData.b.roomMat;
+    });
+  }
+  if(roomOutline){ scene.remove(roomOutline); roomOutline.geometry.dispose(); roomOutline=null; }
+  if(selectedRoom){ roomOutline=buildRoomOutline(selectedRoom); scene.add(roomOutline); }
 }
 if(typeof THREE==="undefined" || typeof THREE.OrbitControls==="undefined"){
   document.getElementById("fallback").style.display="block";
@@ -1633,15 +1691,15 @@ function addSteps(list, region, y0, totalH, nSteps){
     list.push({x:c[0]+tx*along*S, z:c[1]+ty*along*S, y:y0+hh/2, rot:-phi, sx:flight/nSteps*S, sy:hh, sz:width*S});
   }
 }
-/* ---- 階段の構成： 階高 FLOOR_M(3.8m) = 蹴上0.19m×20段。踏面0.26mで直通に必要な長さは
-   19段×0.26+踊り場 ≈ 5.7m 以上かつ幅が片側通行（≦1.9m）の場合だけ直通を認め、
-   それ以外は階段室の中で踊り場折り返し（往路10段→踊り場→復路10段）にする ---- */
+/* ---- 階段の構成： 階高（校舎3.6m／寮3.0m）を蹴上約0.19mで割った段数が総段数。踏面0.26mで直通に必要な長さ
+   （総段数-1）×0.26+踊り場 を階段室が満たし、かつ幅が片側通行（≦1.9m）の場合だけ直通を認め、
+   それ以外は階段室の中で踊り場折り返し（往路→踊り場→復路）にする ---- */
 var stairStats={sw:0, st:0};
 function buildStair(list, cx, cy, tx, ty, ux, uy, flightU, widthU, y0, totalH){
   var flight=flightU, width=widthU;
   if(flight<0.6||width<0.6) return;
   var c=W(cx,cy), phi=Math.atan2(ty,tx);
-  var RISERS=20, HALF=10;
+  var RISERS=Math.max(10, Math.round(totalH*M_PER_MODEL/0.19)), HALF=Math.floor(RISERS/2);
   var flightM=flight*M_PER_UNIT, widthM=width*M_PER_UNIT;
   var straightOK = flightM >= (RISERS-1)*0.26+0.75 && widthM <= 1.9;
   if(straightOK){
@@ -1707,7 +1765,7 @@ function makeLabel(text, opts){
   ctx.fillText(text, c.width/2, c.height/2+2);
   var tex=new THREE.CanvasTexture(c); tex.anisotropy=4;
   var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false}));
-  var h=0.62; sp.scale.set(h*c.width/c.height, h, 1); sp.renderOrder=20;
+  var h=0.34; sp.scale.set(h*c.width/c.height, h, 1); sp.renderOrder=20;
   return sp;
 }
 
@@ -1725,8 +1783,8 @@ DATA.terr.forEach(function(t){
   var h=Math.max(t.l*TSTEP, 0.02);
   var mat=new THREE.MeshStandardMaterial({color:layerColor(t.l), roughness:1, side:THREE.DoubleSide});
   t.p.forEach(function(pts){
-    /* 最上位レイヤーの小面は「一段上がったコンクリート部分」として、1段分の厚みを持つ低い壇にする */
-    var m=new THREE.Mesh(shapeGeo(pts, t.sheet?TSTEP+0.03:h), t.sheet?podiumMat:mat);
+    /* 最上位レイヤーの小面は「一段上がったコンクリート部分」として、地表面から 0.4m だけ上がる低い壇にする（1段=1m の厚みにはしない） */
+    var m=new THREE.Mesh(shapeGeo(pts, t.sheet?MU(0.4):h), t.sheet?podiumMat:mat);
     if(t.sheet){ m.position.y=(t.l-1)*TSTEP; m.castShadow=true; }
     m.receiveShadow=true; if(!t.sheet) m.castShadow=false; terrGroup.add(m);
     var eg=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry,24), new THREE.LineBasicMaterial({color:dark?0x0d0f10:0x77815f, transparent:true, opacity:0.35}));
@@ -1739,7 +1797,7 @@ DATA.terr.forEach(function(t){
   var pos=[], col=[];
   var cLine=new THREE.Color(dark?0x9aa48c:0x5f6b4c);
   DATA.tlines.forEach(function(t){
-    var h=t.l*TSTEP+0.012;
+    var h=t.l*TSTEP+0.004; /* 道路・ラインは厚みを持たせず、地表面に沿わせる */
     t.s.forEach(function(sg){
       var a=W(sg[0],sg[1]), b2=W(sg[2],sg[3]);
       pos.push(a[0],h,a[1], b2[0],h,b2[1]);
@@ -1769,6 +1827,228 @@ var NORTH_OFF=-Math.atan2(GEO_ES,GEO_EC)*180/Math.PI;
 northGroup.rotation.y=-NORTH_OFF*Math.PI/180;
 scene.add(northGroup);
 
+/* ---- 部屋単位の抽出： 各階の壁・間仕切り線で仕切られた区画を1室ずつ個別オブジェクトにする ----
+   床の塗り（外形）の内側を 1.0 図面単位（約0.84m）の格子に分け、壁線に近いセルを壁として塞ぎ、
+   階段室のセルを除いて連結成分ごとに区画する。統合ジオメトリには潰さず、1室=1メッシュで保持する。 */
+var roomMeshes=[], blockers=[];
+var selRoomMat=new THREE.MeshStandardMaterial({color:0xff9040, emissive:0x8a3c00, roughness:0.65});
+var roomOutline=null;
+var DORM_PREFIX={eroom:5, bbld:2, cbld:3, ryod:4, ryof:6, kokusai:8};
+function segDist(px,py,sg){
+  var ax=sg[0], ay=sg[1], bx=sg[2], by=sg[3];
+  var dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy;
+  var t=L2?((px-ax)*dx+(py-ay)*dy)/L2:0; t=Math.max(0,Math.min(1,t));
+  var ex=ax+dx*t-px, ey=ay+dy*t-py; return Math.sqrt(ex*ex+ey*ey);
+}
+function buildRoomsForFloor(b, f, y0, grp){
+  if(!b.roomMat) return;
+  var spec=f.spec||null, fr=null;
+  try{ fr=frameOf(f.f[0]); }catch(e){ fr=null; }
+  var walls=f.w||[];
+  var srects=(f.st||[]).map(function(r){
+    if(r && r.g) return {cx:r.cx, cy:r.cy, ax:Math.sin(r.ang), ay:-Math.cos(r.ang), bx:Math.cos(r.ang), by:Math.sin(r.ang), h1:r.wid/2, h2:r.len/2};
+    var a=(r[4]||0)*Math.PI/180;
+    return {cx:r[0], cy:r[1], ax:Math.cos(a), ay:Math.sin(a), bx:Math.cos(a+Math.PI/2), by:Math.sin(a+Math.PI/2), h1:r[2]/2, h2:r[3]/2};
+  });
+  function stairIdAt(x,y){
+    for(var i=0;i<srects.length;i++){ var r=srects[i], dx=x-r.cx, dy=y-r.cy;
+      if(Math.abs(dx*r.ax+dy*r.ay)<=r.h1 && Math.abs(dx*r.bx+dy*r.by)<=r.h2) return i; }
+    return -1;
+  }
+  var CS=1.0, comps=[], stairCells={};
+  f.f.forEach(function(poly){
+    var bb=bboxOf(poly);
+    var nx=Math.max(1,Math.ceil((bb[2]-bb[0])/CS)), ny=Math.max(1,Math.ceil((bb[3]-bb[1])/CS));
+    var state=new Int8Array(nx*ny); /* 0=外 1=空き 2=壁 3=階段 */
+    for(var j=0;j<ny;j++) for(var i=0;i<nx;i++){
+      var x=bb[0]+(i+0.5)*CS, y=bb[1]+(j+0.5)*CS, k=j*nx+i;
+      if(!ptInPoly(poly,x,y)){ state[k]=0; continue; }
+      var sid=stairIdAt(x,y);
+      if(sid>=0){ state[k]=3; (stairCells[sid]=stairCells[sid]||[]).push([x,y]); continue; }
+      var blocked=false;
+      for(var wi=0;wi<walls.length;wi++){ var sg=walls[wi];
+        if(x<Math.min(sg[0],sg[2])-0.85||x>Math.max(sg[0],sg[2])+0.85||y<Math.min(sg[1],sg[3])-0.85||y>Math.max(sg[1],sg[3])+0.85) continue;
+        if(segDist(x,y,sg)<0.75){ blocked=true; break; } } /* 0.75 = 斜め壁でもセルの角に穴が開かない遮断半径 */
+      state[k]=blocked?2:1;
+    }
+    var seen=new Uint8Array(nx*ny);
+    for(var j2=0;j2<ny;j2++) for(var i2=0;i2<nx;i2++){
+      var k0=j2*nx+i2;
+      if(state[k0]!==1||seen[k0]) continue;
+      var cells=[], stack=[k0]; seen[k0]=1;
+      while(stack.length){ var c=stack.pop(), ci=c%nx, cj=(c-ci)/nx;
+        cells.push([bb[0]+(ci+0.5)*CS, bb[1]+(cj+0.5)*CS]);
+        [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){
+          var ni=ci+d[0], nj=cj+d[1];
+          if(ni<0||nj<0||ni>=nx||nj>=ny) return;
+          var nk=nj*nx+ni;
+          if(state[nk]===1&&!seen[nk]){ seen[nk]=1; stack.push(nk); }
+        });
+      }
+      if(cells.length>=2) comps.push({cells:cells, stair:false});
+    }
+  });
+  Object.keys(stairCells).forEach(function(sid){ if(stairCells[sid].length>=2) comps.push({cells:stairCells[sid], stair:true}); });
+  if(!comps.length) return;
+  /* --- 区画の集計 --- */
+  comps.forEach(function(cp){
+    var sx=0, sy=0, x0=1e9, y0b=1e9, x1=-1e9, y1=-1e9;
+    cp.cells.forEach(function(c){ sx+=c[0]; sy+=c[1]; if(c[0]<x0)x0=c[0]; if(c[1]<y0b)y0b=c[1]; if(c[0]>x1)x1=c[0]; if(c[1]>y1)y1=c[1]; });
+    cp.cx=sx/cp.cells.length; cp.cy=sy/cp.cells.length; cp.x0=x0; cp.y0=y0b; cp.x1=x1; cp.y1=y1;
+    cp.u=fr?(cp.cx-fr.cx)*fr.ux+(cp.cy-fr.cy)*fr.uy:cp.cx;
+    cp.v=fr?(cp.cx-fr.cx)*fr.vx+(cp.cy-fr.cy)*fr.vy:cp.cy;
+    cp.label=null; cp.isRoom=false;
+  });
+  /* --- ラベル付け --- */
+  var prefix=DORM_PREFIX[b.key];
+  var named=["洗面洗濯室","湯沸室","学習室","倉庫","補食室","WC"];
+  var namedIdx=0;
+  function facilityLabel(){ return named[Math.min(namedIdx++, named.length-1)]; }
+  var candidates=[];
+  comps.forEach(function(cp){
+    if(cp.stair){ cp.label="階段室"; return; }
+    if(spec && fr){
+      var ch=(spec.corrW||3.2)/2;
+      var uExt=(cp.x1-cp.x0), lenU=fr.umax-fr.umin;
+      if(spec.mode==="double" && Math.abs(cp.v)<=ch+1.3 && uExt>lenU*0.45){ cp.label="廊下"; return; }
+      if(spec.mode==="singleN" && cp.v<=fr.vmin+(spec.corrW||3.0)+1.3 && uExt>lenU*0.45){ cp.label="廊下"; return; }
+      if(spec.mode==="court"){
+        var vN=fr.vmin+(spec.depthN||6.0), vS=fr.vmax-(spec.depthS||6.0);
+        if(cp.v>vN-0.5 && cp.v<vS+0.5){
+          var cu0=fr.umin+(spec.courtT0||0.36)*lenU, cu1=fr.umin+(spec.courtT1||0.60)*lenU;
+          cp.label=(cp.u>cu0-1 && cp.u<cu1+1)?"光庭・交流スペース":"交流スペース・廊下"; return;
+        }
+      }
+      if(spec.mode==="bath"){
+        var vf=(cp.v-fr.vmin)/Math.max(0.1,(fr.vmax-fr.vmin));
+        if(vf<0.30) cp.label="洗濯室";
+        else if(vf<0.62) cp.label=["玄関","シャワー室","前室"][Math.min(namedIdx++,2)];
+        else cp.label=(cp.u<0)?"脱衣室":"大浴場";
+        cp.isRoom=true; return;
+      }
+      if(spec.mode==="hall"){
+        var vf2=(cp.v-fr.vmin)/Math.max(0.1,(fr.vmax-fr.vmin));
+        cp.label=vf2>0.44?"食堂ホール":["厨房","倉庫・食堂業者控え室"][Math.min(namedIdx++,1)];
+        cp.isRoom=true; return;
+      }
+    }
+    candidates.push(cp);
+  });
+  if(!spec){
+    /* 校舎など： 最も大きく細長い区画を廊下・共用部とみなす */
+    var sorted=candidates.slice().sort(function(a,b2){ return b2.cells.length-a.cells.length; });
+    if(sorted.length>=3){
+      var top=sorted[0], tw=Math.max(top.x1-top.x0, top.y1-top.y0), td=Math.min(top.x1-top.x0, top.y1-top.y0)||0.1;
+      if(top.cells.length>=sorted[1].cells.length*1.25 && tw/td>2.2){ top.label="廊下・共用部"; candidates=candidates.filter(function(c){ return c!==top; }); }
+    }
+    if(b.key==="shokudo" && f.n===2 && candidates.length){ candidates[0].label="集会所"; candidates[0].isRoom=true; candidates=candidates.slice(1); }
+    if(b.key==="shokudo" && f.n===1){
+      var all1=comps.filter(function(cp){ return !cp.stair; }).sort(function(a,b2){ return b2.cells.length-a.cells.length; });
+      if(all1.length){ all1[0].label="食堂ホール"; all1[0].isRoom=true; }
+      var ki=0;
+      candidates.forEach(function(cp){ if(cp!==all1[0] && !cp.label){ cp.label=["厨房","倉庫・食堂業者控え室","前室"][Math.min(ki++,2)]; cp.isRoom=true; } });
+      candidates=[];
+    }
+    if(b.key==="ryod" && prefix){
+      /* D棟の収録済み2Fにも、手帳の並びで居室番号を付ける */
+      var rseq=1;
+      candidates.sort(function(a,b2){ return (a.v-b2.v)||(a.u-b2.u); }).forEach(function(cp){
+        if(cp.cells.length<4){ cp.label=facilityLabel(); return; }
+        cp.label=prefix+""+f.n+("0"+rseq).slice(-2); cp.isRoom=true; rseq++;
+      });
+      candidates=[];
+    }
+  }
+  if(prefix && spec){
+    var rows={};
+    candidates.forEach(function(cp){
+      if(cp.cells.length<4){ cp.label=facilityLabel(); return; }
+      var row=0;
+      if(spec.mode==="double") row=cp.v<0?0:1;
+      rows[row]=rows[row]||[]; rows[row].push(cp);
+    });
+    if(b.key==="eroom" && f.n===1){
+      /* E棟1F： 南列は手帳どおり 5105〜（西→東）、北列の東側4室が 5101〜5104、残りは共用室 */
+      (rows[1]||[]).sort(function(a,b2){ return a.u-b2.u; }).forEach(function(cp,i){
+        cp.label="51"+("0"+(5+i)).slice(-2); cp.isRoom=true;
+      });
+      var nList=(rows[0]||[]).sort(function(a,b2){ return a.u-b2.u; });
+      nList.forEach(function(cp,i){
+        if(i>=nList.length-4){ cp.label="510"+(i-(nList.length-4)+1); cp.isRoom=true; }
+        else { cp.label=facilityLabel(); cp.isRoom=false; }
+      });
+    } else {
+      var seq=1;
+      Object.keys(rows).sort().forEach(function(rk){
+        rows[rk].sort(function(a,b2){ return a.u-b2.u; }).forEach(function(cp){
+          cp.label=prefix+""+f.n+("0"+seq).slice(-2); cp.isRoom=true; seq++;
+        });
+      });
+    }
+  } else {
+    var rn=1;
+    candidates.sort(function(a,b2){ return (a.cy-b2.cy)||(a.cx-b2.cx); }).forEach(function(cp){
+      if(cp.label) return;
+      if(cp.cells.length<4){ cp.label="小室"; return; }
+      cp.label="部屋 R"+(rn++); cp.isRoom=true;
+    });
+  }
+  /* 拠点の部屋はピンの入る区画に正式名を付ける */
+  if(b.hub && b.hubFloor===f.n){
+    var pk=null; Object.keys(PIN_DEFS).forEach(function(k){ if(PIN_DEFS[k].bld===b.key) pk=k; });
+    if(pk){ var pd=PIN_DEFS[pk];
+      var best=null, bestD=1e9;
+      comps.forEach(function(cp){
+        if(cp.stair) return;
+        cp.cells.forEach(function(c){ var dd=(c[0]-pd.dx)*(c[0]-pd.dx)+(c[1]-pd.dy)*(c[1]-pd.dy); if(dd<bestD){ bestD=dd; best=cp; } });
+      });
+      if(best && bestD<CS*CS){ best.label=HUB_INFO[b.hub].label; best.isRoom=true; }
+    }
+  }
+  /* --- 1室=1メッシュで生成（統合しない） --- */
+  var roomCount=0;
+  comps.forEach(function(cp){
+    if(!cp.label) cp.label="部屋";
+    if(cp.isRoom) roomCount++;
+    var pos=[];
+    cp.cells.forEach(function(c){
+      var a=W(c[0]-CS/2, c[1]-CS/2), bq=W(c[0]+CS/2, c[1]-CS/2), cq=W(c[0]+CS/2, c[1]+CS/2), dq=W(c[0]-CS/2, c[1]+CS/2);
+      pos.push(a[0],0,a[1], bq[0],0,bq[1], cq[0],0,cq[1], a[0],0,a[1], cq[0],0,cq[1], dq[0],0,dq[1]);
+    });
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    g.computeVertexNormals();
+    var mesh=new THREE.Mesh(g, b.roomMat);
+    mesh.position.y=y0+0.045;
+    mesh.visible=false; /* 部屋は選択中の棟だけ表示する（レイキャストは不可視でも当たるため、屋根→棟→部屋の導線は保たれる） */
+    var rm={bld:b, floor:f.n, label:cp.label, cx:cp.cx, cy:cp.cy,
+      wM:(cp.x1-cp.x0+CS)*M_PER_UNIT, dM:(cp.y1-cp.y0+CS)*M_PER_UNIT,
+      areaM2:cp.cells.length*CS*CS*M_PER_UNIT*M_PER_UNIT, y0:y0, cells:cp.cells, cs:CS};
+    mesh.userData.room=rm; mesh.userData.b=b;
+    grp.add(mesh); roomMeshes.push(mesh);
+  });
+  ROOM_INDEX[b.key+":"+f.n]=(ROOM_INDEX[b.key+":"+f.n]||0)+roomCount;
+}
+function buildRoomOutline(rm){
+  var set={};
+  rm.cells.forEach(function(c){ set[c[0].toFixed(2)+","+c[1].toFixed(2)]=true; });
+  var pos=[], h=rm.cs/2;
+  function has(x,y){ return !!set[x.toFixed(2)+","+y.toFixed(2)]; }
+  function corner(x,y){ var w=W(x,y); pos.push(w[0],0,w[1]); }
+  rm.cells.forEach(function(c){
+    var x=c[0], y=c[1];
+    if(!has(x, y-rm.cs)){ corner(x-h,y-h); corner(x+h,y-h); }
+    if(!has(x, y+rm.cs)){ corner(x-h,y+h); corner(x+h,y+h); }
+    if(!has(x-rm.cs, y)){ corner(x-h,y-h); corner(x-h,y+h); }
+    if(!has(x+rm.cs, y)){ corner(x+h,y-h); corner(x+h,y+h); }
+  });
+  var g=new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+  var lines=new THREE.LineSegments(g, new THREE.LineBasicMaterial({color:0xb4532a}));
+  lines.position.y=rm.y0+0.07;
+  return lines;
+}
+
 /* ---- buildings ---- */
 var pickables=[], labels=[], hubPins=[], stepMeshes=[];
 REG.forEach(function(b){
@@ -1779,58 +2059,65 @@ REG.forEach(function(b){
   b.slabMat=mat;
   var extMat=new THREE.MeshStandardMaterial({color:b.color, roughness:0.94});
   var roofMat=new THREE.MeshStandardMaterial({color:new THREE.Color(b.color).multiplyScalar(0.62), roughness:0.97});
+  var capMat=new THREE.MeshStandardMaterial({color:new THREE.Color(b.color).multiplyScalar(0.62), roughness:0.97});
+  var extWallMat=new THREE.MeshStandardMaterial({color:new THREE.Color(b.color).lerp(new THREE.Color(0xffffff),0.38), roughness:0.95});
+  var roomMat=new THREE.MeshStandardMaterial({color:new THREE.Color(b.color).lerp(new THREE.Color(0xffffff),0.60), roughness:1});
+  b.roofMat=roofMat; b.capMat=capMat; b.roomMat=roomMat;
   var topSlab=null;
   function perimSegs(fills){ var ow=[]; fills.forEach(function(poly){ for(var j=0;j<poly.length;j++){ var a=poly[j], b2=poly[(j+1)%poly.length]; ow.push([a[0],a[1],b2[0],b2[1]]); } }); return ow; }
   if(b.kind==="floor"){
-    /* 床スラブ = その階グループの「塗りの形」そのもの（複数面あり）。壁 = 間仕切り線画のみ。
-       塗りの外周からは壁を作らない（線画側と二重になるため）。形状のスナップ・整列はしない。 */
+    /* 床スラブ = その階グループの「塗りの形」そのもの（複数面あり）。間仕切り = 線画。
+       それとは別に、全階の外周に「閉じた外壁」を間仕切りより厚く立て、部屋は壁線の区画ごとに個別生成する。 */
     var stepSpecs=[];
     d.fl.forEach(function(f){
       var num=f.n;
-      var y0=b.base+(num-1)*FLOOR_H;
+      var y0=b.base+(num-1)*b.fh;
       f.f.forEach(function(poly){
-        var slab=new THREE.Mesh(shapeGeo(poly,0.055), mat);
+        var slab=new THREE.Mesh(shapeGeo(poly,0.03), mat);
         slab.position.y=y0; slab.castShadow=true; slab.receiveShadow=true; slab.userData.b=b;
         grp.add(slab); b.slabs.push(slab); pickables.push(slab); topSlab=slab;
-        var ceil=new THREE.Mesh(shapeGeo(poly,0.06), roofMat);
-        ceil.position.y=y0+FLOOR_H-0.06; ceil.castShadow=true; ceil.receiveShadow=true; grp.add(ceil);
+        var ceil=new THREE.Mesh(shapeGeo(poly,0.025), roofMat);
+        ceil.position.y=y0+b.fh-0.025; ceil.castShadow=true; ceil.receiveShadow=true; ceil.userData.b=b; grp.add(ceil); blockers.push(ceil);
       });
-      var wm=wallInstances(f.w, y0, FLOOR_H, 0.02, wallMat); if(wm) grp.add(wm);
-      if(num<b.floors) f.st.forEach(function(r){ addStairAny(stepSpecs, r, y0, FLOOR_H); });
+      var wm=wallInstances(f.w, y0, b.fh, 0.008, wallMat); if(wm) grp.add(wm);
+      var ew=wallInstances(perimSegs(f.f), y0, b.fh, 0.014, extWallMat); if(ew) grp.add(ew);
+      buildRoomsForFloor(b, f, y0, grp);
+      if(num<b.floors) f.st.forEach(function(r){ addStairAny(stepSpecs, r, y0, b.fh); });
     });
     if(b.ghost){
       var src=d.fl[0];
       b.ghost.forEach(function(gn){
-        var y0=b.base+(gn-1)*FLOOR_H;
+        var y0=b.base+(gn-1)*b.fh;
         src.f.forEach(function(poly){
-          var gs=new THREE.Mesh(shapeGeo(poly,0.05), ghostMat); gs.position.y=y0; grp.add(gs);
-          var gc=new THREE.Mesh(shapeGeo(poly,0.05), ghostMat); gc.position.y=y0+FLOOR_H-0.05; grp.add(gc);
+          var gs=new THREE.Mesh(shapeGeo(poly,0.03), ghostMat); gs.position.y=y0; grp.add(gs);
+          var gc=new THREE.Mesh(shapeGeo(poly,0.03), ghostMat); gc.position.y=y0+b.fh-0.03; grp.add(gc);
         });
-        var gw=wallInstances(perimSegs(src.f), y0, FLOOR_H, 0.06, ghostMat); if(gw) grp.add(gw);
+        var gw=wallInstances(perimSegs(src.f), y0, b.fh, 0.01, ghostMat); if(gw) grp.add(gw);
       });
     } else {
       var topF=d.fl[d.fl.length-1];
       topF.f.forEach(function(poly){
-        var rf=new THREE.Mesh(shapeGeo(poly,0.05), mat);
-        rf.position.y=b.base+topF.n*FLOOR_H; rf.castShadow=true; grp.add(rf); topSlab=rf;
+        var rf=new THREE.Mesh(shapeGeo(poly,0.03), capMat);
+        rf.position.y=b.base+topF.n*b.fh; rf.castShadow=true; rf.userData.b=b; grp.add(rf); blockers.push(rf); topSlab=rf;
       });
     }
     var sm=stepsMesh(stepSpecs, stepMat); if(sm){ grp.add(sm); stepMeshes.push(sm); }
   } else {
     /* 輪郭のみの棟: 元図面に塗りしかないため、外壁は塗りの外周から作る */
-    var hh=FLOOR_H*(b.mul||1);
+    var hh=b.fh*(b.mul||1);
     d.f.forEach(function(poly){
       var ow=perimSegs([poly]);
       for(var fi=0; fi<b.floors; fi++){
         var y0=b.base+fi*hh;
-        var slab2=new THREE.Mesh(shapeGeo(poly,0.055), mat);
+        var slab2=new THREE.Mesh(shapeGeo(poly,0.03), mat);
         slab2.position.y=y0; slab2.castShadow=true; slab2.receiveShadow=true; slab2.userData.b=b;
         grp.add(slab2); b.slabs.push(slab2); pickables.push(slab2); topSlab=slab2;
-        var wm2=wallInstances(ow, y0, hh, 0.04, extMat); if(wm2) grp.add(wm2);
-        if(fi<b.floors-1){ var ceil2=new THREE.Mesh(shapeGeo(poly,0.06), roofMat); ceil2.position.y=y0+hh-0.06; ceil2.castShadow=true; grp.add(ceil2); }
+        var wm2=wallInstances(ow, y0, hh, 0.014, extWallMat); if(wm2) grp.add(wm2);
+        buildRoomsForFloor(b, {n:fi+1, f:[poly], w:[], st:[]}, y0, grp);
+        if(fi<b.floors-1){ var ceil2=new THREE.Mesh(shapeGeo(poly,0.025), roofMat); ceil2.position.y=y0+hh-0.025; ceil2.castShadow=true; ceil2.userData.b=b; grp.add(ceil2); blockers.push(ceil2); }
       }
-      var rf2=new THREE.Mesh(shapeGeo(poly,0.05), mat);
-      rf2.position.y=b.base+b.floors*hh; rf2.castShadow=true; grp.add(rf2); topSlab=rf2;
+      var rf2=new THREE.Mesh(shapeGeo(poly,0.03), capMat);
+      rf2.position.y=b.base+b.floors*hh; rf2.castShadow=true; rf2.userData.b=b; grp.add(rf2); blockers.push(rf2); topSlab=rf2;
     });
   }
   if(topSlab){
@@ -1840,11 +2127,11 @@ REG.forEach(function(b){
   /* label */
   var topY=b.base+b.totalH;
   var label=makeLabel(b.name,{hub:!!b.hub});
-  label.position.set(b.cw.x, topY+0.85, b.cw.z);
-  scene.add(label); labels.push(label); b.label=label; b.labelY=topY+0.85;
+  label.position.set(b.cw.x, topY+0.34, b.cw.z);
+  scene.add(label); labels.push(label); b.label=label; b.labelY=topY+0.34;
   /* hub: gold band at the hub floor */
   if(b.hub && b.hubFloor){
-    var bandY=b.base+b.hubFloor*FLOOR_H;
+    var bandY=b.base+b.hubFloor*b.fh;
     var ol=outlineOf(b), pts=[];
     ol.forEach(function(p){ var w=W(p[0],p[1]); pts.push(new THREE.Vector3(w[0],0,w[1])); });
     var bg2=new THREE.BufferGeometry().setFromPoints(pts);
@@ -1859,22 +2146,57 @@ REG.forEach(function(b){
     var pd=PIN_DEFS[pdKey], pw=pinWorld(pd);
     b.pinPos=pw;
     var pin=new THREE.Group();
-    var pole=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.62,10), new THREE.MeshStandardMaterial({color:0xd99a12, roughness:0.4}));
-    pole.position.y=0.31;
-    var ball=new THREE.Mesh(new THREE.SphereGeometry(0.17,18,14), new THREE.MeshStandardMaterial({color:0xffc21f, emissive:0x8a6100, roughness:0.3}));
-    ball.position.y=0.78;
-    var ring=new THREE.Mesh(new THREE.RingGeometry(0.26,0.36,28), new THREE.MeshBasicMaterial({color:0xffc21f, transparent:true, opacity:0.75, side:THREE.DoubleSide}));
-    ring.rotation.x=-Math.PI/2; ring.position.y=0.03;
+    var pole=new THREE.Mesh(new THREE.CylinderGeometry(0.016,0.016,0.24,10), new THREE.MeshStandardMaterial({color:0xd99a12, roughness:0.4}));
+    pole.position.y=0.12;
+    var ball=new THREE.Mesh(new THREE.SphereGeometry(0.08,18,14), new THREE.MeshStandardMaterial({color:0xffc21f, emissive:0x8a6100, roughness:0.3}));
+    ball.position.y=0.30;
+    var ring=new THREE.Mesh(new THREE.RingGeometry(0.11,0.16,28), new THREE.MeshBasicMaterial({color:0xffc21f, transparent:true, opacity:0.75, side:THREE.DoubleSide}));
+    ring.rotation.x=-Math.PI/2; ring.position.y=0.015;
     pin.add(pole); pin.add(ball); pin.add(ring);
     pin.position.set(pw.x, pw.y, pw.z);
     scene.add(pin); hubPins.push({group:pin, ring:ring, ball:ball, baseY:pw.y});
     b.pin=pin;
     var hl=makeLabel("★ "+HUB_INFO[b.hub].label,{hub:true});
-    hl.scale.multiplyScalar(0.82); hl.position.set(pw.x, pw.y+1.35, pw.z);
-    scene.add(hl); labels.push(hl); b.hubLabel=hl; b.hubLabelY=pw.y+1.35;
+    hl.scale.multiplyScalar(0.82); hl.position.set(pw.x, pw.y+0.62, pw.z);
+    scene.add(hl); labels.push(hl); b.hubLabel=hl; b.hubLabelY=pw.y+0.62;
   }
 });
 
+
+/* ---- 斜面（スロープ）： 段差の段で切り替わるのではなく、2つの地形レベルの間を連続してつなぐ面として作る ----
+   ・正門： 校舎地区（_07）から南の道路（_06）へ下る参道は斜面
+   ・寮側出入口： 既存の屋外階段（梯子記号）の脇に、段差を下るスロープを併設
+   ・寮→グラウンド： D棟・E棟の高さ（_04）から国際寮・課外活動棟の間を抜けてグラウンド（_01）へ下る道は斜面 */
+(function(){
+  var rampMat=new THREE.MeshStandardMaterial({color:dark?0x3d4348:0x84898c, roughness:1, side:THREE.DoubleSide});
+  function addRamp(pts, widthU, labelText){
+    var pos=[], idx=[], N=14;
+    for(var s=0;s<pts.length-1;s++){
+      var a=pts[s], b2=pts[s+1];
+      var dx=b2[0]-a[0], dy=b2[1]-a[1], L=Math.hypot(dx,dy)||1;
+      var px=-dy/L*widthU/2, py=dx/L*widthU/2, base=s*N*2;
+      for(var i=0;i<=N;i++){
+        var t=i/N, cx=a[0]+dx*t, cy=a[1]+dy*t, h=(a[2]+(b2[2]-a[2])*t)*TSTEP+0.006;
+        var p1=W(cx+px,cy+py), p2=W(cx-px,cy-py);
+        pos.push(p1[0],h,p1[1], p2[0],h,p2[1]);
+        if(i<N){ var k=base+i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
+      }
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    g.setIndex(idx); g.computeVertexNormals();
+    var m=new THREE.Mesh(g, rampMat); m.receiveShadow=true; terrGroup.add(m);
+    if(labelText){
+      var mid=pts[Math.floor(pts.length/2)], mw=W(mid[0],mid[1]);
+      var lb=makeLabel(labelText,{});
+      lb.position.set(mw[0], mid[2]*TSTEP+0.42, mw[1]);
+      scene.add(lb); labels.push(lb);
+    }
+  }
+  addRamp([[206,648,7],[206,676,6],[206,702,6]], 15, "正門（斜面）");
+  addRamp([[137,280,4],[137,304,3]], 5.5, "寮側出入口（階段・スロープ）");
+  addRamp([[218,348,4],[227,303,3],[243,238,2],[258,168,1]], 6, "グラウンドへの斜面");
+})();
 
 /* ---- 駐輪場の屋根： 寮生手帳の配置図で駐輪場とされた位置（C棟北側・F棟南側・国際寮西側）に、
    柱＋低い屋根面として立体化する（地表面の標示ではなく屋根のある構造物として） ---- */
@@ -1903,8 +2225,8 @@ REG.forEach(function(b){
     }
     var vIn=sideV+sign*1.1, vOut=sideV+sign*3.3, vMid=sideV+sign*2.2;
     var cen=fr.PT(0, vMid); var cw=W(cen[0],cen[1]);
-    var roofY=b.base+0.36;
-    var roof=new THREE.Mesh(new THREE.BoxGeometry(len*0.72*S, 0.035, Math.abs(vOut-vIn)*S), roofM);
+    var roofY=b.base+MU(2.3); /* 駐輪場の屋根は実寸で約2.3mの高さ */
+    var roof=new THREE.Mesh(new THREE.BoxGeometry(len*0.72*S, 0.02, Math.abs(vOut-vIn)*S), roofM);
     roof.position.set(cw[0], roofY, cw[1]);
     roof.rotation.y=-Math.atan2(fr.uy, fr.ux);
     roof.castShadow=true; roof.receiveShadow=true;
@@ -1912,8 +2234,8 @@ REG.forEach(function(b){
     [-0.33,0.33].forEach(function(tf){
       [vIn, vOut].forEach(function(vv){
         var p=fr.PT(len*tf, vv); var wp=W(p[0],p[1]);
-        var post=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.36,8), postM);
-        post.position.set(wp[0], b.base+0.18, wp[1]);
+        var post=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,MU(2.3),8), postM);
+        post.position.set(wp[0], b.base+MU(2.3)/2, wp[1]);
         b.group.add(post);
       });
     });
@@ -1937,6 +2259,11 @@ var VIEWS={
   dorm:[dormT.clone().add(new THREE.Vector3(5,6.5,8.5)), dormT],
   gym:[gymT.clone().add(new THREE.Vector3(6,6,9)), gymT],
   hubs:[hubT.clone().add(new THREE.Vector3(7,9,11)), hubT]
+};
+flyRoomFn=function(rm){
+  var w=W(rm.cx, rm.cy);
+  var ty=rm.y0+0.1;
+  flyTo(new THREE.Vector3(w[0]+2.6, ty+2.4, w[1]+3.2), new THREE.Vector3(w[0], ty, w[1]));
 };
 focusFn=function(b){
   if(!b){ flyTo(VIEWS.all[0], VIEWS.all[1]); return; }
@@ -1968,9 +2295,9 @@ btnHeight.addEventListener("click",function(){
     if(!b.group) return;
     b.group.scale.y=heightMul;
     var topY=(b.base+b.totalH)*heightMul;
-    if(b.label) b.label.position.y=topY+0.85;
+    if(b.label) b.label.position.y=topY+0.34;
     /* pin Y handled below from PIN_DEFS */
-    if(b.hubLabel && b.pinPos) b.hubLabel.position.y=b.pinPos.y*heightMul+1.35;
+    if(b.hubLabel && b.pinPos) b.hubLabel.position.y=b.pinPos.y*heightMul+0.62;
   });
   hubPins.forEach(function(p){ p.group.position.y=p.baseY*heightMul; });
 });
@@ -1985,8 +2312,16 @@ renderer.domElement.addEventListener("pointerup",function(e){
   var rect=renderer.domElement.getBoundingClientRect();
   mouse.x=((e.clientX-rect.left)/rect.width)*2-1; mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
   ray.setFromCamera(mouse,camera);
-  var hits=ray.intersectObjects(pickables);
-  if(hits.length){ selectBuilding(hits[0].object.userData.b,false); }
+  var pickSet=roomMeshes.concat(pickables, blockers);
+  var hits=ray.intersectObjects(pickSet);
+  for(var hi=0; hi<hits.length; hi++){
+    var obj=hits[hi].object;
+    /* 選択中の棟の天井・屋根は透けているので、クリックは素通りして部屋に届ける */
+    if(!obj.userData.room && selected && obj.userData.b===selected && blockers.indexOf(obj)>=0) continue;
+    if(obj.userData.room){ selectRoom(obj,false); }
+    else if(obj.userData.b){ selectBuilding(obj.userData.b,false); }
+    break;
+  }
 });
 
 /* ---- compass + loop ---- */
@@ -2004,7 +2339,7 @@ function animate(){
   }
   hubPins.forEach(function(p,i){
     var s=1+0.16*Math.sin(t*2.2+i*1.3); p.ring.scale.set(s,s,s);
-    p.ball.position.y=0.78+0.07*Math.sin(t*2.2+i*1.3);
+    p.ball.position.y=0.30+0.025*Math.sin(t*2.2+i*1.3);
   });
   controls.update();
   var az=controls.getAzimuthalAngle();
