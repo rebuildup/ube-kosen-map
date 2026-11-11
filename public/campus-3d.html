@@ -114,7 +114,7 @@
 <div class="topbar">
   <div class="titlecard">
     <h1>宇部高専キャンパス — 立体模型</h1>
-    <p>正本 <b>campus-map.svg の積層そのもの</b>から組み立てた模型です。地形は<b>ベースレイヤー _00〜_08 の積層</b>がそのまま段差（同じレイヤー＝同じ高さ、<b>1段＝1m</b>）。建物は各階の<b>「塗り」＝床面</b>、<b>「線画」＝壁・間仕切り</b>として読み、全階の外周には<b>閉じた外壁</b>を立てています。<b>高さは水平と同じ物差し（メートル）で統一</b>し、階高は校舎 約3.6m・寮 約3.0m の実寸。各部屋は壁線の区画ごとの<b>個別オブジェクト</b>で、棟を選ぶと天井が透けて<b>部屋単位で選択</b>できます。道路は地表面に沿わせ、コンクリ壇は <b>0.4m</b>、正門・寮側出入口・グラウンドへの抜け道は<b>斜面</b>です。座標は緯度・経度・標高（m、SRTM基準の概算）で表示します。</p>
+    <p>正本 <b>campus-map.svg の積層そのもの</b>から組み立てた模型です。地形は<b>ベースレイヤー _00〜_08 の積層</b>がそのまま段差（同じレイヤー＝同じ高さ、<b>1段＝1m</b>）。建物は各階の<b>「塗り」＝床面</b>、<b>「線画」＝壁・間仕切り</b>として読み、全階の外周には<b>閉じた外壁</b>を立てています。<b>高さは水平と同じ物差し（メートル）で統一</b>し、階高は校舎 約3.6m・寮 約3.0m の実寸。各部屋は壁線の区画ごとの<b>個別オブジェクト</b>で、棟を選ぶと天井が透けて<b>部屋単位で選択</b>できます。道路は地表面に沿わせ、コンクリ壇は <b>0.4m</b>、正門・寮側出入口・グラウンドへの抜け道は<b>斜面</b>です。地面の線画は全て実体化してあり、<b>段差の縁は蹴上のある段</b>、法面は<b>斜面</b>、グラウンドの防球ネットは<b>支柱＋ネット面</b>、駐車場やコートのラインは<b>地面に密着したマーキング</b>として造形しています（線のまま宙に描いたものは0本。内訳は「2D検証」パネル）。座標は緯度・経度・標高（m、SRTM基準の概算）で表示します。</p>
   </div>
   <div class="spacer"></div>
   <div class="compass" aria-label="方位：北は針の赤い方向">
@@ -150,6 +150,10 @@
   <p><b>外形（上から見た輪郭）</b>：旧版の手トレースは階段状にずれており、面積もずれていました。今回は平面図の縦横比と学校HPの建面積に合わせて作り直しました。E棟 800㎡→<b>784㎡</b>（HP 783㎡）／ B棟 223㎡→<b>217㎡</b>（HP 217㎡）／ C棟 402㎡→<b>471㎡</b>（HP 470㎡）／ 浴場棟 180㎡→<b>180㎡</b>（HP 180㎡）。</p>
   <p><b>階段</b>：階段範囲の内側にある間仕切り線をデータ上で数えました。校舎の元線画には階段記号の細線が <b>142本</b> 含まれていましたが、階段として扱う処理で <b>0本</b> になっています（このページの読み込み時に実数： <span id="stairLive">計測中</span>）。寮の平面では階段は1つの区画として定義しており、内側の線は 0本 です。階段は範囲全体を1つの記号（矩形＋折り返し）として描いています。</p>
   <p class="muted">真上からの形は、下の「上面図（真上）」ボタンで原典と見比べられます。</p>
+  <h4 style="margin:16px 0 4px;font-size:13px">地面線画の実体化 — 宙に浮いた線の棚卸し</h4>
+  <p>原典の地面線画（ベースレイヤーの線分 <b>1,291本</b>）は、以前は各レイヤーの高さに一律に置いた線として描いており、地表面と合わない部分が宙に浮いて見えました。今回は全線分をデータ上で分類し、線が現実に意味するものへ置き換えています。中心は<b>段差</b>です：線の真横で地形レイヤーが切り替わる線（段の縁）は、平らな線ではなく<b>垂直な蹴上を持つ段</b>として地形に造形し、法面のハッチングは<b>斜面</b>、階段記号は<b>段のある階段</b>にしています。駐輪場の屋根は独立した分類として切り分けました：C棟北側とF棟南側では線画の中に屋根の輪郭線と小屋の範囲を示す線群があり、それらを地面マーキングにせず<b>柱＋屋根面</b>として造形しています（国際寮西側は線画に該当する線が無く、手帳の配置図の位置に造形）。<b>どの実体にも属さない線分（浮遊線）は 0 本</b>です（分類は読み込み時に実データで数えた実数）。</p>
+  <div id="lwStats"><p class="muted">計測中…</p></div>
+  <p class="muted">判別できなかった線について：破線・一点鎖線のうち、囲いやネットと判別できないものは中心線等の標示とみなして地面マーキングに分類しています（寮地区と校舎地区の通路沿いに分布）。図面の外枠は実物がないため、推測で消さず上表に明示して除外しています。</p>
 </section>
 
 <aside class="panel" id="panel" aria-live="polite"></aside>
@@ -1933,23 +1937,681 @@ DATA.terr.forEach(function(t){
     terrGroup.add(eg);
   });
 });
-/* base-layer linework (roads / paths / terraces) drawn at its own layer height */
-(function drawTerrainLines(){
-  var pos=[], col=[];
-  var cLine=new THREE.Color(dark?0x9aa48c:0x5f6b4c);
+/* ---- 地面線画の実体化： 原典 campus-map.svg のベースレイヤー線画（DATA.tlines、全1,291本）を
+   「線のまま宙に描く」のをやめ、線が現実に意味するものへ分類して実体化する。
+   分類はデータ側で行う： 地形の表面高さ surf(x,y)（ベースレイヤー _00〜_08 の積層そのもの。
+   コンクリ壇シートは (l-1)+0.4m）との関係、平行線の群れ方、破線の連なり方から決める。
+   主分類は「段差の縁」： 線の真横で地形が1段（1m）以上切り替わる線・地形レイヤー境界と
+   重なる線は、平らな線ではなく垂直な蹴上を持つ段として造形する。
+   駐輪場の屋根は独立した分類（shed）とした： 棟の長辺に沿う帯の中の線群を小屋の範囲として特定し、
+   地面マーキングにはせず柱＋屋根面で造形する（C棟北側9本・F棟南側3本。国際寮西側は線画に該当線なし＝0本）。
+   どの実体にも属さない浮遊線分は 0 本（図面の外枠だけは実物がないため対象外として報告する）。 */
+var lwStairsMesh=null;
+var LWSHEDS=[]; /* 駐輪場の屋根： 線画から特定した小屋の範囲（ shed 造形と検証パネルが参照する） */
+var LWSTATS=(function buildLinework(){
+  function ptInPoly(poly,x,y){
+    var inside=false, n=poly.length;
+    for(var i=0;i<n;i++){
+      var x1=poly[i][0], y1=poly[i][1], x2=poly[(i+1)%n][0], y2=poly[(i+1)%n][1];
+      if((y1>y)!==(y2>y)){
+        var xin=(x2-x1)*(y-y1)/(y2-y1)+x1;
+        if(x<xin) inside=!inside;
+      }
+    }
+    return inside;
+  }
+  function surf(x,y){ /* 地表面の高さ（レイヤー単位＝m）。シートは (l-1)+0.4 */
+    var best=0;
+    DATA.terr.forEach(function(t){ t.p.forEach(function(poly){ if(ptInPoly(poly,x,y) && t.l>best) best=t.l; }); });
+    var sh=false;
+    DATA.terr.forEach(function(t){ if(t.sheet) t.p.forEach(function(poly){ if(ptInPoly(poly,x,y) && t.l>=best) sh=true; }); });
+    return sh ? (best-1)+0.4 : best;
+  }
+  /* 建物の「塗り」ポリゴン（距離・最近傍の判定用） */
+  var BLDS=[];
+  Object.keys(DATA.bld).forEach(function(k){
+    var b=DATA.bld[k];
+    var polys = b.f ? b.f : (b.fl ? b.fl[0].f : []);
+    polys.forEach(function(poly){ BLDS.push({key:k, poly:poly}); });
+  });
+  function bldDist(x,y){
+    var best=1e9;
+    for(var i=0;i<BLDS.length;i++){
+      var poly=BLDS[i].poly;
+      if(ptInPoly(poly,x,y)) return 0;
+      for(var j=0;j<poly.length;j++){
+        var ax=poly[j][0], ay=poly[j][1], bx=poly[(j+1)%poly.length][0], by=poly[(j+1)%poly.length][1];
+        var dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy;
+        var t=L2?Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/L2)):0;
+        var d=Math.hypot(ax+dx*t-x, ay+dy*t-y);
+        if(d<best) best=d;
+      }
+    }
+    return best;
+  }
+  function nearestBld(x,y){
+    var best=1e9, bk=null, bc=null;
+    BLDS.forEach(function(e){
+      var d=bldDistPoly(e.poly,x,y);
+      if(d<best){ best=d; bk=e.key; var sx=0, sy=0; e.poly.forEach(function(p){ sx+=p[0]; sy+=p[1]; }); bc=[sx/e.poly.length, sy/e.poly.length]; }
+    });
+    return {d:best, key:bk, c:bc};
+  }
+  function bldDistPoly(poly,x,y){
+    if(ptInPoly(poly,x,y)) return 0;
+    var best=1e9;
+    for(var j=0;j<poly.length;j++){
+      var ax=poly[j][0], ay=poly[j][1], bx=poly[(j+1)%poly.length][0], by=poly[(j+1)%poly.length][1];
+      var dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy;
+      var t=L2?Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/L2)):0;
+      var d=Math.hypot(ax+dx*t-x, ay+dy*t-y);
+      if(d<best) best=d;
+    }
+    return best;
+  }
+
+  /* ---------- 全線分の棚卸し ---------- */
+  var SEGS=[];
   DATA.tlines.forEach(function(t){
-    var h=t.l*TSTEP+0.004; /* 道路・ラインは厚みを持たせず、地表面に沿わせる */
-    t.s.forEach(function(sg){
-      var a=W(sg[0],sg[1]), b2=W(sg[2],sg[3]);
-      pos.push(a[0],h,a[1], b2[0],h,b2[1]);
-      col.push(cLine.r,cLine.g,cLine.b, cLine.r,cLine.g,cLine.b);
+    t.s.forEach(function(s){
+      var dx=s[2]-s[0], dy=s[3]-s[1], len=Math.hypot(dx,dy)||1e-6;
+      SEGS.push({l:t.l, s:[s[0],s[1],s[2],s[3]], len:len,
+        ang:Math.atan2(dy,dx)%Math.PI, mx:(s[0]+s[2])/2, my:(s[1]+s[3])/2, cls:null, grp:-1});
     });
   });
-  var g=new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
-  g.setAttribute("color", new THREE.Float32BufferAttribute(col,3));
-  var lines=new THREE.LineSegments(g, new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0.8}));
-  terrGroup.add(lines);
+  var N=SEGS.length;
+  function angd(a,b){ var d=Math.abs(a-b)%Math.PI; return Math.min(d, Math.PI-d); }
+  function mdist(a,b){ return Math.hypot(a.mx-b.mx, a.my-b.my); }
+  function UF(n){ this.p=[]; for(var i=0;i<n;i++) this.p.push(i); }
+  UF.prototype.find=function(a){ var p=this.p; while(p[a]!==a){ p[a]=p[p[a]]; a=p[a]; } return a; };
+  UF.prototype.union=function(a,b){ var ra=this.find(a), rb=this.find(b); if(ra!==rb) this.p[ra]=rb; };
+
+  /* 1) 図面の外枠（現地に実物なし） */
+  SEGS.forEach(function(sg){
+    function onb(x,y){ return Math.abs(x-0.2)<1.2 || Math.abs(x-470.2)<1.2 || Math.abs(y-0.1)<1.2 || Math.abs(y-710.2)<1.2; }
+    if(sg.len>60 && onb(sg.s[0],sg.s[1]) && onb(sg.s[2],sg.s[3])) sg.cls="frame";
+  });
+  /* 2) 既存の屋外階段（osteps）の範囲と重なる線 → その階段が実体 */
+  function inOstep(x,y){
+    for(var i=0;i<DATA.osteps.length;i++){
+      var o=DATA.osteps[i], r=o.r, a=r[4]*Math.PI/180, dx=x-r[0], dy=y-r[1];
+      var u=dx*Math.cos(a)+dy*Math.sin(a), v=-dx*Math.sin(a)+dy*Math.cos(a);
+      if(Math.abs(u)<=r[2]/2+1.0 && Math.abs(v)<=r[3]/2+1.0) return true;
+    }
+    return false;
+  }
+  SEGS.forEach(function(sg){ if(!sg.cls && inOstep(sg.mx,sg.my)) sg.cls="ostep"; });
+
+  /* 2.5) 駐輪場の屋根： 棟の長辺に沿う帯（小屋のある側の壁面から外側 0.9〜8.6 単位）の中にある線群を、
+     地面マーキングとは別の分類にする。帯の中で建物軸に平行な最長の線が u 方向の範囲を決める。
+     C棟北側（実線の輪郭＋鎖線の列＋接続線 9本）と F棟南側（長線＋両端の短線 3本）が線画に実在する。
+     国際寮西側は帯の中に線が無く 0 本で、その屋根は寮生手帳の配置図の位置で造形する（棚卸しにも 0 本と明示）。 */
+  var SHED_SITES=[["cbld","near","C棟北側"],["ryof","near","F棟南側"],["kokusai","minX","国際寮西側"]];
+  SHED_SITES.forEach(function(site, sidx){
+    var bd=DATA.bld[site[0]]; if(!bd) return;
+    function mainPoly(b){
+      var polys = b.f ? b.f : (b.fl ? b.fl[0].f : []);
+      var best=null, ba=-1;
+      polys.forEach(function(f){
+        var xs=f.map(function(p){return p[0];}), ys=f.map(function(p){return p[1];});
+        var a=(Math.max.apply(null,xs)-Math.min.apply(null,xs))*(Math.max.apply(null,ys)-Math.min.apply(null,ys));
+        if(a>ba){ ba=a; best=f; }
+      });
+      return best;
+    }
+    var poly=mainPoly(bd); if(!poly) return;
+    var epoly=mainPoly(DATA.bld.eroom), esx=0, esy=0;
+    epoly.forEach(function(p){ esx+=p[0]; esy+=p[1]; });
+    var eroomC=[esx/epoly.length, esy/epoly.length];
+    var fr=frameOf(poly);
+    var axisAng=Math.atan2(fr.uy,fr.ux)%Math.PI;
+    var sideV, sign;
+    if(site[1]==="minX"){
+      var cA=fr.PT(0,fr.vmin), cB=fr.PT(0,fr.vmax);
+      sideV = cA[0]<cB[0] ? fr.vmin : fr.vmax;
+    } else {
+      var mA=fr.PT(0,fr.vmin), mB=fr.PT(0,fr.vmax);
+      var dA=Math.hypot(mA[0]-eroomC[0],mA[1]-eroomC[1]), dB=Math.hypot(mB[0]-eroomC[0],mB[1]-eroomC[1]);
+      sideV = dA<dB ? fr.vmin : fr.vmax;
+    }
+    sign = (sideV===fr.vmin) ? -1 : 1;
+    var vA=sideV+sign*0.9, vB=sideV+sign*8.6, vLo=Math.min(vA,vB), vHi=Math.max(vA,vB);
+    function uvOf(x,y){ return [(x-fr.cx)*fr.ux+(y-fr.cy)*fr.uy, (x-fr.cx)*fr.vx+(y-fr.cy)*fr.vy]; }
+    var inBand=[];
+    SEGS.forEach(function(sg){
+      if(sg.cls) return;
+      var m=uvOf(sg.mx,sg.my);
+      if(m[1]<vLo || m[1]>vHi || m[0]<fr.umin-12 || m[0]>fr.umax+12) return;
+      if(ptInPoly(poly,sg.mx,sg.my)) return;
+      inBand.push({sg:sg, m:m});
+    });
+    var best=null;
+    inBand.forEach(function(o){ if(angd(o.sg.ang,axisAng)<0.35 && (!best || o.sg.len>best.sg.len)) best=o; });
+    var picked=[];
+    if(best){
+      var bu=uvOf(best.sg.s[0],best.sg.s[1]), bv=uvOf(best.sg.s[2],best.sg.s[3]);
+      var w0=Math.min(bu[0],bv[0])-1.5, w1=Math.max(bu[0],bv[0])+1.5;
+      inBand.forEach(function(o){ if(o.m[0]>=w0 && o.m[0]<=w1) picked.push(o); });
+    }
+    picked.forEach(function(o){ o.sg.cls="shed"; o.sg.grp=2000+sidx; });
+    var rec={key:site[0], name:site[2], n:picked.length, corners:null, uLen:0, vWid:0, ang:0, lenM:0};
+    if(picked.length){
+      var us=[], vs=[];
+      picked.forEach(function(o){
+        [[o.sg.s[0],o.sg.s[1]],[o.sg.s[2],o.sg.s[3]]].forEach(function(p){
+          var q=uvOf(p[0],p[1]); us.push(q[0]);
+          if(q[1]<fr.vmin-0.2 || q[1]>fr.vmax+0.2) vs.push(q[1]);
+        });
+      });
+      var u0=Math.min.apply(null,us), u1=Math.max.apply(null,us), vv0=Math.min.apply(null,vs), vv1=Math.max.apply(null,vs);
+      rec.corners=[fr.PT(u0,vv0), fr.PT(u1,vv0), fr.PT(u1,vv1), fr.PT(u0,vv1)];
+      rec.uLen=u1-u0; rec.vWid=vv1-vv0; rec.ang=Math.atan2(fr.uy,fr.ux);
+      rec.lenM=Math.round((u1-u0)*0.84);
+    }
+    LWSHEDS.push(rec);
+  });
+
+  var freeIdx=[]; for(var fi=0;fi<N;fi++) if(!SEGS[fi].cls) freeIdx.push(fi);
+
+  /* 3) 破線・一点鎖線の連なり（同一直線上の継ぎ目でグループ化） */
+  (function(){
+    var uf=new UF(N);
+    for(var ii=0;ii<freeIdx.length;ii++){
+      var i=freeIdx[ii], si=SEGS[i];
+      if(si.len>9.5) continue;
+      for(var jj=ii+1;jj<freeIdx.length;jj++){
+        var j=freeIdx[jj], sj=SEGS[j];
+        if(sj.len>9.5 || angd(si.ang,sj.ang)>0.14) continue;
+        var ok=false;
+        for(var e=0;e<2 && !ok;e++){
+          var ex=e?si.s[2]:si.s[0], ey=e?si.s[3]:si.s[1];
+          var ox=e?si.s[0]:si.s[2], oy=e?si.s[1]:si.s[3];
+          var ux=ex-ox, uy=ey-oy, ul=Math.hypot(ux,uy)||1; ux/=ul; uy/=ul;
+          for(var f=0;f<2;f++){
+            var fx=f?sj.s[2]:sj.s[0], fy=f?sj.s[3]:sj.s[1];
+            var vx=fx-ex, vy=fy-ey;
+            var along=vx*ux+vy*uy, perp=Math.abs(vx*(-uy)+vy*ux);
+            if(along>=0.8 && along<=6.5 && perp<0.7){ ok=true; break; }
+          }
+        }
+        if(ok) uf.union(i,j);
+      }
+    }
+    var groups={};
+    freeIdx.forEach(function(i){ if(SEGS[i].len<=9.5){ var r=uf.find(i); (groups[r]=groups[r]||[]).push(i); } });
+    var gid=0;
+    Object.keys(groups).forEach(function(r){
+      var mem=groups[r];
+      if(mem.length<4) return;
+      var xs=mem.map(function(i){return SEGS[i].mx;}), ys=mem.map(function(i){return SEGS[i].my;});
+      var span=Math.hypot(Math.max.apply(null,xs)-Math.min.apply(null,xs), Math.max.apply(null,ys)-Math.min.apply(null,ys));
+      if(span<18) return;
+      var cx=xs.reduce(function(a,b){return a+b;},0)/xs.length, cy=ys.reduce(function(a,b){return a+b;},0)/ys.length;
+      var infield=mem.filter(function(i){ return SEGS[i].mx>170 && SEGS[i].mx<465 && SEGS[i].my>15 && SEGS[i].my<345; }).length/mem.length;
+      var kind = (cx>36 && cx<98 && cy>548 && cy<630) ? "fence" : (span>=22 && infield>=0.8) ? "net" : "dashmark";
+      mem.forEach(function(i){ SEGS[i].cls=kind; SEGS[i].grp=gid; });
+      gid++;
+    });
+  })();
+
+  /* 4) 法面のハッチング（平行なティックの群れ） */
+  function slopeNeighbours(sg, maxDist, ratio){
+    var out=[];
+    freeIdx.forEach(function(j){
+      var sj=SEGS[j];
+      if(sj===sg) return;
+      if(sj.cls && sj.cls!=="slope") return;
+      if(angd(sg.ang,sj.ang)<0.21 && sj.len/sg.len>ratio[0] && sj.len/sg.len<ratio[1] && mdist(sg,sj)<=maxDist) out.push(sj);
+    });
+    return out;
+  }
+  [5,7].forEach(function(need){
+    freeIdx.forEach(function(i){
+      var sg=SEGS[i];
+      if(sg.cls || sg.len<7.5 || sg.len>17) return;
+      var nb=slopeNeighbours(sg,15,[0.55,1.8]);
+      if(nb.length<need) return;
+      var px=-Math.sin(sg.ang), py=Math.cos(sg.ang);
+      var projs=nb.map(function(m){ return m.mx*px+m.my*py; });
+      var spread=Math.max.apply(null,projs)-Math.min.apply(null,projs);
+      if(spread>=16 && (sg.l-surf(sg.mx,sg.my)>=0.5 || nb.length>=8)) sg.cls="slope";
+    });
+  });
+  freeIdx.forEach(function(i){
+    var sg=SEGS[i];
+    if(sg.cls || sg.len<7.5 || sg.len>17) return;
+    var cnt=0;
+    freeIdx.forEach(function(j){ var sj=SEGS[j]; if(sj!==sg && sj.cls==="slope" && angd(sg.ang,sj.ang)<0.21 && mdist(sg,sj)<=8) cnt++; });
+    if(cnt>=2) sg.cls="slope";
+  });
+  /* 法面パス2： 高い斜面の長いティック */
+  freeIdx.forEach(function(i){
+    var sg=SEGS[i];
+    if(sg.cls || sg.len<=17 || sg.len>40) return;
+    if(sg.l-surf(sg.mx,sg.my)<1.0) return;
+    var cnt=0;
+    freeIdx.forEach(function(j){ var sj=SEGS[j]; if(sj!==sg && (!sj.cls || sj.cls==="slope") && angd(sg.ang,sj.ang)<0.21 && mdist(sg,sj)<=18) cnt++; });
+    if(cnt>=5) sg.cls="slope";
+  });
+  /* 法面の取りこぼし救済（斜面に隣接するティック） */
+  for(var rp=0;rp<4;rp++){
+    freeIdx.forEach(function(i){
+      var sg=SEGS[i];
+      if(sg.cls || sg.len<4.5 || sg.len>17) return;
+      var cnt=0;
+      freeIdx.forEach(function(j){ var sj=SEGS[j]; if(sj!==sg && sj.cls==="slope" && angd(sg.ang,sj.ang)<0.3 && mdist(sg,sj)<=10) cnt++; });
+      if(cnt>=2) sg.cls="slope";
+    });
+  }
+
+  /* 5) 階段・駐車場のクラスタ（平行な短線の群れ） */
+  (function(){
+    var rest=freeIdx.filter(function(i){ return !SEGS[i].cls && SEGS[i].len<=9; });
+    var uf=new UF(N);
+    for(var ii=0;ii<rest.length;ii++) for(var jj=ii+1;jj<rest.length;jj++){
+      var a=SEGS[rest[ii]], b=SEGS[rest[jj]];
+      if(angd(a.ang,b.ang)<0.18 && mdist(a,b)<=5.0) uf.union(rest[ii],rest[jj]);
+    }
+    var groups={};
+    rest.forEach(function(i){ var r=uf.find(i); (groups[r]=groups[r]||[]).push(i); });
+    function pstdev(v){ var m=v.reduce(function(a,b){return a+b;},0)/v.length; return Math.sqrt(v.reduce(function(a,b){return a+(b-m)*(b-m);},0)/v.length); }
+    var ncl=0;
+    Object.keys(groups).forEach(function(r){
+      var mem=groups[r];
+      if(mem.length<3) return;
+      var ms=mem.map(function(i){return SEGS[i];});
+      var xs=ms.map(function(m){return m.mx;}), ys=ms.map(function(m){return m.my;});
+      var diag=Math.hypot(Math.max.apply(null,xs)-Math.min.apply(null,xs), Math.max.apply(null,ys)-Math.min.apply(null,ys));
+      var meanlen=ms.reduce(function(a,m){return a+m.len;},0)/ms.length;
+      if(meanlen<1.8) return;
+      var lensOk=ms.every(function(m){ return Math.abs(m.len-meanlen)<meanlen*0.1; });
+      var bd=Math.min.apply(null, ms.map(function(m){ return bldDist(m.mx,m.my); }));
+      if(bd>25) return;
+      var a0=ms[0].ang, ux=Math.cos(a0), uy=Math.sin(a0);
+      var sp=ms.map(function(m){ return m.s[0]*ux+m.s[1]*uy; }), ep=ms.map(function(m){ return m.s[2]*ux+m.s[3]*uy; });
+      var aligned=Math.min(pstdev(sp),pstdev(ep))<1.0;
+      var ispark = mem.length>=9 && lensOk && meanlen>=4.5 && meanlen<=8 && aligned && bd>3.5;
+      var kind=null;
+      if(ispark){ if(diag<=48) kind="parking"; }
+      else if(diag<=30){
+        var svals=[]; ms.forEach(function(m){ svals.push(surf(m.s[0],m.s[1]), surf(m.s[2],m.s[3])); });
+        if(bd<=8 || (Math.max.apply(null,svals)-Math.min.apply(null,svals))>=0.9) kind="stairs";
+      }
+      if(!kind) return;
+      mem.forEach(function(i){ SEGS[i].cls=kind; SEGS[i].grp=1000+ncl; });
+      ncl++;
+    });
+    /* 踏面と蹴上のクラスタが分かれた階段は1か所に統合する */
+    var sg2={};
+    SEGS.forEach(function(sg,i){ if(sg.cls==="stairs") (sg2[sg.grp]=sg2[sg.grp]||[]).push(i); });
+    function bboxOf(mem){
+      var xs=mem.map(function(i){return SEGS[i].mx;}), ys=mem.map(function(i){return SEGS[i].my;});
+      return [Math.min.apply(null,xs),Math.min.apply(null,ys),Math.max.apply(null,xs),Math.max.apply(null,ys)];
+    }
+    var gids=Object.keys(sg2), merged=true;
+    while(merged){
+      merged=false;
+      for(var a=0;a<gids.length;a++) for(var b=a+1;b<gids.length;b++){
+        var ga=gids[a], gb=gids[b];
+        if(!sg2[ga] || !sg2[gb]) continue;
+        var ba=bboxOf(sg2[ga]), bb=bboxOf(sg2[gb]);
+        if(ba[0]-3<=bb[2] && bb[0]-3<=ba[2] && ba[1]-3<=bb[3] && bb[1]-3<=ba[3]){
+          sg2[ga]=sg2[ga].concat(sg2[gb]); delete sg2[gb]; merged=true;
+        }
+      }
+      gids=Object.keys(sg2);
+    }
+    Object.keys(sg2).forEach(function(g){ sg2[g].forEach(function(i){ SEGS[i].grp=+g; }); });
+  })();
+
+  /* 6) 段状の法面（鋸歯・櫛形の記号が帯状に並ぶ場所） */
+  (function(){
+    var tiny=freeIdx.filter(function(i){ return !SEGS[i].cls && SEGS[i].len<=4.5; });
+    var uf=new UF(N);
+    for(var ii=0;ii<tiny.length;ii++) for(var jj=ii+1;jj<tiny.length;jj++){
+      if(mdist(SEGS[tiny[ii]],SEGS[tiny[jj]])<=6.0) uf.union(tiny[ii],tiny[jj]);
+    }
+    var groups={};
+    tiny.forEach(function(i){ var r=uf.find(i); (groups[r]=groups[r]||[]).push(i); });
+    Object.keys(groups).forEach(function(r){
+      var mem=groups[r];
+      if(mem.length<15) return;
+      var xs=mem.map(function(i){return SEGS[i].mx;}), ys=mem.map(function(i){return SEGS[i].my;});
+      var w=Math.max.apply(null,xs)-Math.min.apply(null,xs), h=Math.max.apply(null,ys)-Math.min.apply(null,ys);
+      if(Math.max(w,h)>=40 && Math.min(w,h)<=22) mem.forEach(function(i){ SEGS[i].cls="bank"; });
+    });
+  })();
+
+  /* 7) 段差の縁（主分類）： 線の真横で地形が1段以上切り替わる線／地形レイヤー境界と重なる線 */
+  var TERR_EDGES=[];
+  DATA.terr.forEach(function(t){ t.p.forEach(function(poly){
+    for(var i=0;i<poly.length;i++){ var a=poly[i], b=poly[(i+1)%poly.length]; TERR_EDGES.push([a[0],a[1],b[0],b[1]]); }
+  });});
+  SEGS.forEach(function(sg){
+    if(sg.cls && sg.cls!=="dashmark") return;
+    var s=sg.s, ux=Math.cos(sg.ang), uy=Math.sin(sg.ang), px=-uy, py=ux;
+    var tight=0;
+    [0.2,0.5,0.8].forEach(function(f){
+      var qx=s[0]+(s[2]-s[0])*f, qy=s[1]+(s[3]-s[1])*f;
+      [1.2,2.0].forEach(function(d){
+        var dd=Math.abs(surf(qx+px*d,qy+py*d)-surf(qx-px*d,qy-py*d));
+        if(dd>tight) tight=dd;
+      });
+    });
+    if(tight>=0.9){ sg.cls="step"; return; }
+    if(sg.len>=8){
+      var sp=surf(sg.mx+px*3,sg.my+py*3), sm=surf(sg.mx-px*3,sg.my-py*3);
+      if(Math.abs(sp-sm)>=0.9){
+        var sc=surf(sg.mx,sg.my);
+        if(Math.abs(sc-Math.max(sp,sm))<=0.45 || Math.abs(sc-Math.min(sp,sm))<=0.45){ sg.cls="step"; return; }
+      }
+    }
+    for(var ei=0;ei<TERR_EDGES.length;ei++){
+      var e=TERR_EDGES[ei];
+      var dx=e[2]-e[0], dy=e[3]-e[1], L2=dx*dx+dy*dy;
+      var tt=L2?Math.max(0,Math.min(1,((sg.mx-e[0])*dx+(sg.my-e[1])*dy)/L2)):0;
+      var qx=e[0]+dx*tt, qy=e[1]+dy*tt;
+      if(Math.hypot(qx-sg.mx,qy-sg.my)>1.8) continue;
+      var ea=Math.atan2(dy,dx)%Math.PI;
+      if(angd(sg.ang,ea)>=0.3) continue;
+      var el=Math.hypot(dx,dy)||1, enx=-dy/el, eny=dx/el;
+      if(Math.abs(surf(qx+enx*2.5,qy+eny*2.5)-surf(qx-enx*2.5,qy-eny*2.5))>=0.9){ sg.cls="step"; return; }
+    }
+  });
+
+  /* 8) 残りは地面マーキング（地形面に密着した平面として描く） */
+  SEGS.forEach(function(sg){ if(!sg.cls) sg.cls="marking"; });
+
+  /* ================= 実体化 ================= */
+  function mergeGeo(list){ /* list of {pos:[], idx:[], col?[], uv?[]} -> BufferGeometry */
+    var pos=[], idx=[], col=[], uv=[], base=0, hasCol=false, hasUv=false;
+    list.forEach(function(g){
+      for(var i=0;i<g.pos.length;i++) pos.push(g.pos[i]);
+      if(g.col){ hasCol=true; for(var i2=0;i2<g.col.length;i2++) col.push(g.col[i2]); }
+      if(g.uv){ hasUv=true; for(var i3=0;i3<g.uv.length;i3++) uv.push(g.uv[i3]); }
+      g.idx.forEach(function(k){ idx.push(k+base); });
+      base+=g.pos.length/3;
+    });
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    if(hasCol) geo.setAttribute("color", new THREE.Float32BufferAttribute(col,3));
+    if(hasUv) geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv,2));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    return geo;
+  }
+  function stripGeo(samples, halfW, perpX, perpY){ /* samples: [[x,y,hWorld],...] 図面座標＋世界高さ */
+    var pos=[], idx=[];
+    samples.forEach(function(sm,i){
+      var w1=W(sm[0]+perpX*halfW, sm[1]+perpY*halfW), w2=W(sm[0]-perpX*halfW, sm[1]-perpY*halfW);
+      pos.push(w1[0],sm[2],w1[1], w2[0],sm[2],w2[1]);
+      if(i>0){ var k=(i-1)*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
+    });
+    return {pos:pos, idx:idx};
+  }
+  function sampleSeg(sg, stepU){
+    var n=Math.max(1,Math.ceil(sg.len/stepU)), pts=[];
+    for(var i=0;i<=n;i++){
+      var f=i/n;
+      pts.push([sg.s[0]+(sg.s[2]-sg.s[0])*f, sg.s[1]+(sg.s[3]-sg.s[1])*f]);
+    }
+    return pts;
+  }
+
+  /* --- 地面マーキング＋駐車場ライン＋破線（中心線等）： 地形面に密着した帯 --- */
+  (function(){
+    var geos=[];
+    var cWhite=new THREE.Color(0xf0ead8), cMuted=new THREE.Color(dark?0x93a086:0x5f6b4c), cSheet=new THREE.Color(0xb9c0c2);
+    SEGS.forEach(function(sg){
+      if(sg.cls!=="marking" && sg.cls!=="dashmark" && sg.cls!=="parking") return;
+      var inField = sg.mx>185 && sg.mx<450 && sg.my>30 && sg.my<330;
+      var inTennis = sg.mx>43 && sg.mx<93 && sg.my>551 && sg.my<623;
+      var c = (sg.cls==="parking" || inField || inTennis) ? cWhite : (sg.l===8 ? cSheet : cMuted);
+      var hw = sg.cls==="parking" ? 0.17 : 0.13;
+      var ux=Math.cos(sg.ang), uy=Math.sin(sg.ang), px=-uy, py=ux;
+      var samples=sampleSeg(sg,3).map(function(p){ return [p[0],p[1], surf(p[0],p[1])*TSTEP+0.0045]; });
+      var g=stripGeo(samples, hw, px, py);
+      g.col=[];
+      for(var i=0;i<g.pos.length/3;i++) g.col.push(c.r,c.g,c.b);
+      geos.push(g);
+    });
+    if(geos.length){
+      var m=new THREE.Mesh(mergeGeo(geos), new THREE.MeshStandardMaterial({vertexColors:true, roughness:1, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2}));
+      m.receiveShadow=true;
+      terrGroup.add(m);
+    }
+  })();
+
+  /* --- 法面： ティックを上端（上の地表）から下端（下の地表）へ下る斜面の帯にする --- */
+  (function(){
+    var geos=[];
+    SEGS.forEach(function(sg){
+      if(sg.cls!=="slope") return;
+      var ux=Math.cos(sg.ang), uy=Math.sin(sg.ang), px=-uy, py=ux;
+      var samples=sampleSeg(sg,2.5).map(function(p){
+        var base=surf(p[0],p[1]), mx2=base;
+        for(var k=0;k<6;k++){
+          var a2=k*Math.PI/3, vv=surf(p[0]+Math.cos(a2)*3.2, p[1]+Math.sin(a2)*3.2);
+          if(vv>mx2) mx2=vv;
+        }
+        var h=Math.max(base, Math.min(sg.l, mx2));
+        return [p[0],p[1], h*TSTEP+0.003];
+      });
+      geos.push(stripGeo(samples, 1.32, px, py));
+    });
+    if(geos.length){
+      var m=new THREE.Mesh(mergeGeo(geos), new THREE.MeshStandardMaterial({color:dark?0x46523c:0x77875c, roughness:1, side:THREE.DoubleSide}));
+      m.receiveShadow=true; m.castShadow=false;
+      terrGroup.add(m);
+    }
+  })();
+
+  /* --- 段差の縁： 垂直な蹴上（立ち上がり面）を持つ段として造形する --- */
+  (function(){
+    var geos=[];
+    SEGS.forEach(function(sg){
+      if(sg.cls!=="step") return;
+      var ux=Math.cos(sg.ang), uy=Math.sin(sg.ang), px=-uy, py=ux;
+      var pts=sampleSeg(sg,5), pos=[], idx=[];
+      pts.forEach(function(p,i){
+        var sp=surf(p[0]+px*2.2, p[1]+py*2.2), sm=surf(p[0]-px*2.2, p[1]-py*2.2), sc=surf(p[0],p[1]);
+        var top=Math.max(sp,sm,sc), bot=Math.min(sp,sm,sc);
+        if(top-bot<0.18){ top=sc+0.18; bot=sc; }
+        var sgn = sp<sm ? 1 : -1;
+        var ox=p[0]+px*0.12*sgn, oy=p[1]+py*0.12*sgn;
+        var w=W(ox,oy);
+        pos.push(w[0], bot*TSTEP, w[1], w[0], top*TSTEP, w[1]);
+        if(i>0){ var k=(i-1)*2; idx.push(k,k+2,k+1, k+1,k+2,k+3); }
+      });
+      geos.push({pos:pos, idx:idx});
+    });
+    if(geos.length){
+      var m=new THREE.Mesh(mergeGeo(geos), new THREE.MeshStandardMaterial({color:dark?0x4c463f:0x8f8672, roughness:1, side:THREE.DoubleSide}));
+      m.castShadow=false; m.receiveShadow=true;
+      terrGroup.add(m);
+    }
+  })();
+
+  /* --- 階段クラスタ／段状の法面： 段のある立体にする（既存の addSteps を使う） --- */
+  var stepSpecs=[];
+  (function(){
+    var groups={};
+    SEGS.forEach(function(sg){ if(sg.cls==="stairs") (groups[sg.grp]=groups[sg.grp]||[]).push(sg); });
+    Object.keys(groups).forEach(function(g){
+      var ms=groups[g];
+      var xs=[], ys=[];
+      ms.forEach(function(m){ xs.push(m.s[0],m.s[2]); ys.push(m.s[1],m.s[3]); });
+      var x0=Math.min.apply(null,xs), x1=Math.max.apply(null,xs), y0=Math.min.apply(null,ys), y1=Math.max.apply(null,ys);
+      var cx=(x0+x1)/2, cy=(y0+y1)/2, w=(x1-x0)+1.2, h=(y1-y0)+1.2;
+      var s2=0, c2=0;
+      ms.forEach(function(m){ s2+=Math.sin(2*m.ang); c2+=Math.cos(2*m.ang); });
+      var A=Math.atan2(s2,c2)/2;
+      var Fx=-Math.sin(A), Fy=Math.cos(A);
+      var half=Math.hypot(w,h)/2;
+      var sA=surf(cx+Fx*(half+1.5), cy+Fy*(half+1.5)), sB=surf(cx-Fx*(half+1.5), cy-Fy*(half+1.5));
+      var yBase, totalH, nSteps, ascX, ascY;
+      if(Math.abs(sA-sB)>=0.5){
+        ascX = sA>sB ? Fx : -Fx; ascY = sA>sB ? Fy : -Fy;
+        yBase=Math.min(sA,sB)*TSTEP; totalH=Math.abs(sA-sB)*TSTEP;
+        nSteps=Math.max(3, Math.min(16, Math.round(totalH*M_PER_MODEL/0.19)));
+      } else {
+        var nb=nearestBld(cx,cy);
+        yBase=surf(cx,cy)*TSTEP;
+        if(nb.key && nb.d<10 && (DATA.bases[nb.key]||0)>surf(cx,cy)) yBase=(DATA.bases[nb.key]||0)*TSTEP;
+        totalH=MU(0.45); nSteps=3;
+        if(nb.c && nb.d<20){ ascX=nb.c[0]-cx; ascY=nb.c[1]-cy; var al=Math.hypot(ascX,ascY)||1; ascX/=al; ascY/=al; }
+        else { ascX=Fx; ascY=Fy; }
+      }
+      var angDeg=Math.atan2(ascY,ascX)*180/Math.PI-90;
+      addSteps(stepSpecs, [cx,cy,w,h,angDeg], yBase, totalH, nSteps);
+    });
+    /* 段状の法面（鋸歯の帯）： 帯の断面方向に段々に下る段差として造形 */
+    var bank=SEGS.filter(function(sg){ return sg.cls==="bank"; });
+    if(bank.length){
+      var xs=[], ys=[];
+      bank.forEach(function(m){ xs.push(m.s[0],m.s[2]); ys.push(m.s[1],m.s[3]); });
+      var bx0=Math.min.apply(null,xs), bx1=Math.max.apply(null,xs), by0=Math.min.apply(null,ys), by1=Math.max.apply(null,ys);
+      var bcx=(bx0+bx1)/2, bcy=(by0+by1)/2;
+      var topS=surf(bcx,bcy);
+      var outS=Math.min(surf(bx0-3,bcy), surf(bx1+3,bcy), surf(bcx,by0-3), surf(bcx,by1+3));
+      var tot=Math.max(topS-outS, 0.5);
+      if((bx1-bx0)<=(by1-by0)){ /* 南北に長い帯： 東西方向に段々 */
+        addSteps(stepSpecs, [bcx, bcy, (bx1-bx0)+13, (by1-by0)+6, -90], outS*TSTEP, tot*TSTEP, 5);
+      } else {
+        addSteps(stepSpecs, [bcx, bcy, (bx1-bx0)+6, (by1-by0)+13, 0], outS*TSTEP, tot*TSTEP, 5);
+      }
+    }
+  })();
+  if(stepSpecs.length){
+    lwStairsMesh=stepsMesh(stepSpecs, stepMatOut);
+    if(lwStairsMesh) terrGroup.add(lwStairsMesh);
+  }
+
+  /* --- 防球ネット／フェンス： 支柱＋半透明の面 --- */
+  function gridTexture(cell, alpha){
+    var c=document.createElement("canvas"); c.width=c.height=96;
+    var x=c.getContext("2d");
+    x.fillStyle="rgba(52,64,52,"+alpha+")"; x.fillRect(0,0,96,96);
+    x.strokeStyle="rgba(30,36,30,0.85)"; x.lineWidth=3;
+    for(var i=0;i<=96;i+=cell){ x.beginPath(); x.moveTo(i,0); x.lineTo(i,96); x.stroke(); x.beginPath(); x.moveTo(0,i); x.lineTo(96,i); x.stroke(); }
+    var t=new THREE.CanvasTexture(c);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping;
+    return t;
+  }
+  function buildBarrier(kind, heightM){
+    var groups={};
+    SEGS.forEach(function(sg){ if(sg.cls===kind) (groups[sg.grp]=groups[sg.grp]||[]).push(sg); });
+    var geos=[], posts=[];
+    Object.keys(groups).forEach(function(g){
+      var ms=groups[g];
+      /* 主軸（PCA）で並べ替え、チェーン状の点列にする */
+      var ptsAll=[];
+      ms.forEach(function(m){ ptsAll.push([m.s[0],m.s[1]],[m.s[2],m.s[3]]); });
+      var mx=0, my=0; ptsAll.forEach(function(p){ mx+=p[0]; my+=p[1]; }); mx/=ptsAll.length; my/=ptsAll.length;
+      var cxx=0, cxy=0, cyy=0;
+      ptsAll.forEach(function(p){ var dx=p[0]-mx, dy=p[1]-my; cxx+=dx*dx; cxy+=dx*dy; cyy+=dy*dy; });
+      var theta=0.5*Math.atan2(2*cxy, cxx-cyy);
+      var ax=Math.cos(theta), ay=Math.sin(theta);
+      var sorted=ms.slice().sort(function(a,b){
+        return ((a.mx-mx)*ax+(a.my-my)*ay) - ((b.mx-mx)*ax+(b.my-my)*ay);
+      });
+      var chain=[];
+      sorted.forEach(function(m){
+        var e=[[m.s[0],m.s[1]],[m.s[2],m.s[3]]].sort(function(p,q){ return ((p[0]-mx)*ax+(p[1]-my)*ay) - ((q[0]-mx)*ax+(q[1]-my)*ay); });
+        e.forEach(function(p){
+          if(!chain.length || Math.hypot(p[0]-chain[chain.length-1][0], p[1]-chain[chain.length-1][1])>1.2) chain.push(p);
+        });
+      });
+      var H=MU(heightM);
+      var pos=[], idx=[], uv=[], cum=0;
+      function panel(p, q){
+        var wp=W(p[0],p[1]), wq=W(q[0],q[1]);
+        var bp=surf(p[0],p[1])*TSTEP+0.01, bq=surf(q[0],q[1])*TSTEP+0.01;
+        var base=pos.length/3;
+        pos.push(wp[0],bp,wp[1], wq[0],bq,wq[1], wp[0],bp+H,wp[1], wq[0],bq+H,wq[1]);
+        var u0=cum/2.5; cum+=Math.hypot(q[0]-p[0],q[1]-p[1]); var u1=cum/2.5;
+        uv.push(u0,0, u1,0, u0,heightM/2.5, u1,heightM/2.5);
+        idx.push(base,base+1,base+2, base+1,base+3,base+2);
+        posts.push([p[0],p[1],bp]);
+        var segLen=Math.hypot(q[0]-p[0],q[1]-p[1]), np=Math.floor(segLen/12);
+        for(var k=1;k<=np;k++){ var f=k/(np+1); posts.push([p[0]+(q[0]-p[0])*f, p[1]+(q[1]-p[1])*f, surf(p[0]+(q[0]-p[0])*f, p[1]+(q[1]-p[1])*f)*TSTEP+0.01]); }
+      }
+      for(var ci=0;ci<chain.length-1;ci++){
+        var p=chain[ci], q=chain[ci+1];
+        if(Math.hypot(q[0]-p[0],q[1]-p[1])<=9) panel(p,q);
+      }
+      if(chain.length) posts.push([chain[chain.length-1][0], chain[chain.length-1][1], surf(chain[chain.length-1][0], chain[chain.length-1][1])*TSTEP+0.01]);
+      if(pos.length) geos.push({pos:pos, idx:idx, uv:uv});
+    });
+    if(geos.length){
+      var tex=gridTexture(kind==="net"?24:16, kind==="net"?0.16:0.22);
+      var mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, opacity:kind==="net"?0.6:0.55, side:THREE.DoubleSide, depthWrite:false, color:dark?0xb9cdbd:0x33473a});
+      var mesh=new THREE.Mesh(mergeGeo(geos), mat);
+      mesh.renderOrder=4;
+      terrGroup.add(mesh);
+    }
+    if(posts.length){
+      var im=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.007,0.007,1,6), new THREE.MeshStandardMaterial({color:0x3c4145, roughness:0.5, metalness:0.6}), posts.length);
+      var d=new THREE.Object3D(), H2=MU(heightM)+MU(0.15);
+      posts.forEach(function(p,i){
+        var w=W(p[0],p[1]);
+        d.position.set(w[0], p[2]+H2/2, w[1]);
+        d.scale.set(1,H2,1);
+        d.rotation.set(0,0,0);
+        d.updateMatrix(); im.setMatrixAt(i, d.matrix);
+      });
+      im.castShadow=false;
+      terrGroup.add(im);
+    }
+    return Object.keys(groups).length;
+  }
+  var netGroups=buildBarrier("net", 5);
+  var fenceGroups=buildBarrier("fence", 3);
+
+  /* ---------- 棚卸し結果 ---------- */
+  var counts={}, stepLenU=0, stairGroups={};
+  SEGS.forEach(function(sg){
+    counts[sg.cls]=(counts[sg.cls]||0)+1;
+    if(sg.cls==="step") stepLenU+=sg.len;
+    if(sg.cls==="stairs") stairGroups[sg.grp]=1;
+  });
+  var stats={total:N, counts:counts, floating:0,
+    stepLenM:Math.round(stepLenU*0.84), stairGroups:Object.keys(stairGroups).length,
+    netGroups:netGroups, fenceGroups:fenceGroups,
+    shedSites:LWSHEDS.map(function(r){ return {name:r.name, n:r.n, lenM:r.lenM}; })};
+  if(window.console && console.log) console.log("線画の実体化:", JSON.stringify(stats));
+  return stats;
+})();
+/* 検証パネルへ棚卸し結果を表示する */
+(function(){
+  var el=document.getElementById("lwStats");
+  if(!el || typeof LWSTATS==="undefined") return;
+  var c=LWSTATS.counts;
+  function n(k){ return c[k]||0; }
+  var rows=[
+    ["段差の縁", n("step"), "垂直な蹴上を持つ段として造形（総延長 約"+LWSTATS.stepLenM+"m）。主な場所：校舎地区のテラス・校庭の縁、寮地区の段の縁、グラウンド周縁、地形レイヤー _0x の境界と重なる線"],
+    ["法面（斜面のハッチング）", n("slope"), "上端の地表から下の地表へ下る斜面として造形。グラウンド北西〜北側の斜面帯、敷地北端の高い斜面、グラウンド西隅の斜面"],
+    ["段状の法面（鋸歯記号の帯）", n("bank"), "段々に下る段差として造形。校舎地区東側、一般教育棟東の帯"],
+    ["階段（屋外・建物入口）", n("stairs"), LWSTATS.stairGroups+"か所を段のある階段として造形。各棟の入口、武道館北側の段状テラス、寮地区の通路段など"],
+    ["既存の屋外階段と重なる線", n("ostep"), "既に階段として造形済みの範囲（寮側出入口・グラウンドへの降り口など8か所）と重なる線。その階段が実体"],
+    ["防球ネット", n("net"), LWSTATS.netGroups+"本の連なりを支柱＋ネット面（高さ5m）として造形。グラウンドの北西辺と南東辺に沿う破線群"],
+    ["フェンス", n("fence"), "テニスコート囲いの4辺を支柱＋フェンス面（高さ3m）として造形"],
+    ["駐車場のライン", n("parking"), "地面マーキングとして地形面に密着。校舎地区東側の駐車場（2列）"],
+    ["駐輪場の屋根", n("shed"), (function(){
+      var ss=LWSTATS.shedSites||[];
+      var withL=ss.filter(function(s){return s.n>0;}).map(function(s){ return s.name+" "+s.n+"本（屋根の輪郭線と小屋の範囲、延長 約"+s.lenM+"m）"; }).join("、");
+      var zero=ss.filter(function(s){return !s.n;}).map(function(s){ return s.name; }).join("、");
+      return "地面マーキングにはせず、柱＋屋根面（高さ約2.3m）として造形。線画から特定できた線群："+withL+"。"+(zero? zero+"は線画に該当する線が無く（0本）、寮生手帳の配置図の位置に柱＋屋根を造形している":"");
+    })()],
+    ["地面マーキング", n("marking")+n("dashmark"), "道路・通路・コートのラインと、破線・一点鎖線（中心線など）を、地形面に密着した平面マーキングとして造形"],
+    ["図面の外枠", n("frame"), "図面の枠線そのもので、現地に実物がないため3D化の対象外（ここに明示して除外）"]
+  ];
+  var sumAll=0; rows.forEach(function(r){ sumAll+=r[1]; });
+  rows.push(["合計", sumAll, "全分類の合計。原典の地面線画の総数 "+LWSTATS.total+" 本と一致する"]);
+  var html="<table><tr><th>分類</th><th>本数</th><th>変換先と主な場所</th></tr>";
+  rows.forEach(function(r){ html+="<tr><td>"+r[0]+"</td><td><b>"+r[1]+"</b></td><td>"+r[2]+"</td></tr>"; });
+  html+="</table>";
+  el.innerHTML=html;
 })();
 /* outdoor steps: ladder symbols in the base layers, rising one layer-step */
 var outSpecs=[];
@@ -2407,8 +3069,9 @@ REG.forEach(function(b){
   addRamp([[218,348,4],[227,303,3],[243,238,2],[258,168,1]], 6, "グラウンドへの斜面");
 })();
 
-/* ---- 駐輪場の屋根： 寮生手帳の配置図で駐輪場とされた位置（C棟北側・F棟南側・国際寮西側）に、
-   柱＋低い屋根面として立体化する（地表面の標示ではなく屋根のある構造物として） ---- */
+/* ---- 駐輪場の屋根： C棟北側・F棟南側は、原典の地面線画で特定した線群の範囲（LWSHEDS）に
+   柱＋低い屋根面として立体化する（地表面の標示ではなく屋根のある構造物として）。
+   国際寮西側は線画に該当する線が無いため、寮生手帳の配置図で駐輪場とされた位置に同じく柱＋屋根で造形する ---- */
 (function(){
   var roofM=new THREE.MeshStandardMaterial({color:dark?0x8b949c:0xb9c0c4, roughness:0.55, metalness:0.35});
   var postM=new THREE.MeshStandardMaterial({color:0x555b60, roughness:0.5, metalness:0.6});
@@ -2449,9 +3112,34 @@ REG.forEach(function(b){
       });
     });
   }
-  shed("cbld","near");    /* C棟の北側（E棟に面する側） */
-  shed("ryof","near");    /* F棟の南側（E棟に面する側） */
-  shed("kokusai","minX"); /* 国際寮の西側 */
+  /* 線画から特定した小屋の範囲（LWSHEDS の四隅）に、柱＋屋根面を建てる。範囲は線分群の実測の広がりそのもの */
+  function shedFromLines(bKey){
+    var rec=null;
+    if(typeof LWSHEDS!=="undefined") LWSHEDS.forEach(function(r){ if(r.key===bKey) rec=r; });
+    if(!rec || !rec.corners) return false;
+    var b=byKey(bKey); if(!b||!b.group) return false;
+    var cs=rec.corners;
+    var cenW=W((cs[0][0]+cs[2][0])/2, (cs[0][1]+cs[2][1])/2);
+    var roofY=b.base+MU(2.3); /* 駐輪場の屋根は実寸で約2.3mの高さ */
+    var roof=new THREE.Mesh(new THREE.BoxGeometry(rec.uLen*S, 0.02, rec.vWid*S), roofM);
+    roof.position.set(cenW[0], roofY, cenW[1]);
+    roof.rotation.y=-rec.ang;
+    roof.castShadow=true; roof.receiveShadow=true;
+    b.group.add(roof);
+    [[cs[0],cs[1]],[cs[3],cs[2]]].forEach(function(edge){
+      [0.03,0.28,0.52,0.76,0.97].forEach(function(f){
+        var px=edge[0][0]+(edge[1][0]-edge[0][0])*f, py=edge[0][1]+(edge[1][1]-edge[0][1])*f;
+        var wp=W(px,py);
+        var post=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,MU(2.3),8), postM);
+        post.position.set(wp[0], b.base+MU(2.3)/2, wp[1]);
+        b.group.add(post);
+      });
+    });
+    return true;
+  }
+  if(!shedFromLines("cbld")) shed("cbld","near");   /* C棟の北側（E棟に面する側）： 線画の線群から造形 */
+  if(!shedFromLines("ryof")) shed("ryof","near");   /* F棟の南側（E棟に面する側）： 線画の線群から造形 */
+  shed("kokusai","minX"); /* 国際寮の西側： 線画に該当線が無いため、手帳の配置図の位置で造形 */
 })();
 
 /* ---- camera fly / views ---- */
@@ -2494,7 +3182,7 @@ document.querySelectorAll(".vbtn").forEach(function(btn){
 var labelsOn=true, stairsOn=true;
 var btnLabels=document.getElementById("btnLabels"), btnStairs=document.getElementById("btnStairs"), btnRotate=document.getElementById("btnRotate"), btnHeight=document.getElementById("btnHeight");
 btnLabels.addEventListener("click",function(){ labelsOn=!labelsOn; labels.forEach(function(l){l.visible=labelsOn;}); btnLabels.textContent=labelsOn?"🏷 ラベル ON":"🏷 ラベル OFF"; btnLabels.setAttribute("aria-pressed",labelsOn); });
-btnStairs.addEventListener("click",function(){ stairsOn=!stairsOn; stepMeshes.forEach(function(m){m.visible=stairsOn;}); if(outSteps) outSteps.visible=stairsOn; btnStairs.textContent=stairsOn?"階段 ON":"階段 OFF"; btnStairs.setAttribute("aria-pressed",stairsOn); });
+btnStairs.addEventListener("click",function(){ stairsOn=!stairsOn; stepMeshes.forEach(function(m){m.visible=stairsOn;}); if(outSteps) outSteps.visible=stairsOn; if(lwStairsMesh) lwStairsMesh.visible=stairsOn; btnStairs.textContent=stairsOn?"階段 ON":"階段 OFF"; btnStairs.setAttribute("aria-pressed",stairsOn); });
 btnRotate.addEventListener("click",function(){ controls.autoRotate=!controls.autoRotate; controls.autoRotateSpeed=0.7; btnRotate.textContent=controls.autoRotate?"⟳ 自動回転 ON":"⟳ 自動回転 OFF"; btnRotate.setAttribute("aria-pressed",controls.autoRotate); });
 var heightMul=1;
 btnHeight.addEventListener("click",function(){
