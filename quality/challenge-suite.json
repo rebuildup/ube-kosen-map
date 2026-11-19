@@ -39,6 +39,18 @@
       ]
     },
     {
+      "id": "reject-floor-level-mismatch",
+      "expect": "reject",
+      "diagnostic": "DATA_INTEGRITY_VIOLATION: amenity toilet-mens-ippan-1f floor level z=2 disagrees with floorId \"1F\"",
+      "patches": [
+        {
+          "path": "src/data/mapAmenities.json",
+          "before": "\"y\": 2243.46,\n    \"z\": 1,",
+          "after": "\"y\": 2243.46,\n    \"z\": 2,"
+        }
+      ]
+    },
+    {
       "id": "accept-cosmetic-rename",
       "expect": "accept",
       "patches": [

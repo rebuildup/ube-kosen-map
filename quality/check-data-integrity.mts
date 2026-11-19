@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import { CAMPUS_MAP_BOUNDS } from "../src/data/buildings.ts";
 import { BUILDING_FLOOR_CONFIGS } from "../src/data/floorConfig.ts";
 import amenitiesJson from "../src/data/mapAmenities.json" with { type: "json" };
+import { floorNumberFromId } from "../src/components/map/utils/viewport.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const violations: string[] = [];
@@ -150,6 +151,18 @@ if (!Array.isArray(amenitiesJson)) {
         ) {
           violate(
             `amenity ${label} references unknown floor "${raw.floorId}" in ${raw.buildingId}`,
+          );
+        }
+        // z is the floor number shown by the renderer; it must agree with
+        // the numeric prefix of floorId (e.g. "2F" -> z 2).
+        if (
+          typeof raw.floorId === "string" &&
+          typeof raw.z === "number" &&
+          floorNumberFromId(raw.floorId) !== null &&
+          floorNumberFromId(raw.floorId) !== raw.z
+        ) {
+          violate(
+            `amenity ${label} floor level z=${raw.z} disagrees with floorId "${raw.floorId}"`,
           );
         }
       }
