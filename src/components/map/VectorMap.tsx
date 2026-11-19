@@ -13,6 +13,7 @@ import FloorSelector from "./FloorSelector";
 import { ClusterPin, HighlightPin, MapPin, getPointColor } from "./MapPin";
 import ZoomControls from "./ZoomControls";
 import { calculatePanViewBox } from "./utils/dragPan";
+import { clusterPointsOnScreen } from "./utils/screenClustering";
 import { addTouchPointer, removeTouchPointer } from "./utils/pointerGesture";
 import { shouldEmitTouchMapClick } from "./utils/touchMapClick";
 import { shouldIgnoreTouchTarget } from "./utils/touchTargetGuard";
@@ -27,6 +28,9 @@ const ADJUSTED_MAP_BOUNDS = {
 const DEFAULT_ROTATION = 90;
 const CAMPUS_MAP_URL = "/campus-map3.svg?v=20260305-1";
 const DRAG_CURSOR_ACTIVATION_DISTANCE = 3;
+const EXCLUDED_CLUSTER_POINT_IDS: ReadonlySet<string> = new Set([
+  "default-center-anchor",
+]);
 
 export interface MapVisualOptions {
   fillPrimary: string;
@@ -2957,13 +2961,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const createClusters = useCallback((): PointCluster[] => {
     if (clusterSourcePoints.length === 0) return [];
 
-    const getClusterDistanceThreshold = (point: InteractivePoint): number => {
-      if (point.type === "toilet" || point.type === "trash") {
-        return AMENITY_CLUSTER_DISTANCE_PX;
-      }
-      return BASE_CLUSTER_DISTANCE_PX;
-    };
-
     const toScreenPoint = (
       point: InteractivePoint,
     ): { x: number; y: number } => {
@@ -2975,71 +2972,15 @@ const VectorMap: React.FC<VectorMapProps> = ({
       return screen ?? { x: rotated.x, y: rotated.y };
     };
 
-    const calculateDistancePx = (
-      p1: { x: number; y: number },
-      p2: { x: number; y: number },
-    ): number => {
-      return Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    };
-
-    const clusters: PointCluster[] = [];
-    const usedPoints = new Set<string>();
-    const candidatePoints = clusterSourcePoints.filter(
-      (point) => point.id !== "default-center-anchor",
+    return clusterPointsOnScreen(
+      clusterSourcePoints,
+      toScreenPoint,
+      (point) =>
+        point.type === "toilet" || point.type === "trash"
+          ? AMENITY_CLUSTER_DISTANCE_PX
+          : BASE_CLUSTER_DISTANCE_PX,
+      EXCLUDED_CLUSTER_POINT_IDS,
     );
-    const screenPointCache = new Map<string, { x: number; y: number }>();
-    const getCachedScreenPoint = (point: InteractivePoint) => {
-      const cached = screenPointCache.get(point.id);
-      if (cached) return cached;
-      const next = toScreenPoint(point);
-      screenPointCache.set(point.id, next);
-      return next;
-    };
-
-    for (const point of candidatePoints) {
-      if (usedPoints.has(point.id)) continue;
-
-      const clusterPoints: InteractivePoint[] = [point];
-      usedPoints.add(point.id);
-      const pointScreen = getCachedScreenPoint(point);
-
-      // 近くの他のポイントを探す
-      for (const otherPoint of candidatePoints) {
-        if (usedPoints.has(otherPoint.id)) continue;
-
-        const otherScreen = getCachedScreenPoint(otherPoint);
-        const pairThreshold = Math.max(
-          getClusterDistanceThreshold(point),
-          getClusterDistanceThreshold(otherPoint),
-        );
-        const distance = calculateDistancePx(pointScreen, otherScreen);
-        if (distance <= pairThreshold) {
-          clusterPoints.push(otherPoint);
-          usedPoints.add(otherPoint.id);
-        }
-      }
-
-      // クラスターの中心座標を計算
-      const centerX =
-        clusterPoints.reduce((sum, p) => sum + p.coordinates.x, 0) /
-        clusterPoints.length;
-      const centerY =
-        clusterPoints.reduce((sum, p) => sum + p.coordinates.y, 0) /
-        clusterPoints.length;
-
-      // 一つのクラスターとして作成（条件を簡素化）
-      clusters.push({
-        coordinates: { x: centerX, y: centerY },
-        count: clusterPoints.length,
-        id: `cluster-${clusterPoints
-          .map((p) => p.id)
-          .sort((a: string, b: string) => a.localeCompare(b))
-          .join("-")}`,
-        points: clusterPoints,
-      });
-    }
-
-    return clusters;
   }, [clusterSourcePoints, transformPinCoord, svgToScreen]);
 
   const clusters = useMemo(() => createClusters(), [createClusters]);
