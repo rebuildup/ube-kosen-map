@@ -1,5 +1,5 @@
-import React from "react";
-import { BuildingFloorConfig } from "../../data/floorConfig";
+import type React from "react";
+import type { BuildingFloorConfig } from "../../data/floorConfig";
 
 interface FloorSelectorProps {
   building: BuildingFloorConfig;
@@ -14,13 +14,15 @@ const FloorSelector: React.FC<FloorSelectorProps> = ({
 }) => {
   if (building.floors.length <= 1) return null;
   return (
-    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-10">
+    <div className="map-ui-control absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-10">
       {[...building.floors].reverse().map((floor) => {
         const isSelected = floor.id === selectedFloorId;
         return (
           <button
+            type="button"
             key={floor.id}
             onClick={() => onSelectFloor(floor.id)}
+            aria-pressed={isSelected}
             className={`w-12 h-12 rounded-full shadow-md text-sm font-bold transition-all ${
               isSelected
                 ? "bg-blue-500 text-white scale-110 shadow-lg"

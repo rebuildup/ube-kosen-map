@@ -11,6 +11,16 @@ interface Transform {
   translateY: number;
 }
 
+interface TouchPointLike {
+  clientX: number;
+  clientY: number;
+}
+
+type TouchListLike = {
+  length: number;
+  [index: number]: TouchPointLike;
+};
+
 interface UseSimpleMapZoomPanOptions {
   width: number;
   height: number;
@@ -38,11 +48,8 @@ export const useSimpleMapZoomPan = ({
   });
 
   const [isDragging, setIsDragging] = useState(false);
-  const [lastMousePos, setLastMousePos] = useState<Point>({ x: 0, y: 0 });
-
-  // タッチ操作用の状態
-  const [lastTouchDistance, setLastTouchDistance] = useState<number>(0);
-  const [, setLastTouchCenter] = useState<Point>({ x: 0, y: 0 });
+  const lastMousePosRef = useRef<Point>({ x: 0, y: 0 });
+  const lastTouchDistanceRef = useRef<number>(0);
 
   // Transform適用関数
   const applyTransform = useCallback(
@@ -160,11 +167,12 @@ export const useSimpleMapZoomPan = ({
       const containerRect = containerRef.current.getBoundingClientRect();
       const centerX = containerRect.width / 2;
       const centerY = containerRect.height / 2;
+      const clampedScale = Math.max(minScale, Math.min(maxScale, targetScale));
 
       applyTransform({
-        scale: Math.max(minScale, Math.min(maxScale, targetScale)),
-        translateX: centerX - point.x * targetScale,
-        translateY: centerY - point.y * targetScale,
+        scale: clampedScale,
+        translateX: centerX - point.x * clampedScale,
+        translateY: centerY - point.y * clampedScale,
       });
     },
     [minScale, maxScale, applyTransform],
@@ -176,8 +184,10 @@ export const useSimpleMapZoomPan = ({
       if (!containerRef.current) return { x: 0, y: 0 };
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      const x = (screenX - containerRect.left - transform.translateX) / transform.scale;
-      const y = (screenY - containerRect.top - transform.translateY) / transform.scale;
+      const x =
+        (screenX - containerRect.left - transform.translateX) / transform.scale;
+      const y =
+        (screenY - containerRect.top - transform.translateY) / transform.scale;
 
       return {
         x: Math.max(0, Math.min(width, x)),
@@ -188,7 +198,7 @@ export const useSimpleMapZoomPan = ({
   );
 
   // タッチポイント間の距離を計算
-  const getTouchDistance = useCallback((touches: React.TouchList): number => {
+  const getTouchDistance = useCallback((touches: TouchListLike): number => {
     if (touches.length < 2) return 0;
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
@@ -196,7 +206,7 @@ export const useSimpleMapZoomPan = ({
   }, []);
 
   // タッチポイントの中心点を計算
-  const getTouchCenter = useCallback((touches: React.TouchList): Point => {
+  const getTouchCenter = useCallback((touches: TouchListLike): Point => {
     if (touches.length === 1) {
       return { x: touches[0].clientX, y: touches[0].clientY };
     }
@@ -211,7 +221,7 @@ export const useSimpleMapZoomPan = ({
     if (e.button !== 0) return; // 左クリックのみ
 
     setIsDragging(true);
-    setLastMousePos({ x: e.clientX, y: e.clientY });
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     e.preventDefault();
   }, []);
 
@@ -219,8 +229,8 @@ export const useSimpleMapZoomPan = ({
     (e: MouseEvent) => {
       if (!isDragging) return;
 
-      const deltaX = e.clientX - lastMousePos.x;
-      const deltaY = e.clientY - lastMousePos.y;
+      const deltaX = e.clientX - lastMousePosRef.current.x;
+      const deltaY = e.clientY - lastMousePosRef.current.y;
 
       applyTransform({
         ...transform,
@@ -228,9 +238,9 @@ export const useSimpleMapZoomPan = ({
         translateY: transform.translateY + deltaY,
       });
 
-      setLastMousePos({ x: e.clientX, y: e.clientY });
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     },
-    [isDragging, lastMousePos, transform, applyTransform],
+    [isDragging, transform, applyTransform],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -253,42 +263,43 @@ export const useSimpleMapZoomPan = ({
       if (e.touches.length === 1) {
         // シングルタッチ：ドラッグ開始
         setIsDragging(true);
-        setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        lastMousePosRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
       } else if (e.touches.length === 2) {
         // マルチタッチ：ピンチ開始
         setIsDragging(false);
         const distance = getTouchDistance(e.touches);
-        const center = getTouchCenter(e.touches);
-        setLastTouchDistance(distance);
-        setLastTouchCenter(center);
+        lastTouchDistanceRef.current = distance;
       }
     },
-    [getTouchDistance, getTouchCenter],
+    [getTouchDistance],
   );
+
+  const isOverMapCardOverlay = useCallback((event: Event): boolean => {
+    const eventPath =
+      typeof event.composedPath === "function" ? event.composedPath() : [];
+
+    for (const pathTarget of eventPath) {
+      if (
+        pathTarget instanceof Element &&
+        pathTarget.closest(".map-card-overlay")
+      ) {
+        return true;
+      }
+    }
+
+    const target = event.target;
+    return target instanceof Element && !!target.closest(".map-card-overlay");
+  }, []);
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
       if (!containerRef.current) return;
 
-      // Check if touch is over a card area
-      const cardElements = document.querySelectorAll(".map-card-overlay");
-      let isOverCard = false;
-
-      for (const cardElement of cardElements) {
-        const rect = cardElement.getBoundingClientRect();
-        if (
-          e.touches[0].clientX >= rect.left &&
-          e.touches[0].clientX <= rect.right &&
-          e.touches[0].clientY >= rect.top &&
-          e.touches[0].clientY <= rect.bottom
-        ) {
-          isOverCard = true;
-          break;
-        }
-      }
-
       // If over card, don't interfere with card touch events
-      if (isOverCard) {
+      if (isOverMapCardOverlay(e)) {
         return;
       }
 
@@ -304,8 +315,8 @@ export const useSimpleMapZoomPan = ({
 
       if (e.touches.length === 1 && isDragging) {
         // シングルタッチ：ドラッグ
-        const deltaX = e.touches[0].clientX - lastMousePos.x;
-        const deltaY = e.touches[0].clientY - lastMousePos.y;
+        const deltaX = e.touches[0].clientX - lastMousePosRef.current.x;
+        const deltaY = e.touches[0].clientY - lastMousePosRef.current.y;
 
         applyTransform({
           ...transform,
@@ -313,15 +324,21 @@ export const useSimpleMapZoomPan = ({
           translateY: transform.translateY + deltaY,
         });
 
-        setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        lastMousePosRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
       } else if (e.touches.length === 2) {
         // マルチタッチ：ピンチズーム
-        const distance = getTouchDistance(e.touches as unknown as React.TouchList);
-        const center = getTouchCenter(e.touches as unknown as React.TouchList);
+        const distance = getTouchDistance(e.touches);
+        const center = getTouchCenter(e.touches);
 
-        if (lastTouchDistance > 0) {
-          const scaleFactor = distance / lastTouchDistance;
-          const newScale = Math.max(minScale, Math.min(maxScale, transform.scale * scaleFactor));
+        if (lastTouchDistanceRef.current > 0) {
+          const scaleFactor = distance / lastTouchDistanceRef.current;
+          const newScale = Math.max(
+            minScale,
+            Math.min(maxScale, transform.scale * scaleFactor),
+          );
 
           if (newScale !== transform.scale && containerRef.current) {
             const containerRect = containerRef.current.getBoundingClientRect();
@@ -332,101 +349,72 @@ export const useSimpleMapZoomPan = ({
 
             applyTransform({
               scale: newScale,
-              translateX: centerX - (centerX - transform.translateX) * scaleRatio,
-              translateY: centerY - (centerY - transform.translateY) * scaleRatio,
+              translateX:
+                centerX - (centerX - transform.translateX) * scaleRatio,
+              translateY:
+                centerY - (centerY - transform.translateY) * scaleRatio,
             });
           }
         }
 
-        setLastTouchDistance(distance);
-        setLastTouchCenter(center);
+        lastTouchDistanceRef.current = distance;
       }
     },
     [
       isDragging,
-      lastMousePos,
       transform,
       applyTransform,
-      lastTouchDistance,
       getTouchDistance,
       getTouchCenter,
       minScale,
       maxScale,
+      isOverMapCardOverlay,
     ],
   );
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
-    if (!containerRef.current) return;
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      if (!containerRef.current) return;
+      const overCard = isOverMapCardOverlay(e);
 
-    // Check if touch is over a card area
-    const cardElements = document.querySelectorAll(".map-card-overlay");
-    let isOverCard = false;
-
-    const lastTouch = e.changedTouches[0];
-    for (const cardElement of cardElements) {
-      const rect = cardElement.getBoundingClientRect();
-      if (
-        lastTouch.clientX >= rect.left &&
-        lastTouch.clientX <= rect.right &&
-        lastTouch.clientY >= rect.top &&
-        lastTouch.clientY <= rect.bottom
-      ) {
-        isOverCard = true;
-        break;
+      // cancelableイベントのみでpreventDefaultを試行
+      if (!overCard && e.cancelable) {
+        try {
+          e.preventDefault();
+        } catch (error) {
+          // passive listenerでpreventDefaultが失敗した場合は無視
+          console.debug("preventDefault failed on touchend:", error);
+        }
       }
-    }
 
-    // If over card, don't interfere with card touch events
-    if (isOverCard) {
-      return;
-    }
-
-    // cancelableイベントのみでpreventDefaultを試行
-    if (e.cancelable) {
-      try {
-        e.preventDefault();
-      } catch (error) {
-        // passive listenerでpreventDefaultが失敗した場合は無視
-        console.debug("preventDefault failed on touchend:", error);
+      if (e.touches.length === 0) {
+        // 全てのタッチが終了
+        setIsDragging(false);
+        lastTouchDistanceRef.current = 0;
+      } else if (overCard) {
+        // オーバーレイ上で終了した場合も状態を確実にリセット
+        setIsDragging(false);
+        lastTouchDistanceRef.current = 0;
+      } else if (e.touches.length === 1) {
+        // マルチタッチからシングルタッチに移行
+        lastTouchDistanceRef.current = 0;
+        setIsDragging(true);
+        lastMousePosRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
       }
-    }
-
-    if (e.touches.length === 0) {
-      // 全てのタッチが終了
-      setIsDragging(false);
-      setLastTouchDistance(0);
-    } else if (e.touches.length === 1) {
-      // マルチタッチからシングルタッチに移行
-      setLastTouchDistance(0);
-      setIsDragging(true);
-      setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-    }
-  }, []);
+    },
+    [isOverMapCardOverlay],
+  );
 
   // ホイールイベントハンドラー
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if (!containerRef.current) return;
 
-      // Check if wheel event is over a card area
-      const cardElements = document.querySelectorAll(".map-card-overlay");
-      let isOverCard = false;
-
-      for (const cardElement of cardElements) {
-        const rect = cardElement.getBoundingClientRect();
-        if (
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom
-        ) {
-          isOverCard = true;
-          break;
-        }
-      }
-
       // If over card, allow card scrolling
-      if (isOverCard) {
+      if (isOverMapCardOverlay(e)) {
         return;
       }
 
@@ -437,7 +425,10 @@ export const useSimpleMapZoomPan = ({
       const mouseY = e.clientY - containerRect.top;
 
       const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
-      const newScale = Math.max(minScale, Math.min(maxScale, transform.scale * scaleFactor));
+      const newScale = Math.max(
+        minScale,
+        Math.min(maxScale, transform.scale * scaleFactor),
+      );
 
       if (newScale === transform.scale) return;
 
@@ -449,7 +440,7 @@ export const useSimpleMapZoomPan = ({
         translateY: mouseY - (mouseY - transform.translateY) * scaleRatio,
       });
     },
-    [transform, minScale, maxScale, applyTransform],
+    [transform, minScale, maxScale, applyTransform, isOverMapCardOverlay],
   );
 
   // イベントリスナーの設定
@@ -466,6 +457,9 @@ export const useSimpleMapZoomPan = ({
       passive: false,
     });
     container.addEventListener("touchend", handleTouchEnd, { passive: false });
+    container.addEventListener("touchcancel", handleTouchEnd, {
+      passive: false,
+    });
 
     // ホイールイベント
     container.addEventListener("wheel", handleWheel, { passive: false });
@@ -475,9 +469,16 @@ export const useSimpleMapZoomPan = ({
       document.removeEventListener("mouseup", handleMouseUp);
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
+      container.removeEventListener("touchcancel", handleTouchEnd);
       container.removeEventListener("wheel", handleWheel);
     };
-  }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd, handleWheel]);
+  }, [
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchMove,
+    handleTouchEnd,
+    handleWheel,
+  ]);
 
   // 初期化
   useEffect(() => {
