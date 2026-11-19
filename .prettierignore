@@ -1,0 +1,13 @@
+dist/
+node_modules/
+.agents/
+.claude/
+docs/
+public/
+templates/
+scripts/
+*.svg
+*.lock
+bun.lock
+skills-lock.json
+package-lock.json

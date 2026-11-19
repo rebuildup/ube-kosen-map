@@ -107,9 +107,7 @@ export const MapPin: React.FC<MapPinProps> = ({
   const IconComponent = POINT_TYPE_ICONS[type];
   const ICON_SIZE = 12;
   const twoDigitOnly =
-    pinLabelContent != null && pinLabelContent !== ""
-      ? pinLabelContent
-      : null;
+    pinLabelContent != null && pinLabelContent !== "" ? pinLabelContent : null;
   const showTextInsidePin = twoDigitOnly != null;
 
   // Google Maps standard pin size - shorter pointer

@@ -4,28 +4,28 @@ This document refines [execution roles](execution-roles.md) and does not redefin
 
 ## Four different concepts
 
-| Dimension | Meaning | Canonical source |
-| --- | --- | --- |
-| Actor role | Coordinator, Supervisor, Worker, Reviewer: who is responsible and has authority | execution-roles / ADR-0019 |
-| Execution function | what an attempt does: implement, refactor, review, verify, recover, reconcile, cleanup, etc. | the task's objective, acceptance and applicable Skills |
-| Attempt class | observational / mutable / durable: isolation, identity, fencing, checkpoint obligations | execution-roles / parallel-orchestration / agent-recovery |
-| Presentation | human-facing Herdr workspace/tab/pane, label and capacity | herdr-runtime layout adapter |
+| Dimension          | Meaning                                                                                      | Canonical source                                          |
+| ------------------ | -------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Actor role         | Coordinator, Supervisor, Worker, Reviewer: who is responsible and has authority              | execution-roles / ADR-0019                                |
+| Execution function | what an attempt does: implement, refactor, review, verify, recover, reconcile, cleanup, etc. | the task's objective, acceptance and applicable Skills    |
+| Attempt class      | observational / mutable / durable: isolation, identity, fencing, checkpoint obligations      | execution-roles / parallel-orchestration / agent-recovery |
+| Presentation       | human-facing Herdr workspace/tab/pane, label and capacity                                    | herdr-runtime layout adapter                              |
 
 A Worker may perform refactoring or verification; a Reviewer is a specialized Worker. Recovery is a cross-cutting operation, not a permanent agent process or an unconditional permission to kill another attempt. Device is a host/tool resource, not an actor role. A tab is **never** evidence of task/attempt completion, authorization or ownership.
 
 ## Function vocabulary and applicable contract
 
-| Function | Work and outputs | Governing boundary |
-| --- | --- | --- |
-| coordinate, supervise, integrate | task decomposition, observation, result admission | only the integration authority may admit results |
-| implement, fix, refactor | mutable candidate creation, changes and repair | explicit writable-state ownership, immutable result and validation |
-| research | bounded investigation and alternatives | observational unless promoted due to mutation |
-| review | independent critical evaluation | cold review independence; non-authoring by default |
-| verify, benchmark | tests and measurements on a pinned artifact | validated SHA/environment identity and exclusive singleton device lease when needed |
-| recover | discover and safely resume interrupted attempts | atomic ownership transfer, fencing and stale-result exclusion |
-| reconcile | align real remote/branch/PR/runtime state with declared state | side effects verified and authorized before changing it |
-| cleanup | free completed session/workspace/branch resources | no unique uncommitted work, unreconciled side effects or uncollected evidence |
-| device, serve, logs | host-native applications, singleton GUI/device, background service and diagnostics | explicitly leased mutable service/device state where applicable |
+| Function                         | Work and outputs                                                                   | Governing boundary                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| coordinate, supervise, integrate | task decomposition, observation, result admission                                  | only the integration authority may admit results                                    |
+| implement, fix, refactor         | mutable candidate creation, changes and repair                                     | explicit writable-state ownership, immutable result and validation                  |
+| research                         | bounded investigation and alternatives                                             | observational unless promoted due to mutation                                       |
+| review                           | independent critical evaluation                                                    | cold review independence; non-authoring by default                                  |
+| verify, benchmark                | tests and measurements on a pinned artifact                                        | validated SHA/environment identity and exclusive singleton device lease when needed |
+| recover                          | discover and safely resume interrupted attempts                                    | atomic ownership transfer, fencing and stale-result exclusion                       |
+| reconcile                        | align real remote/branch/PR/runtime state with declared state                      | side effects verified and authorized before changing it                             |
+| cleanup                          | free completed session/workspace/branch resources                                  | no unique uncommitted work, unreconciled side effects or uncollected evidence       |
+| device, serve, logs              | host-native applications, singleton GUI/device, background service and diagnostics | explicitly leased mutable service/device state where applicable                     |
 
 Project-specific functions may be added by extending this vocabulary and its operating contract. Do not let a UI lane or role string itself grant mutating capabilities. Under the dedicated non-authoring Supervisor profile (ADR-0035), `implement`/`fix`/`refactor` must be executed by a separate Worker or scoped deterministic executor, not by self-promoting the Supervisor's current session. Tool access must be enforced by runtime permissions, remote credentials, and a constrained broker.
 
@@ -40,6 +40,7 @@ project-init's existing [parallel-orchestration](../skills/parallel-orchestratio
 Default human-facing tabs are \`Ctrl\`, \`Work\`, \`Device\`. Multiple functions share each tab without losing their logical identity. For example, Implement, Refactor, Review and Verify may all be placed in Work while their evidence/ownership rules remain different. Recover/Reconcile/Cleanup ordinarily belong to Ctrl, but are created only when work requires them. Device is a visual grouping for tool/host work, not authority to operate a physical device.
 
 The Herdr adapter may:
+
 - reuse an existing project workspace when identity is unambiguous;
 - create one project-root anchored workspace if absent, leaving its root shell in Ctrl;
 - use an existing named functional tab; otherwise create only a needed tab;
@@ -48,6 +49,7 @@ The Herdr adapter may:
 - refuse ambiguous, conflicting, unknown or incomplete runtime layout inventory.
 
 The Herdr adapter must not:
+
 - create a workspace for each execution attempt;
 - treat each function as a mandatory tab or each native subagent as a pane;
 - rerun work merely because a pane says \`idle\`/\`done\`;
@@ -55,7 +57,7 @@ The Herdr adapter must not:
 - silently switch machine/provider, close or move a live user's pane, perform \`layout.apply\` or steal focus;
 - infer worktree, issue, task or device ownership from a Herdr ID or label.
 
-Human rearrangements are not automatically reverted. Future reorganizations require a separate explicit non-destructive reconciliation plan; moving active panes changes IDs and must update transient references. Herdr's client-specific screen width determines visual readability, so four panes is a *starting bound*, not a universal claim of optimality.
+Human rearrangements are not automatically reverted. Future reorganizations require a separate explicit non-destructive reconciliation plan; moving active panes changes IDs and must update transient references. Herdr's client-specific screen width determines visual readability, so four panes is a _starting bound_, not a universal claim of optimality.
 
 ## Project-specific settings and evaluation
 

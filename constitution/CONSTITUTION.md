@@ -110,7 +110,6 @@ Constitutionへの追加は、Operating Model / Practice / Skillでは表現で�
 
 non-constitutional ruleは、能力向上・代替mechanism・eval evidenceによって不要になった場合、意図的に降格・削除できます。
 
-
 ## Project identity
 
 This repository owns the Ube Kosen map web application source. Map data/content identity and UI/rendering behavior must remain explicit when validating changes.

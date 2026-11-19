@@ -1430,9 +1430,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const multiTouchModeRef = useRef<"rotate" | "zoom" | null>(null);
 
   type TouchCollection =
-    | TouchList
-    | React.TouchList
-    | Array<{ clientX: number; clientY: number }>;
+    TouchList | React.TouchList | Array<{ clientX: number; clientY: number }>;
 
   const getTouchDistance = useCallback((touches: TouchCollection): number => {
     if (touches.length < 2) return 0;
@@ -3316,7 +3314,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
       }
 
       // 3. デフォルト方向で連鎖的な反転を試行（最大3段階まで）
-      labelRect = calculateLabelRect(pos, defaultDirection);
       let chainResult = tryFlipChain(
         i,
         defaultDirection,
@@ -3400,8 +3397,8 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
   const isAreaFocusedInActiveBuilding = Boolean(
     focusedAreaPoint?.buildingId &&
-      activeBuilding &&
-      focusedAreaPoint.buildingId === activeBuilding.id,
+    activeBuilding &&
+    focusedAreaPoint.buildingId === activeBuilding.id,
   );
 
   const focusedAreaPolygonSvg = useMemo(() => {
@@ -3935,11 +3932,7 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
                     svgCoordinate={cluster.coordinates}
                     type={
                       point.type as
-                        | "event"
-                        | "exhibit"
-                        | "stall"
-                        | "toilet"
-                        | "trash"
+                        "event" | "exhibit" | "stall" | "toilet" | "trash"
                     }
                     color={point.color}
                     pinLabel={point.pinLabel}

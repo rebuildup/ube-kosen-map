@@ -51,11 +51,11 @@ A specialized Worker that evaluates a candidate artifact/evidence. It is non-aut
 
 ## Attempt classes
 
-| Class | Typical work | Mutable source/runtime ownership | Durable recovery |
-| --- | --- | --- | --- |
-| Observational | research, exploration, review, diagnostics | no | not required by default |
-| Mutable | independent implementation or stateful execution | yes, explicit boundary required | optional unless continuity requires it |
-| Durable | Issue-level / long-running / background / remote work | as applicable | required |
+| Class         | Typical work                                          | Mutable source/runtime ownership | Durable recovery                       |
+| ------------- | ----------------------------------------------------- | -------------------------------- | -------------------------------------- |
+| Observational | research, exploration, review, diagnostics            | no                               | not required by default                |
+| Mutable       | independent implementation or stateful execution      | yes, explicit boundary required  | optional unless continuity requires it |
+| Durable       | Issue-level / long-running / background / remote work | as applicable                    | required                               |
 
 The lightest class that satisfies constitutional obligations should be used.
 

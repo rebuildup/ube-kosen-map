@@ -48,7 +48,7 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
       try {
         savedLanguage = window.localStorage.getItem("language");
       } catch {
-        savedLanguage = null;
+        // Ignore storage read failures in restricted environments.
       }
       if (savedLanguage && (savedLanguage === "en" || savedLanguage === "ja")) {
         return savedLanguage;
