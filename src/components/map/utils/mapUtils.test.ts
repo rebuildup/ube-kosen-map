@@ -1,142 +1,80 @@
 import { describe, expect, it } from "vitest";
 
-import type { InteractivePoint } from "../../../types/map";
-import {
-  adaptiveCluster,
-  clusterPoints,
-  dbscanCluster,
-  findClusterForPoint,
-  getClusterBounds,
-  getClusterTypes,
-  isPointInCluster,
-} from "./clustering";
 import { calculatePanViewBox } from "./dragPan";
 import { addTouchPointer, removeTouchPointer } from "./pointerGesture";
-import {
-  disableSvgChildHitTesting,
-  enableSvgChildHitTesting,
-  getDragHitTestingClassName,
-} from "./svgHitTesting";
+import { clusterPointsOnScreen } from "./screenClustering";
 import { shouldEmitTouchMapClick } from "./touchMapClick";
 import { shouldIgnoreTouchTarget } from "./touchTargetGuard";
 
-const makePoint = (
-  id: string,
-  x: number,
-  y: number,
-  type: InteractivePoint["type"] = "toilet",
-): InteractivePoint => ({
+const makePoint = (id: string, x: number, y: number) => ({
   coordinates: { x, y },
   id,
-  title: id,
-  type,
 });
 
-describe("clusterPoints", () => {
-  it("returns all points as singles when clustering is disabled", () => {
-    const points = [makePoint("a", 0, 0), makePoint("b", 1, 1)];
-    const result = clusterPoints(points, { enabled: false });
-    expect(result.clusters).toHaveLength(0);
-    expect(result.singles).toHaveLength(2);
+describe("clusterPointsOnScreen", () => {
+  const identityScreen = (p: { coordinates: { x: number; y: number } }) => ({
+    x: p.coordinates.x,
+    y: p.coordinates.y,
   });
+  const threshold = () => 50;
 
-  it("groups nearby points into a cluster", () => {
+  it("groups nearby points and reports a centroid in map coordinates", () => {
     const points = [
       makePoint("a", 0, 0),
       makePoint("b", 10, 0),
       makePoint("c", 0, 10),
       makePoint("far", 1000, 1000),
     ];
-    const result = clusterPoints(points, { minPoints: 2, radius: 50 });
-    expect(result.clusters).toHaveLength(1);
-    expect(result.clusters[0].count).toBe(3);
-    expect(result.clusters[0].points.map((p) => p.id).sort()).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
-    expect(result.singles.map((p) => p.id)).toEqual(["far"]);
+    const clusters = clusterPointsOnScreen(points, identityScreen, threshold);
+    expect(clusters).toHaveLength(2);
+    const grouped = clusters.find((c) => c.count === 3);
+    expect(grouped?.coordinates).toEqual({ x: 10 / 3, y: 10 / 3 });
+    expect(grouped?.points.map((p) => p.id).sort()).toEqual(["a", "b", "c"]);
+    expect(clusters.find((c) => c.count === 1)?.points[0].id).toBe("far");
   });
 
-  it("computes cluster centroid", () => {
-    const points = [makePoint("a", 0, 0), makePoint("b", 10, 20)];
-    const result = clusterPoints(points, { minPoints: 2, radius: 100 });
-    expect(result.clusters[0].coordinates).toEqual({ x: 5, y: 10 });
-  });
-});
-
-describe("dbscanCluster", () => {
-  it("does not cluster points below density threshold", () => {
-    const points = [makePoint("a", 0, 0), makePoint("b", 10, 0)];
-    const result = dbscanCluster(points, { minPoints: 3, radius: 50 });
-    expect(result.clusters).toHaveLength(0);
-    expect(result.singles).toHaveLength(2);
+  it("keeps distant points as singleton clusters", () => {
+    const points = [makePoint("a", 0, 0), makePoint("far", 1000, 1000)];
+    const clusters = clusterPointsOnScreen(points, identityScreen, threshold);
+    expect(clusters).toHaveLength(2);
+    expect(clusters.every((c) => c.count === 1)).toBe(true);
   });
 
-  it("clusters density-connected points", () => {
-    const points = [
-      makePoint("a", 0, 0),
-      makePoint("b", 10, 0),
-      makePoint("c", 20, 0),
-      makePoint("far", 1000, 1000),
-    ];
-    const result = dbscanCluster(points, { minPoints: 2, radius: 15 });
-    expect(result.clusters).toHaveLength(1);
-    expect(result.clusters[0].count).toBe(3);
-    expect(result.singles.map((p) => p.id)).toEqual(["far"]);
+  it("clusters in screen space, not map space", () => {
+    // Two points far apart in map coords but adjacent on screen must cluster.
+    const points = [makePoint("a", 0, 0), makePoint("b", 10000, 0)];
+    const flatScreen = () => ({ x: 0, y: 0 });
+    const clusters = clusterPointsOnScreen(points, flatScreen, threshold);
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0].count).toBe(2);
+    // centroid is still expressed in map coordinates
+    expect(clusters[0].coordinates.x).toBe(5000);
   });
-});
 
-describe("adaptiveCluster", () => {
-  it("shrinks radius at higher zoom", () => {
-    const points = [
-      makePoint("a", 0, 0),
-      makePoint("b", 60, 0),
-      makePoint("c", 120, 0),
-    ];
-    const zoomedOut = adaptiveCluster(points, 1, { minPoints: 2, radius: 100 });
-    const zoomedIn = adaptiveCluster(points, 4, { minPoints: 2, radius: 100 });
-    expect(
-      zoomedOut.clusters.length + zoomedIn.clusters.length,
-    ).toBeGreaterThan(0);
-    expect(zoomedIn.clusters[0]?.count ?? 0).toBeLessThanOrEqual(
-      zoomedOut.clusters[0]?.count ?? 0,
+  it("respects per-point thresholds via pairwise max", () => {
+    const points = [makePoint("near", 0, 0), makePoint("far", 80, 0)];
+    const tight = clusterPointsOnScreen(points, identityScreen, () => 50);
+    expect(tight).toHaveLength(2);
+    const loose = clusterPointsOnScreen(points, identityScreen, (p) =>
+      p.id === "far" ? 100 : 50,
     );
+    expect(loose).toHaveLength(1);
   });
 
-  it("falls back to zoom 1 for invalid zoom", () => {
-    const result = adaptiveCluster([makePoint("a", 0, 0)], Number.NaN);
-    expect(result.singles).toHaveLength(1);
-  });
-});
-
-describe("cluster utilities", () => {
-  const cluster = {
-    coordinates: { x: 0, y: 0 },
-    count: 2,
-    id: "cluster-a-b",
-    points: [makePoint("a", 0, 0), makePoint("b", 10, 10, "trash")],
-  };
-
-  it("finds cluster membership", () => {
-    expect(isPointInCluster(cluster.points[0], cluster)).toBe(true);
-    expect(isPointInCluster(makePoint("z", 0, 0), cluster)).toBe(false);
-    expect(findClusterForPoint(cluster.points[1], [cluster])?.id).toBe(
-      "cluster-a-b",
+  it("excludes configured ids", () => {
+    const points = [makePoint("a", 0, 0), makePoint("skip", 5, 0)];
+    const clusters = clusterPointsOnScreen(
+      points,
+      identityScreen,
+      threshold,
+      new Set(["skip"]),
     );
-    expect(findClusterForPoint(makePoint("z", 0, 0), [cluster])).toBeNull();
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0].points.map((p) => p.id)).toEqual(["a"]);
   });
 
-  it("reports types and bounds", () => {
-    expect(getClusterTypes(cluster).sort()).toEqual(["toilet", "trash"]);
-    expect(getClusterBounds(cluster)).toEqual({
-      height: 10,
-      maxX: 10,
-      maxY: 10,
-      minX: 0,
-      minY: 0,
-      width: 10,
-    });
+  it("returns an empty list for empty input", () => {
+    expect(clusterPointsOnScreen([], identityScreen, threshold)).toEqual([]);
   });
 });
 
@@ -166,27 +104,6 @@ describe("pointer gesture helpers", () => {
   it("removes pointers idempotently", () => {
     expect(removeTouchPointer([1, 2], 1)).toEqual([2]);
     expect(removeTouchPointer([1], 9)).toEqual([1]);
-  });
-});
-
-describe("svg hit testing helpers", () => {
-  it("toggles the drag hit-testing class", () => {
-    const classes = new Set<string>();
-    const svg = {
-      classList: {
-        add: (c: string) => classes.add(c),
-        contains: (c: string) => classes.has(c),
-        remove: (c: string) => classes.delete(c),
-      },
-    } as unknown as SVGSVGElement;
-    const cls = getDragHitTestingClassName();
-    disableSvgChildHitTesting(svg);
-    expect(svg.classList.contains(cls)).toBe(true);
-    enableSvgChildHitTesting(svg);
-    expect(svg.classList.contains(cls)).toBe(false);
-    // null-safe
-    disableSvgChildHitTesting(null);
-    enableSvgChildHitTesting(undefined);
   });
 });
 
