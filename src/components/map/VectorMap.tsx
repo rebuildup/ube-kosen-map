@@ -4,7 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useLanguage } from "../../context/LanguageContext";
 import { CAMPUS_MAP_BOUNDS } from "../../data/buildings";
-import type { MapItemType } from "../../types/map";
+import type {
+  Coordinate,
+  InteractivePoint,
+  PointCluster,
+  ViewBox,
+} from "../../types/map";
 import {
   BUILDING_FLOOR_CONFIGS,
   type BuildingFloorConfig,
@@ -14,15 +19,22 @@ import { ClusterPin, HighlightPin, MapPin, getPointColor } from "./MapPin";
 import ZoomControls from "./ZoomControls";
 import { calculatePanViewBox } from "./utils/dragPan";
 import { clusterPointsOnScreen } from "./utils/screenClustering";
+import {
+  computeCenteredViewBox,
+  computeFittedViewBox,
+  floorIdToZ,
+  niceInterval,
+  normalizePointCoordinate,
+  resolveInitialViewBox,
+} from "./utils/viewport";
 import { addTouchPointer, removeTouchPointer } from "./utils/pointerGesture";
 import { shouldEmitTouchMapClick } from "./utils/touchMapClick";
 import { shouldIgnoreTouchTarget } from "./utils/touchTargetGuard";
 
 const ADJUSTED_MAP_BOUNDS = {
-  height: 7105.2,
+  ...CAMPUS_MAP_BOUNDS,
   marginX: 200,
   marginY: 200,
-  width: 4705.3,
 };
 
 const DEFAULT_ROTATION = 90;
@@ -70,68 +82,6 @@ export const DEFAULT_MAP_VISUAL_OPTIONS: MapVisualOptions = {
   strokeWidth: 0.25,
 };
 
-/** グリッド間隔を人間が読みやすいキリの良い数値に丸める */
-const niceInterval = (raw: number): number => {
-  const mag = 10 ** Math.floor(Math.log10(raw));
-  const n = raw / mag;
-  if (n < 1.5) return mag;
-  if (n < 3.5) return 2 * mag;
-  if (n < 7.5) return 5 * mag;
-  return 10 * mag;
-};
-
-interface Coordinate {
-  x: number;
-  y: number;
-  z?: number; // floor level (1=1F, 2=2F, etc.)
-}
-
-interface AnchorArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  z?: number;
-}
-
-interface InteractivePoint {
-  id: string;
-  coordinates: Coordinate;
-  anchorArea?: AnchorArea;
-  isAreaFocusable?: boolean;
-  buildingId?: string;
-  floorId?: string;
-  svgGroupId?: string;
-  childPoints?: Array<{
-    id: string;
-    coordinates: Coordinate;
-    title: string;
-    type: MapItemType;
-    buildingId?: string;
-    floorId?: string;
-    svgGroupId?: string;
-    color?: string;
-  }>;
-  title: string;
-  type: MapItemType;
-  size?: number;
-  color?: string;
-  /** 指定時は円内にこの文字を小さく表示（子ピン用） */
-  pinLabel?: string;
-  isSelected?: boolean;
-  isHovered?: boolean;
-  contentItem?: unknown;
-  onClick?: () => void;
-  onHover?: (hovered: boolean) => void;
-}
-
-interface PointCluster {
-  id: string;
-  coordinates: Coordinate;
-  points: InteractivePoint[];
-  count: number;
-}
-
 interface VectorMapProps {
   // 基本設定
   mode?: "display" | "detail" | "interactive";
@@ -164,115 +114,6 @@ interface VectorMapProps {
   pinCoordinateOffsetX?: number;
   pinCoordinateOffsetY?: number;
 }
-
-interface ViewBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
-
-const floorIdToZ = (floorId: string | null): number | null => {
-  if (!floorId) return null;
-  const matched = floorId.match(/^(\d+)/);
-  if (!matched) return null;
-  const parsed = Number.parseInt(matched[1], 10);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const normalizePointCoordinate = (point: InteractivePoint): Coordinate => {
-  if (!point.anchorArea) return point.coordinates;
-  const { anchorArea } = point;
-  return {
-    x: anchorArea.x + anchorArea.width / 2,
-    y: anchorArea.y + anchorArea.height / 2,
-    z: point.coordinates.z ?? anchorArea.z,
-  };
-};
-
-const computeFittedViewBox = (
-  points: InteractivePoint[],
-  zoom: number,
-  bounds: { width: number; height: number } = CAMPUS_MAP_BOUNDS,
-): ViewBox => {
-  const mapWidth = bounds.width;
-  const mapHeight = bounds.height;
-  const targetWidth = mapWidth / zoom;
-  const targetHeight = mapHeight / zoom;
-
-  let centerX = mapWidth / 2;
-  let centerY = mapHeight / 2;
-
-  if (points.length > 0) {
-    const xs = points.map((p) => p.coordinates.x);
-    const ys = points.map((p) => p.coordinates.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    centerX = (minX + maxX) / 2;
-    centerY = (minY + maxY) / 2;
-  }
-
-  const horizontalPadding = mapWidth * 0.2;
-  const verticalPadding = mapHeight * 0.2;
-
-  const minX = -horizontalPadding;
-  const maxX = mapWidth + horizontalPadding - targetWidth;
-  const minY = -verticalPadding;
-  const maxY = mapHeight + verticalPadding - targetHeight;
-
-  return {
-    height: targetHeight,
-    width: targetWidth,
-    x: clamp(centerX - targetWidth / 2, minX, maxX),
-    y: clamp(centerY - targetHeight / 2, minY, maxY),
-  };
-};
-
-const computeCenteredViewBox = (
-  center: Coordinate,
-  zoom: number,
-  bounds: { width: number; height: number } = CAMPUS_MAP_BOUNDS,
-): ViewBox => {
-  const mapWidth = bounds.width;
-  const mapHeight = bounds.height;
-  const targetWidth = mapWidth / zoom;
-  const targetHeight = mapHeight / zoom;
-
-  const horizontalPadding = mapWidth * 0.2;
-  const verticalPadding = mapHeight * 0.2;
-
-  const minX = -horizontalPadding;
-  const maxX = mapWidth + horizontalPadding - targetWidth;
-  const minY = -verticalPadding;
-  const maxY = mapHeight + verticalPadding - targetHeight;
-
-  return {
-    height: targetHeight,
-    width: targetWidth,
-    x: clamp(center.x - targetWidth / 2, minX, maxX),
-    y: clamp(center.y - targetHeight / 2, minY, maxY),
-  };
-};
-
-const resolveInitialViewBox = (
-  points: InteractivePoint[],
-  mode: VectorMapProps["mode"],
-  zoom: number,
-  bounds: { width: number; height: number } = CAMPUS_MAP_BOUNDS,
-  initialCenter?: Coordinate,
-): ViewBox => {
-  if (initialCenter) {
-    return computeCenteredViewBox(initialCenter, zoom, bounds);
-  }
-  if (mode === "display" && points.length > 0) {
-    return computeFittedViewBox(points, zoom, bounds);
-  }
-  return computeFittedViewBox([], zoom, bounds);
-};
 
 const VectorMap: React.FC<VectorMapProps> = ({
   className = "",
