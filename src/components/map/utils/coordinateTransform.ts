@@ -27,8 +27,10 @@ export interface MapBoundsSize {
   width: number;
 }
 
-/** DOMRect -> the measured-rect shape used by pure layout helpers. */
-export const toMeasuredRect = (rect: DOMRect): MeasuredRect => ({
+/** DOMRect-like -> the measured-rect shape used by pure layout helpers. */
+export const toMeasuredRect = (
+  rect: Pick<MeasuredRect, "height" | "left" | "top" | "width">,
+): MeasuredRect => ({
   height: rect.height,
   left: rect.left,
   top: rect.top,
