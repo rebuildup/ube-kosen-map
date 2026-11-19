@@ -586,8 +586,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
   useEffect(() => {
     const manualBuilding = manualBuildingId
       ? (BUILDING_FLOOR_CONFIGS.find(
-          (building) =>
-            building.id === manualBuildingId,
+          (building) => building.id === manualBuildingId,
         ) ?? null)
       : null;
 
