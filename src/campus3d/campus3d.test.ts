@@ -93,6 +93,31 @@ describe("campus model data", () => {
   });
 });
 
+describe("public data boundary", () => {
+  // Dormitory room numbers and handbook-derived interior descriptions are
+  // restricted (docs/campus3d-data-policy.md). The registry must never carry
+  // them: this repo is public, so UI hiding cannot protect the data.
+  const DORM_KEYS = new Set([
+    "ryod",
+    "kokusai",
+    "ryof",
+    "shokudo",
+    "eroom",
+    "bbld",
+    "cbld",
+    "yokujo",
+  ]);
+
+  it("keeps dorm room numbers and handbook citations out of the registry", () => {
+    for (const b of BUILDING_REGISTRY) {
+      if (!DORM_KEYS.has(b.key)) continue;
+      const text = `${b.rooms ?? ""} ${b.note ?? ""}`;
+      expect(text, b.key).not.toMatch(/[0-9]{4}/);
+      expect(text, b.key).not.toContain("寮生手帳");
+    }
+  });
+});
+
 describe("2D map link", () => {
   it("covers every 3D building and every 2D building without dangling ids", () => {
     const issues = validateMap2dLink(BUILDING_REGISTRY.map((b) => b.key));
