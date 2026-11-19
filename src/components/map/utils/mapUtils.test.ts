@@ -115,7 +115,7 @@ describe("cluster utilities", () => {
     coordinates: { x: 0, y: 0 },
     count: 2,
     id: "cluster-a-b",
-    points: [makePoint("a", 0, 0), makePoint("b", 10, 10, "stall")],
+    points: [makePoint("a", 0, 0), makePoint("b", 10, 10, "trash")],
   };
 
   it("finds cluster membership", () => {
@@ -128,7 +128,7 @@ describe("cluster utilities", () => {
   });
 
   it("reports types and bounds", () => {
-    expect(getClusterTypes(cluster).sort()).toEqual(["stall", "toilet"]);
+    expect(getClusterTypes(cluster).sort()).toEqual(["toilet", "trash"]);
     expect(getClusterBounds(cluster)).toEqual({
       height: 10,
       maxX: 10,

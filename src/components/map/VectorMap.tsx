@@ -1,24 +1,14 @@
-import {
-  Image as ImageIcon,
-  Speaker as SpeakerIcon,
-  UtensilsCrossed as StallIcon,
-  Toilet as ToiletIcon,
-  Trash2 as TrashIcon,
-} from "lucide-react";
 import type React from "react";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useLanguage } from "../../context/LanguageContext";
 import { CAMPUS_MAP_BOUNDS } from "../../data/buildings";
+import type { MapItemType } from "../../types/map";
 import {
   BUILDING_FLOOR_CONFIGS,
   type BuildingFloorConfig,
-  DEFAULT_LAYER_OPTIONS,
-  type MapLayerOptions,
 } from "../../data/floorConfig";
-import { UnifiedCard } from "../../shared/components/ui/UnifiedCard";
-import type { Item } from "../../types/common";
 import FloorSelector from "./FloorSelector";
 import { ClusterPin, HighlightPin, MapPin, getPointColor } from "./MapPin";
 import ZoomControls from "./ZoomControls";
@@ -112,21 +102,21 @@ interface InteractivePoint {
     id: string;
     coordinates: Coordinate;
     title: string;
-    type: "event" | "exhibit" | "stall" | "location" | "toilet" | "trash";
+    type: MapItemType;
     buildingId?: string;
     floorId?: string;
     svgGroupId?: string;
     color?: string;
   }>;
   title: string;
-  type: "event" | "exhibit" | "stall" | "location" | "toilet" | "trash";
+  type: MapItemType;
   size?: number;
   color?: string;
   /** 指定時は円内にこの文字を小さく表示（子ピン用） */
   pinLabel?: string;
   isSelected?: boolean;
   isHovered?: boolean;
-  contentItem?: Item;
+  contentItem?: unknown;
   onClick?: () => void;
   onHover?: (hovered: boolean) => void;
 }
@@ -165,7 +155,6 @@ interface VectorMapProps {
   minZoom?: number;
   initialZoom?: number; // 追加: 初期ズーム倍率
   initialCenter?: Coordinate;
-  layerOptions?: MapLayerOptions;
   mapVisualOptions?: MapVisualOptions;
   pinCoordinateScale?: number;
   pinCoordinateOffsetX?: number;
@@ -301,7 +290,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
   showControls = true,
   showPins = true,
   showGrid = false,
-  layerOptions = DEFAULT_LAYER_OPTIONS,
   mapVisualOptions = DEFAULT_MAP_VISUAL_OPTIONS,
   pinCoordinateScale = 1,
   pinCoordinateOffsetX = 0,
@@ -481,9 +469,8 @@ const VectorMap: React.FC<VectorMapProps> = ({
   }, [points]);
 
   const activeFloorZ = useMemo(() => {
-    const floorId = layerOptions.globalFloor ?? selectedFloorId;
-    return floorIdToZ(floorId);
-  }, [layerOptions.globalFloor, selectedFloorId]);
+    return floorIdToZ(selectedFloorId);
+  }, [selectedFloorId]);
 
   const visiblePoints = useMemo(() => {
     if (activeFloorZ === null) return normalizedPoints;
@@ -523,9 +510,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
         if (groupId) {
           const buildingId = groupIdToBuildingId.get(groupId);
           if (buildingId) {
-            if (layerOptions.hiddenBuildingIds.has(buildingId)) {
-              return null;
-            }
             return (
               BUILDING_FLOOR_CONFIGS.find(
                 (building) => building.id === buildingId,
@@ -537,7 +521,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       }
       return null;
     },
-    [groupIdToBuildingId, layerOptions.hiddenBuildingIds],
+    [groupIdToBuildingId],
   );
 
   const detectCenterBuilding = useCallback((): BuildingFloorConfig | null => {
@@ -603,8 +587,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
     const manualBuilding = manualBuildingId
       ? (BUILDING_FLOOR_CONFIGS.find(
           (building) =>
-            building.id === manualBuildingId &&
-            !layerOptions.hiddenBuildingIds.has(building.id),
+            building.id === manualBuildingId,
         ) ?? null)
       : null;
 
@@ -623,7 +606,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
     viewBox,
     mapRotation,
     effectiveBounds,
-    layerOptions.hiddenBuildingIds,
     manualBuildingId,
     detectCenterBuilding,
     activePinPoint,
@@ -3724,79 +3706,6 @@ ${scope} [id="${gid}"] .cls-3,${scope} [id="${gid}"] .cls-7,${scope} [id="${gid}
               `}</style>
               );
             })()}
-            {/* レイヤーオプションCSS: メインのマップのみ（階層マップへ伝播しない） */}
-            {(() => {
-              const scope = "#main-map-layer";
-              const parts: string[] = [];
-              // イベントモード: 背景レイヤー(_00〜_06)を非表示
-              if (layerOptions.eventMode) {
-                parts.push(
-                  `${scope} [id="_00"],${scope} [id="_01"],${scope} [id="_02"],${scope} [id="_03"],${scope} [id="_04"],${scope} [id="_05"],${scope} [id="_06"]{display:none!important}`,
-                );
-                parts.push(
-                  `${scope} [id="_07"]>.cls-3,${scope} [id="_07"]>g:not([id])>.cls-3,${scope} [id="_07"]>.cls-15,${scope} [id="_07"]>g:not([id])>.cls-15,${scope} [id="_08"]>.cls-3,${scope} [id="_08"]>g:not([id])>.cls-3,${scope} [id="_08"]>.cls-15,${scope} [id="_08"]>g:not([id])>.cls-15,${scope} [id="_09"]>.cls-3,${scope} [id="_09"]>g:not([id])>.cls-3,${scope} [id="_09"]>.cls-15,${scope} [id="_09"]>g:not([id])>.cls-15,${scope} [id="_10"]>.cls-3,${scope} [id="_10"]>g:not([id])>.cls-3,${scope} [id="_10"]>.cls-15,${scope} [id="_10"]>g:not([id])>.cls-15,${scope} [id="_11"]>.cls-3,${scope} [id="_11"]>g:not([id])>.cls-3,${scope} [id="_11"]>.cls-15,${scope} [id="_11"]>g:not([id])>.cls-15{visibility:visible!important}`,
-                );
-                parts.push(
-                  `${scope} path[d^="M259.76,326.61"],${scope} path[d^="M186.25,411.55"],${scope} path[d^="M180.37,405.83"],${scope} path[d^="M154.64,409.71"],${scope} path[d^="M155.24,418.18"],${scope} path[d^="M155.46,408.96"],${scope} path[d^="M155.4,420.56"],${scope} path[d^="M150.28,415.65"],${scope} path[d^="M161.22,414.52"],${scope} path[d^="M156.26,419.64"],${scope} path[d^="M150.49,414.09"],${scope} path[d^="M156.1,409.61"]{display:none!important}`,
-                );
-              }
-              // 全建物フロア指定: 各建物の指定外フロアは輪郭のみ残す
-              if (layerOptions.globalFloor) {
-                BUILDING_FLOOR_CONFIGS.forEach((b) => {
-                  if (!b.floors.length) return;
-                  const targetFloor = b.floors.find(
-                    (f) => f.id === layerOptions.globalFloor,
-                  );
-                  if (!targetFloor) return; // このfloorがない建物はスキップ
-                  const targetFloorIndex = b.floors.findIndex(
-                    (f) => f.id === layerOptions.globalFloor,
-                  );
-                  if (targetFloorIndex < 0) return;
-
-                  const lowerGids = b.floors
-                    .filter((_, idx) => idx < targetFloorIndex)
-                    .map((f) => f.svgGroupId);
-                  const upperGids = b.floors
-                    .filter((_, idx) => idx > targetFloorIndex)
-                    .map((f) => f.svgGroupId);
-
-                  if (lowerGids.length > 0) {
-                    parts.push(
-                      `${lowerGids.map((fgid) => `${scope} [id="${fgid}"]>path,${scope} [id="${fgid}"]>g>path`).join(",")}{fill:${mapVisualOptions.fillSecondary}!important}`,
-                    );
-                    if (!mapVisualOptions.showRoomLines) {
-                      parts.push(
-                        `${lowerGids.map((fgid) => `${scope} [id="${fgid}"] .cls-3,${scope} [id="${fgid}"] .cls-7,${scope} [id="${fgid}"] .cls-14`).join(",")}{visibility:hidden!important}`,
-                      );
-                      parts.push(
-                        `${lowerGids.map((fgid) => `${scope} [id="${fgid}"] .cls-15`).join(",")}{visibility:hidden!important}`,
-                      );
-                    }
-                  }
-                  if (upperGids.length > 0) {
-                    parts.push(
-                      `${upperGids.map((fgid) => `${scope} [id="${fgid}"]`).join(",")}{display:none!important}`,
-                    );
-                  }
-                });
-              }
-              // 非表示建物
-              if (layerOptions.hiddenBuildingIds.size > 0) {
-                BUILDING_FLOOR_CONFIGS.forEach((b) => {
-                  if (!layerOptions.hiddenBuildingIds.has(b.id)) return;
-                  const gids: string[] = [];
-                  if (b.svgGroupId) gids.push(b.svgGroupId);
-                  b.floors.forEach((f) => gids.push(f.svgGroupId));
-                  if (gids.length > 0) {
-                    parts.push(
-                      `${gids.map((g) => `${scope} [id="${g}"]`).join(",")}{display:none!important}`,
-                    );
-                  }
-                });
-              }
-              if (!parts.length) return null;
-              return <style>{parts.join("\n")}</style>;
-            })()}
             {/* Campus Map SVG (inline). #main-map-layer でフォーカス/レイヤーCSSを限定し階層マップへ伝播しない */}
             {mapRotation === 0 ? (
               <g id="main-map-layer">
@@ -3930,10 +3839,7 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
                     id={point.id}
                     position={screenPosition}
                     svgCoordinate={cluster.coordinates}
-                    type={
-                      point.type as
-                        "event" | "exhibit" | "stall" | "toilet" | "trash"
-                    }
+                    type={point.type}
                     color={point.color}
                     pinLabel={point.pinLabel}
                     label={showLabel ? point.title : undefined}
@@ -3993,19 +3899,11 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
                 typeCounts[p.type].count += 1;
               }
               // 表示順と日本語ラベル
-              const typeOrder = [
-                "exhibit",
-                "stall",
-                "event",
-                "toilet",
-                "trash",
-              ];
+              const typeOrder = ["toilet", "trash", "location"];
               const typeLabels: Record<string, string> = {
-                event: "イベント",
-                exhibit: "展示",
-                stall: "露店",
                 toilet: "トイレ",
                 trash: "ゴミ箱",
+                location: "施設",
               };
               const orderedTypes = typeOrder.filter(
                 (type) => typeCounts[type]?.count,
@@ -4125,105 +4023,6 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
           </div>
         )}
 
-        {/* Single Content Card Overlay */}
-        {selectedPoint?.contentItem && (
-          <div
-            className={`map-card-overlay absolute z-30 ${isDragging ? "pointer-events-none" : "pointer-events-auto"}`}
-            style={{
-              left: `${cardPosition.x}px`,
-              top: `${cardPosition.y}px`,
-              touchAction: "none",
-              transform: cardPosition.transform || "translate(-50%, -50%)",
-              width: "240px", // 300px → 240px に縮小
-            }}
-          >
-            {/* Mobile hover indicator */}
-            {mobileHoveredPoint === selectedPoint.id && (
-              <div
-                className="absolute -top-2 -right-2 z-10 rounded-full bg-blue-500 px-2 py-1 text-xs text-white shadow-lg"
-                style={{ fontSize: "10px" }}
-              >
-                タップで詳細へ
-              </div>
-            )}
-
-            {/* Content Card */}
-            <div
-              style={{
-                position: "relative",
-                width: "240px",
-              }}
-            >
-              {/* カードと背景を重ねる領域 */}
-              <div
-                style={{
-                  position: "relative",
-                }}
-              >
-                {/* 背景フレーム */}
-                <div
-                  className="card-background pointer-events-none absolute rounded-lg shadow-xl transition-all duration-200"
-                  style={{
-                    background:
-                      selectedPoint.contentItem.type === "event"
-                        ? "#EA4335"
-                        : selectedPoint.contentItem.type === "exhibit"
-                          ? "#4285F4"
-                          : "#FF6B35",
-                    border: "2px solid white",
-                    bottom: "-6px",
-                    left: "-6px",
-                    padding: "2px",
-                    right: "-6px",
-                    top: "-6px",
-                    transform: "translateY(0)",
-                    zIndex: 0,
-                  }}
-                />
-                {/* カードコンテンツ - カード自体がホバーを検知 */}
-                <button
-                  type="button"
-                  className="card-content"
-                  style={{
-                    display: "contents",
-                  }}
-                  onMouseEnter={(e) => {
-                    // カード内のホバーで背景を動かす
-                    const bg = e.currentTarget.parentElement?.querySelector(
-                      ".card-background",
-                    ) as HTMLElement;
-                    if (bg) {
-                      bg.style.transform = "translateY(-4px)";
-                      bg.style.boxShadow = "0 12px 24px rgba(0, 0, 0, 0.3)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const bg = e.currentTarget.parentElement?.querySelector(
-                      ".card-background",
-                    ) as HTMLElement;
-                    if (bg) {
-                      bg.style.transform = "translateY(0)";
-                      bg.style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.2)";
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      // カードクリック処理
-                    }
-                  }}
-                >
-                  <UnifiedCard
-                    item={selectedPoint.contentItem}
-                    showTags={true}
-                    showDescription={true}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Multiple Content Cards Overlay (Cluster) */}
         {selectedCluster && selectedCluster.length > 0 && (
           <div
@@ -4259,16 +4058,6 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
                     .sort((a, b) => a.title.localeCompare(b.title, "ja"))
                     .map((point) => {
                       const rowColor = point.color ?? getPointColor(point.type);
-                      const RowTypeIcon =
-                        point.type === "event"
-                          ? SpeakerIcon
-                          : point.type === "exhibit"
-                            ? ImageIcon
-                            : point.type === "stall"
-                              ? StallIcon
-                              : point.type === "toilet"
-                                ? ToiletIcon
-                                : TrashIcon;
                       return (
                         <button
                           key={point.id}
@@ -4281,15 +4070,9 @@ ${focusedAreaHiddenFloorGids.length > 0 ? `${focusedAreaHiddenFloorGids.map((fgi
                           }}
                         >
                           <span
-                            className="inline-flex h-6 w-6 items-center justify-center rounded-full"
+                            className="inline-block h-3 w-3 shrink-0 rounded-full"
                             style={{ backgroundColor: rowColor }}
-                          >
-                            <RowTypeIcon
-                              size={13}
-                              color="#ffffff"
-                              strokeWidth={2.5}
-                            />
-                          </span>
+                          />
                           <span className="text-sm font-medium text-gray-800">
                             {point.title || point.id}
                           </span>

@@ -6,7 +6,7 @@
  */
 
 import type { LucideIcon } from "lucide-react";
-import { Image, Speaker, Toilet, Trash2, UtensilsCrossed } from "lucide-react";
+import { Image, Toilet, Trash2 } from "lucide-react";
 import type React from "react";
 
 import type { Coordinate, MapItemType } from "../../types/map";
@@ -32,11 +32,7 @@ interface MapPinProps {
 }
 
 const POINT_TYPE_ICONS: Record<MapItemType, LucideIcon> = {
-  event: Speaker,
-  exhibit: Image,
   location: Image,
-  sponsor: Image,
-  stall: UtensilsCrossed,
   toilet: Toilet,
   trash: Trash2,
 };
@@ -44,30 +40,16 @@ const POINT_TYPE_ICONS: Record<MapItemType, LucideIcon> = {
 // eslint-disable-next-line react-refresh/only-export-components
 export function getPointColor(type: MapItemType): string {
   switch (type) {
-    case "event": {
-      return "#EA4335";
-    } // Google Maps red
-    case "exhibit": {
-      return "#4285F4";
-    } // Google Maps blue
-    case "stall": {
-      return "#FF6B35";
-    } // Orange (better contrast with white)
-    case "toilet": {
+    case "toilet":
+    case "location": {
       return "#34A853";
     } // Google Maps green
     case "trash": {
       return "#9E9E9E";
     } // Gray
-    case "location": {
-      return "#34A853";
-    }
-    case "sponsor": {
-      return "#4285F4";
-    }
     default: {
       return "#34A853";
-    } // Google Maps green
+    }
   }
 }
 
