@@ -47,32 +47,32 @@ Skillsは `.agents/skills/`（canonical）と `.claude/skills/` に `--copy` 導
 
 ## 能力ごとの担当（Skill table）
 
-| 能力 | 担当Skill | 使う場面 |
-| --- | --- | --- |
-| delivery | `github-delivery` | Issue / branch / PR / release lifecycle |
-| recovery | `agent-recovery` | 中断からの再開、checkpoint、外部side effect |
-| orchestration | `parallel-orchestration` | subagent / 複数workerへの分解・委譲 |
-| quality-gate | `quality-gate` | verification level、gate、CI |
-| design-before-build | `design-refinement` | 非自明なfeature / designの実装前整理 |
-| engineering-decisions | `engineering-decisions` | 実装判断の優先順位、tool選定 |
-| correctness | `correctness-assurance` | 重要な不変条件の保証手段設計 |
-| code-naming | `code-naming` | 命名・リネーム・命名レビュー |
-| debugging | `diagnosing-bugs` | 再現できる失敗の原因特定 |
-| code-review | `code-review` | diffを規約と仕様の2軸でレビュー |
-| security-advisory | `security-maintenance` | 依存脆弱性情報の取り込みと優先度 |
-| security-audit | `security-audit` | 未知のsecurity defectの能動探索 |
-| estimation | `agent-delivery-estimation` | 中長期のrelease計画・見積もり |
-| onboarding | `onboarding` | 会話履歴なしで始められるdocs |
-| prose-artifact | `writing-discipline` | README / ADR / Issue / PR / commit等の文章 |
-| prose-japanese | `natural-japanese` | 日本語文章の推敲 |
-| interaction-style | `interaction-discipline` | userとのやりとり、質問の絞り方 |
-| policy-evaluation | `policy-evaluation` | Skill / policy変更の評価 |
-| skill-selection | `skill-selection` | 導入Skillの選定・lock記録 |
-| visual-design | `design-intent` | UIのvisual directionを実装前に固める |
-| accessibility | `accessibility-audit` | 既存UIのa11y監査・修正 |
-| web-platform | `modern-web-guidance` | HTML/CSS/DOM/Web APIの現行指針を検索 |
-| framework-react | `vercel-react-best-practices` | React実装・性能パターン |
-| workspace-lifecycle | `worktree-workflow` | worktreeの作成・掃除・cache |
-| system-quality | `system-quality` | 要求保存・全体再構成・改善比較（上記Skillの共通依存） |
+| 能力                  | 担当Skill                     | 使う場面                                              |
+| --------------------- | ----------------------------- | ----------------------------------------------------- |
+| delivery              | `github-delivery`             | Issue / branch / PR / release lifecycle               |
+| recovery              | `agent-recovery`              | 中断からの再開、checkpoint、外部side effect           |
+| orchestration         | `parallel-orchestration`      | subagent / 複数workerへの分解・委譲                   |
+| quality-gate          | `quality-gate`                | verification level、gate、CI                          |
+| design-before-build   | `design-refinement`           | 非自明なfeature / designの実装前整理                  |
+| engineering-decisions | `engineering-decisions`       | 実装判断の優先順位、tool選定                          |
+| correctness           | `correctness-assurance`       | 重要な不変条件の保証手段設計                          |
+| code-naming           | `code-naming`                 | 命名・リネーム・命名レビュー                          |
+| debugging             | `diagnosing-bugs`             | 再現できる失敗の原因特定                              |
+| code-review           | `code-review`                 | diffを規約と仕様の2軸でレビュー                       |
+| security-advisory     | `security-maintenance`        | 依存脆弱性情報の取り込みと優先度                      |
+| security-audit        | `security-audit`              | 未知のsecurity defectの能動探索                       |
+| estimation            | `agent-delivery-estimation`   | 中長期のrelease計画・見積もり                         |
+| onboarding            | `onboarding`                  | 会話履歴なしで始められるdocs                          |
+| prose-artifact        | `writing-discipline`          | README / ADR / Issue / PR / commit等の文章            |
+| prose-japanese        | `natural-japanese`            | 日本語文章の推敲                                      |
+| interaction-style     | `interaction-discipline`      | userとのやりとり、質問の絞り方                        |
+| policy-evaluation     | `policy-evaluation`           | Skill / policy変更の評価                              |
+| skill-selection       | `skill-selection`             | 導入Skillの選定・lock記録                             |
+| visual-design         | `design-intent`               | UIのvisual directionを実装前に固める                  |
+| accessibility         | `accessibility-audit`         | 既存UIのa11y監査・修正                                |
+| web-platform          | `modern-web-guidance`         | HTML/CSS/DOM/Web APIの現行指針を検索                  |
+| framework-react       | `vercel-react-best-practices` | React実装・性能パターン                               |
+| workspace-lifecycle   | `worktree-workflow`           | worktreeの作成・掃除・cache                           |
+| system-quality        | `system-quality`              | 要求保存・全体再構成・改善比較（上記Skillの共通依存） |
 
 Skill fileのcanonical配置は `.agents/skills/<name>/`。`.claude/skills/` は同一内容のmirror。

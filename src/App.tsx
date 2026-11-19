@@ -23,8 +23,9 @@ type AmenityPoint = {
 const amenities = amenitiesJson as AmenityPoint[];
 
 const MapPage = () => {
-  const [layerOptions, setLayerOptions] =
-    useState<MapLayerOptions>(DEFAULT_LAYER_OPTIONS);
+  const [layerOptions, setLayerOptions] = useState<MapLayerOptions>(
+    DEFAULT_LAYER_OPTIONS,
+  );
 
   const points = useMemo(
     () =>
