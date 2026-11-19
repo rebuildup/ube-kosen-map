@@ -1,5 +1,9 @@
 # Generic Map Sync Implementation Plan
 
+> **Note:** この文書は完了済みの移行作業の歴史的記録であり、現行の正本ではない。
+> 現行の要求は `docs/product/requirements.md`、設計判断は `docs/adr/`、
+> 作業規約は `AGENTS.md` を参照すること（ADR-0039）。
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Sync the generic campus map engine from `comfes-2026/packages/ube-kosen-map` back into `ube-kosen-map`, while removing event-only data and demo behavior.
