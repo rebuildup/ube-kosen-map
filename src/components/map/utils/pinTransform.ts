@@ -1,4 +1,4 @@
-import { CAMPUS_MAP_BOUNDS } from "../../../data/mapBounds";
+import { CAMPUS_MAP_BOUNDS } from "../../../data/buildings";
 import type { Coordinate } from "../../../types/map";
 
 /**

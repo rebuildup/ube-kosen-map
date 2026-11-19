@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CAMPUS_MAP_BOUNDS } from "../../../data/mapBounds";
+import { CAMPUS_MAP_BOUNDS } from "../../../data/buildings";
 import { computeCardPosition } from "./cardPlacement";
 import {
   clientToMapCoordinate,

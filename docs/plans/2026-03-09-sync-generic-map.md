@@ -15,7 +15,7 @@
 **Files:**
 - Modify: `src/components/map/*`
 - Modify: `src/context/LanguageContext.tsx`
-- Modify: `src/data/mapBounds.ts`
+- Modify: `src/data/buildings.ts`
 - Modify: `src/data/floorConfig.ts`
 - Modify: `src/data/mapAmenities.json`
 - Modify: `src/types/map.ts`
