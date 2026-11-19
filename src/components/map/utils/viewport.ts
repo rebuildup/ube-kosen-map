@@ -1,4 +1,6 @@
-import { CAMPUS_MAP_BOUNDS } from "../../../data/buildings";
+// Explicit .ts extension: quality/check-data-integrity.mts imports this
+// module under plain `node` (type stripping), which requires extensions.
+import { CAMPUS_MAP_BOUNDS } from "../../../data/buildings.ts";
 import type {
   Coordinate,
   InteractivePoint,

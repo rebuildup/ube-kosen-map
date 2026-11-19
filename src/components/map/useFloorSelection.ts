@@ -4,6 +4,10 @@ import {
   BUILDING_FLOOR_CONFIGS,
   type BuildingFloorConfig,
 } from "../../data/floorConfig";
+import {
+  resolveDetectedFloorId,
+  resolveFocusedFloorId,
+} from "./utils/floorSelection";
 
 const BUILDING_BY_ID = new Map(
   BUILDING_FLOOR_CONFIGS.map((building) => [building.id, building]),
@@ -98,14 +102,7 @@ export const useFloorSelection = ({
     }
     setManualBuildingId(building.id);
     setActiveBuilding(building);
-    if (building.floors.length > 0) {
-      setSelectedFloorId((prev) => {
-        const hasPrevFloor = building.floors.some((floor) => floor.id === prev);
-        return hasPrevFloor ? prev : building.defaultFloor;
-      });
-    } else {
-      setSelectedFloorId(null);
-    }
+    setSelectedFloorId((prev) => resolveFocusedFloorId(building, prev));
   }, []);
 
   useEffect(() => {
@@ -118,9 +115,7 @@ export const useFloorSelection = ({
 
       setActiveBuilding(found);
       if (found?.id !== activeBuilding?.id) {
-        setSelectedFloorId(
-          found && found.floors.length > 0 ? found.defaultFloor : null,
-        );
+        setSelectedFloorId(resolveDetectedFloorId(found));
       }
     });
     return () => cancelAnimationFrame(frame);
