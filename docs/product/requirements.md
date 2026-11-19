@@ -38,8 +38,24 @@ challenge suite）へ対応付ける。
 - 多言語UI（言語切替UIは存在しない。翻訳基盤はフルスクリーン文言のみ残存）
 - 永続化・アカウント・バックエンド
 
+## 実装・検証との対応
+
+| 要求 | 主な実装箇所 | 検証証跡 |
+| --- | --- | --- |
+| F1 | `VectorMap` 初期viewBox解決（`utils/viewport.ts` の `resolveInitialViewBox`/`computeFittedViewBox`） | `viewport.test.ts`、freeze時の起動確認 |
+| F2 | `useMapGestures`（ドラッグ/ピンチ/ホイール）+ `utils/viewport.ts`・`utils/dragPan.ts` の純粋変換 | `mapGeometry.test.ts`、`interaction.test.ts`、freeze時のdesktop/mobile操作確認 |
+| F3 | `useFloorSelection`（手動選択>中央検出）、`FloorSelector` | `check:data`（floorConfig↔SVG参照）、freeze時の操作確認 |
+| F4 | `utils/screenClustering.ts` + `MapPin`/`ClusterPin` | `interaction.test.ts`、freeze時のクラスタ往復確認 |
+| F5 | `VectorMap` fullscreen制御 + `ZoomControls` | freeze時のdesktop/mobile確認 |
+| F6 | ジェスチャーのpointer/touch経路、ピンのタップ領域 | freeze時の390px幅確認 |
+| F7 | `MapPin` のaria-label・button化、`ZoomControls` のaria-label | コードレビュー + freeze時のキーボード確認 |
+| N1 | `src/data/`（純データ）と `src/components/map/`（描画）の分離 | `check:data`、module境界のレビュー |
+| N2 | `quality/check-data-integrity.mts` | `bun run check:data`（worker/integration/release全gate + challenge suite） |
+| N3 | hook分解（ADR-0038案B）: `useMapGestures`/`useFloorSelection`/`useMapSelection`/`useViewportMeasurement` + 純粋utils | `typecheck`/`eslint`（react-hooks rules）+ `mapGeometry.test.ts`/`viewport.test.ts` |
+| N4 | `mise.toml` + `bun.lock` + `AGENTS.md` のbootstrap手順 | fresh cloneでの `validate:integration` 実行 |
+
 ## 現行実装との差異メモ
 
-- 回転モード（Rキー）は UI 上到達不能な上級者機能として残存。要求 F1–F7 に
-  含まれないため、維持する場合は根拠を明記し、そうでなければ撤去対象。
+- 回転モード（Rキー・`isRotateMode`）は #39 で撤去済み。SVGレイヤーの
+  固定90°変換は `utils/pinTransform.ts` の定数として残る。
 - 建物名ラベルの常時表示は要求に含めない（F3のフロア選択UIで建物名は提示される）。
