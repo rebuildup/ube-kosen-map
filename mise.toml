@@ -1,11 +1,12 @@
 [tools]
 bun = "1.4.2"
+node = "26.13.1"
 
 [tasks.skills-list]
-run = "bunx skills add rebuildup/project-init --list"
+run = "bunx skills list"
 
 [tasks.skills-bootstrap]
-run = "bunx skills add rebuildup/project-init --skill '*' --agent claude-code --agent codex -y"
+run = "bunx skills experimental_install -y"
 
 [tasks.skills-update]
 run = "bunx skills update -p -y"
