@@ -536,12 +536,7 @@ const generateBuilding = (
       }
       walls.push(...wallBoxes(f.w ?? [], y0, common.floorHeight, 0.008));
       walls.push(
-        ...wallBoxes(
-          perimeterSegments(f.f),
-          y0,
-          common.floorHeight,
-          0.014,
-        ),
+        ...wallBoxes(perimeterSegments(f.f), y0, common.floorHeight, 0.014),
       );
       rooms.push(...partitionFloor(entry.key, num, f.f, f.w ?? [], f.st ?? []));
       if (num < common.floors) {
