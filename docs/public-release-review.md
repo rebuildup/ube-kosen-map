@@ -7,43 +7,20 @@
 
 | リスク | 影響・公開範囲 | 対策 | 状態 |
 | --- | --- | --- | --- |
-| LICENSE 未設定 | 公開repoで再利用条件が不明。コードと学校由来素材の権利が未分離 | 下記「LICENSE案」を作成。LICENSEファイル追加は承認待ち | 承認待ち |
-| Git履歴の残存資料 | `docs/reference/binran.pdf`（学生便覧PDF）、`data/` 配下の検査設定backup・3D graph JSON、`CORE_POLICY.md`/`AGENT.md`/`CLAUDE.md`、`.claude/agent-log.txt` が全commit履歴に残存 | 履歴は既にpublic公開済みのため、現時点の書き換えは新規露出を防がない（下記「Git履歴」参照） | 評価済み・要判断 |
+| LICENSE 未設定 | 公開repoで再利用条件が不明。コードと学校由来素材の権利が未分離 | 二層構成の LICENSE ファイルを追加（コード: MIT、地図素材: 利用条件を明記） | 実施済み |
+| Git履歴の残存資料 | `docs/reference/binran.pdf`（学生便覧PDF）、`data/` 配下の検査設定backup・3D graph JSON、`CORE_POLICY.md`/`AGENT.md`/`CLAUDE.md`、`.claude/agent-log.txt` が全commit履歴に残存 | 履歴は既にpublic公開済みのため書き換えず、選択肢Aを採用。`.gitignore` で再混入を防止 | 実施済み |
 | `docs/plans/2026-03-09-sync-generic-map.md` の正本関係 | comfes-2026からの同期計画で、参照先 `docs/reference/*`・`npm run typecheck` 等が現行と不整合。現行プロダクト方針の正本に見えると誤読される | ADR-0039 で「歴史的記録・非正本」として位置付け | 実施済み |
 | package.json version | `0.2.0` は release-0-2-0 と一致。他にversion参照なし | 整合確認済み | 実施済み |
 | PR #20（3Dキャンパスモデル） | `public/campus-3d.html` 単体ファイル。寮生手帳の棟別平面図（部屋番号入り）をソースに寮の部屋単位モデルを含む。未マージだが誤mergeで公開される経路がある | PRをcloseし、再評価結果を記録（下記） | 実施済み |
 
-## LICENSE案（承認待ち）
+## LICENSE
 
-コードと素材の権利を分けた二層構成を提案する。
+user承認のうえ、二層構成の LICENSE ファイルをリポジトリルートに追加した。
 
-- **コード**（`src/`、ビルド設定、ドキュメント）: MIT License。著作権者は
-  リポジトリ管理者。
+- **コード**（`src/`、ビルド設定、ドキュメント）: MIT License。
 - **地図素材**（`public/campus-map3.svg`、`src/data/`）: 学校公開の構内図を
   もとにした派生物であり、学校の著作物・商標を含む。アプリの一部としての
   利用・表示を目的とし、素材単体の再配布・改変配布は行わない旨を明記する。
-
-LICENSE ファイル本文案:
-
-```text
-MIT License（コード部分）
-
-Copyright (c) 2026 ube-kosen-map contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of the software and associated documentation files (the "Software"), ...
-（標準MIT条文）
-
----
-
-地図素材について:
-public/campus-map3.svg および src/data/ 以下の地図データは、宇部工業高等
-専門学校が公開する構内図をもとに作成した派生物です。学校の著作物・商標を
-含み、本アプリケーションでの表示を目的として利用します。素材単体の再配布・
-改変した上での配布は行いません。
-```
-
-判断事項: ライセンス種別（MITでよいか）と、素材条項の文言の最終確認。
 
 ## Git履歴の残存資料
 
@@ -65,10 +42,11 @@ history rewrite（git filter-repo等）を実行しても、GitHub上の既存co
 完全な除去にはリポジトリ削除・再作成（Issue/PR履歴の喪失）が必要で、
 コストが便益を大きく上回る。
 
-### 選択肢
+### 選択肢と決定
 
-- **A（推奨）: 現状維持 + 今後の混入防止**。`.gitignore` とpre-commit的な
-  確認で `data/`・`docs/reference/` 系の作業ファイルが再び入らないようにする。
+- **A（採用）: 現状維持 + 今後の混入防止**。`.gitignore` で `data/`、
+  `docs/reference/`、`.claude/agent-log.txt`、旧方針文書
+  （`CORE_POLICY.md`/`AGENT.md`/`CLAUDE.md`）の再追加を防ぐ。
   影響: 既存履歴はそのまま。実害リスクは低い（機微な個人情報は確認されず、
   binran.pdfは学校発行の公開文書）。
 - **B: GitHubサポートへキャッシュ削除依頼 + 履歴書き換え**。filter-repoで
@@ -93,4 +71,5 @@ history rewrite（git filter-repo等）を実行しても、GitHub上の既存co
 - PR #20 のcloseと評価記録（本書 + PRコメント）
 - `docs/plans/2026-03-09-sync-generic-map.md` の非正本化（ADR-0039）
 - version整合の確認（package.json 0.2.0 = release-0-2-0）
-- LICENSE案の作成（ファイル追加は承認後）
+- LICENSE ファイルの追加（コードMIT＋地図素材条項の二層構成）
+- `.gitignore` による履歴残存資料の再混入防止（選択肢A）
