@@ -1,0 +1,15 @@
+[
+  "eslint.config.ts",
+  ".prettierrc.json",
+  ".prettierignore",
+  "tsconfig.json",
+  "tsconfig.app.json",
+  "tsconfig.node.json",
+  "vitest.config.ts",
+  "package.json",
+  ".github/workflows/ci.yml",
+  "quality",
+  "mise.toml",
+  ".agents/skills/system-quality/scripts/challenge.mts",
+  ".agents/skills/system-quality/scripts/verify-contract.mts"
+]

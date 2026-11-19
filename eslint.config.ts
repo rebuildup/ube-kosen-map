@@ -29,7 +29,8 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       // React Compiler diagnostics: the map renderer predates these rules.
-      // Tracked as follow-up work in the UI/UX cleanup issue (#24).
+      // Tracked as real implementation fixes in #39 (VectorMap decomposition).
+      // Downgraded to warn only until that lands; do not add new suppressions.
       "react-hooks/refs": "warn",
       "react-hooks/set-state-in-effect": "warn",
       "react-refresh/only-export-components": [

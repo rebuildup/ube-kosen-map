@@ -11,10 +11,17 @@ export interface Building {
   rooms?: string[];
 }
 
+const runtimeGlobal = globalThis as {
+  process?: { env?: { NODE_ENV?: string } };
+  window?: { location?: { hostname?: string } };
+};
 const shouldLogCoordinateResolution =
-  (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") ||
-  (typeof window !== "undefined" &&
-    /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname));
+  (typeof runtimeGlobal.process !== "undefined" &&
+    runtimeGlobal.process.env?.NODE_ENV !== "production") ||
+  (typeof runtimeGlobal.window !== "undefined" &&
+    /^(localhost|127\.0\.0\.1)$/.test(
+      runtimeGlobal.window.location?.hostname ?? "",
+    ));
 const GENERIC_LOCATION_TOKENS = new Set(["棟", "館", "室", "a"]);
 
 function normalizeLocationToken(value: string): string {

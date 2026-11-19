@@ -1,0 +1,53 @@
+{
+  "command": ["node", "quality/check-data-integrity.mts"],
+  "timeoutMs": 30000,
+  "cases": [
+    {
+      "id": "reject-amenity-out-of-bounds",
+      "expect": "reject",
+      "diagnostic": "DATA_INTEGRITY_VIOLATION: amenity toilet-mens-ippan-1f coordinates are outside map bounds",
+      "patches": [
+        {
+          "path": "src/data/mapAmenities.json",
+          "before": "\"x\": 2075.2,\n    \"y\": 2243.46,",
+          "after": "\"x\": 20750.2,\n    \"y\": 2243.46,"
+        }
+      ]
+    },
+    {
+      "id": "reject-missing-svg-group",
+      "expect": "reject",
+      "diagnostic": "DATA_INTEGRITY_VIOLATION: floor building-ippan/1F references missing SVG group \"_存在しない棟1F\"",
+      "patches": [
+        {
+          "path": "src/data/floorConfig.ts",
+          "before": "svgGroupId: \"_一般棟1F\"",
+          "after": "svgGroupId: \"_存在しない棟1F\""
+        }
+      ]
+    },
+    {
+      "id": "reject-unknown-building-ref",
+      "expect": "reject",
+      "diagnostic": "DATA_INTEGRITY_VIOLATION: amenity toilet-mens-ippan-1f references unknown building \"building-nonexistent\"",
+      "patches": [
+        {
+          "path": "src/data/mapAmenities.json",
+          "before": "    \"id\": \"toilet-mens-ippan-1f\",\n    \"name\": \"男子トイレ(一般棟1F)\",\n    \"type\": \"toilet\",\n    \"x\": 2075.2,\n    \"y\": 2243.46,\n    \"z\": 1,\n    \"buildingId\": \"building-ippan\",\n    \"floorId\": \"1F\"",
+          "after": "    \"id\": \"toilet-mens-ippan-1f\",\n    \"name\": \"男子トイレ(一般棟1F)\",\n    \"type\": \"toilet\",\n    \"x\": 2075.2,\n    \"y\": 2243.46,\n    \"z\": 1,\n    \"buildingId\": \"building-nonexistent\",\n    \"floorId\": \"1F\""
+        }
+      ]
+    },
+    {
+      "id": "accept-cosmetic-rename",
+      "expect": "accept",
+      "patches": [
+        {
+          "path": "src/data/mapAmenities.json",
+          "before": "\"name\": \"男子トイレ(一般棟1F)\",",
+          "after": "\"name\": \"男子トイレ（一般棟1F）\","
+        }
+      ]
+    }
+  ]
+}

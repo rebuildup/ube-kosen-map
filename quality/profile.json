@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "profile": "ube-kosen-map",
+  "version": "1.0.0",
+  "stack": {
+    "package_manager": "bun",
+    "runtime": "node 26.13.1",
+    "language": "typescript",
+    "framework": "react 18 + vite 6 + tailwindcss 4",
+    "app_type": "static web app (SPA)"
+  },
+  "official_guidance": {
+    "checked_at": "2026-11-19",
+    "sources": [
+      "https://vite.dev/guide/",
+      "https://react.dev/",
+      "https://eslint.org/docs/latest/use/configure/",
+      "https://vitest.dev/guide/"
+    ],
+    "note": "framework標準のbuild/typecheckを優先し、重複toolは導入しない"
+  },
+  "test_taxonomy": {
+    "unit": {
+      "meaning": "純粋ロジック・座標変換・ユーティリティの局所behaviorを高速検証",
+      "runner": "vitest",
+      "entry": "bun run test",
+      "scope": "src/**/*.test.ts(x)"
+    },
+    "contract": {
+      "meaning": "data層(buildings/floorConfig/amenities)と公開SVG・設定の相互参照整合性",
+      "runner": "node quality/check-data-integrity.mts",
+      "entry": "bun run check:data",
+      "scope": "src/data/**, public/campus-map3.svg"
+    },
+    "smoke": {
+      "meaning": "production buildの起動と主要boundary(地図描画・主要操作UI)の成立",
+      "runner": "vite preview + playwright DOM/console確認",
+      "entry": "release gateで実施（自動化は今後の課題）",
+      "scope": "dist/ artifact"
+    },
+    "e2e": {
+      "meaning": "user-visible critical flowのend-to-end検証",
+      "runner": "未導入。現状はsmokeで代替し、導入は変更riskが要求した時点で検討",
+      "scope": "なし"
+    }
+  },
+  "gates": {
+    "worker": {
+      "command": ["bun", "run", "validate:fast"],
+      "meaning": "typecheck + lint + unit test + format:check + data integrity。ticket作業中の高速feedback"
+    },
+    "integration": {
+      "command": ["bun", "run", "validate:integration"],
+      "meaning": "worker gate + production build。ticket PR統合前"
+    },
+    "release": {
+      "command": ["bun", "run", "validate:release"],
+      "meaning": "integration gate + system-quality challenge(違反拒否/正当受理の実証) + contract自己照合。freeze後の包括検証"
+    }
+  },
+  "change_type_mapping": {
+    "pure_logic": ["unit", "contract"],
+    "map_data": ["contract", "unit", "smoke"],
+    "ui_component": ["unit", "smoke"],
+    "build_config": ["integration"],
+    "ci_workflow": ["integration", "contract"],
+    "gate_rules": ["release", "contract"],
+    "release_candidate": ["release"]
+  },
+  "ci": {
+    "workflow": ".github/workflows/ci.yml",
+    "triggers": {
+      "pull_request": "check(integration相当) + contract(base比較)",
+      "push_main": "check",
+      "push_release": "check + release-gate(challenge含む)"
+    },
+    "concurrency": "workflow+ref単位でcancel-in-progress",
+    "runner": "ubuntu-latest",
+    "timeouts": { "check": "10m", "contract": "5m", "release-gate": "15m" }
+  },
+  "contract": {
+    "manifest": "quality-contract.json",
+    "checker": ".agents/skills/system-quality/scripts/verify-contract.mts",
+    "semantics": "protected pathsの変更をbase比較で検出。gate rule変更はrelease branch直接のレビュー済みcommitでbaseline更新してから利用側ticketをrebaseする。challenge/verify-contractのrunner script自体も保護対象（gate弱体化の自己合格を防ぐ）",
+    "known_gap": "bun.lockは対象外(依存更新の頻度対ノイズ)。package.jsonはgate scriptsを含むため対象。templates/**は文書のみで実行コードなし、.agents/.claudeのSkill群はskills-lockのhashで管理されapp lint対象外（system-quality scriptsのみcontract保護）。"
+  },
+  "challenge": {
+    "runner": ".agents/skills/system-quality/scripts/challenge.mts",
+    "suite": "quality/challenge-suite.json",
+    "command": ["node", "quality/check-data-integrity.mts"],
+    "semantics": "隔離コピーへ違反を注入しexit 1+固有診断で拒否、正当変更を受理することを実証",
+    "known_gap": "依存を要する検査(typecheck/lint)はchallenge対象外。data integrity gateのみを機械的challengeで保証"
+  },
+  "coverage_policy": "coverage閾値は未設定。contract testとchallengeで意味的保証を優先",
+  "failure_policy": "skipped test/.only/|| true/no-fail option/検査の無効化を禁止。timeout/crashは検出成功に数えない"
+}

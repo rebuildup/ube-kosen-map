@@ -5,9 +5,14 @@ on:
     branches: [main, "release-*"]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -21,7 +26,45 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bun run typecheck
-      - run: bun run lint
-      - run: bun run test
-      - run: bun run build
+      - run: bun run validate:integration
+
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: trusted
+
+      - name: Verify quality contract against base revision
+        run: |
+          if [ ! -f trusted/quality-contract.json ]; then
+            echo "quality-contract.json is not present on the base revision; skipping."
+            exit 0
+          fi
+          node candidate/.agents/skills/system-quality/scripts/verify-contract.mts trusted candidate
+
+  release-gate:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "26.13.1"
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run validate:release
