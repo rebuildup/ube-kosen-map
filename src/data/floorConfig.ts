@@ -230,14 +230,4 @@ export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
   },
 ];
 
-export interface MapLayerOptions {
-  eventMode: boolean;
-  globalFloor: string | null; // "1F" | "2F" | "3F" | "4F" | null
-  hiddenBuildingIds: Set<string>;
-}
 
-export const DEFAULT_LAYER_OPTIONS: MapLayerOptions = {
-  eventMode: false,
-  globalFloor: null,
-  hiddenBuildingIds: new Set(),
-};

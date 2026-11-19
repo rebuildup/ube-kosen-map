@@ -120,8 +120,7 @@ export interface PanConstraints {
 /**
  * Base item type for map points
  */
-export type MapItemType =
-  "event" | "exhibit" | "stall" | "location" | "sponsor" | "toilet" | "trash";
+export type MapItemType = "location" | "toilet" | "trash";
 
 /**
  * Interactive point on the map

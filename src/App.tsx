@@ -1,12 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { MapOptionsPanel } from "./components/map/MapOptionsPanel";
 import VectorMap from "./components/map/VectorMap";
 import { LanguageProvider } from "./context/LanguageContext";
-import {
-  DEFAULT_LAYER_OPTIONS,
-  type MapLayerOptions,
-} from "./data/floorConfig";
 import amenitiesJson from "./data/mapAmenities.json";
 
 type AmenityPoint = {
@@ -22,11 +17,7 @@ type AmenityPoint = {
 
 const amenities = amenitiesJson as AmenityPoint[];
 
-const MapPage = () => {
-  const [layerOptions, setLayerOptions] = useState<MapLayerOptions>(
-    DEFAULT_LAYER_OPTIONS,
-  );
-
+const App = () => {
   const points = useMemo(
     () =>
       amenities.map((amenity) => ({
@@ -45,48 +36,28 @@ const MapPage = () => {
   );
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--color-bg-primary)" }}
-    >
-      <div className="mx-auto max-w-7xl px-4 py-4">
-        <header className="mb-4 rounded-lg border border-gray-200 bg-white/90 p-4 shadow-sm">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Ube Kosen Map
+    <LanguageProvider>
+      <div className="flex h-dvh flex-col bg-white">
+        <header className="flex h-12 shrink-0 items-center border-b border-gray-200 px-4">
+          <h1 className="text-sm font-semibold text-gray-900 sm:text-base">
+            宇部高専キャンパスマップ
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            汎用の校内マップ表示用デモです。校舎レイヤー、フロア表示、ズーム、
-            パン、フルスクリーン、設備ピンの基本機能を確認できます。
-          </p>
         </header>
-
-        <div
-          className="relative overflow-hidden rounded-lg"
-          style={{ backgroundColor: "var(--color-bg-secondary)" }}
-        >
+        <main className="relative min-h-0 flex-1">
           <VectorMap
             mode="display"
             points={points}
-            height="90vh"
-            className="rounded-lg"
+            height="100%"
             maxZoom={80}
             minZoom={0.3}
             showControls
             initialZoom={2}
             showGrid={false}
-            layerOptions={layerOptions}
           />
-          <MapOptionsPanel options={layerOptions} onChange={setLayerOptions} />
-        </div>
+        </main>
       </div>
-    </div>
+    </LanguageProvider>
   );
 };
-
-const App = () => (
-  <LanguageProvider>
-    <MapPage />
-  </LanguageProvider>
-);
 
 export default App;
