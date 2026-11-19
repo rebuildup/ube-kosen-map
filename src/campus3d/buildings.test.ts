@@ -42,6 +42,16 @@ describe("campus model generation", () => {
       expect(s.sy).toBeGreaterThan(0);
       expect(s.sz).toBeGreaterThan(0);
     }
+    // Stair steps are solid boxes whose heights accumulate: the smallest
+    // is one riser (~0.19 m rule -> 19 risers over a 3.6 m floor) and the
+    // largest reaches the full floor height.
+    const heights = keiei!.stairs.map((s) => s.sy);
+    const riserModel = 3.6 / 19 / 26.25;
+    const floorModel = 3.6 / 26.25;
+    expect(Math.min(...heights)).toBeCloseTo(riserModel, 3);
+    // Return-flight stairs top out at (RISERS-1)/RISERS of the floor.
+    expect(Math.max(...heights)).toBeGreaterThan(0.9 * floorModel);
+    expect(Math.max(...heights)).toBeLessThanOrEqual(floorModel + 1e-9);
   });
 
   it("keeps dormitories as exterior massing without interior rooms", () => {
