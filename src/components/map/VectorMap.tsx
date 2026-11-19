@@ -143,10 +143,47 @@ const VectorMap: React.FC<VectorMapProps> = ({
   const { t } = useLanguage();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Measured DOM geometry for coordinate transforms. Kept in state (not
+  // read from refs during render) so pin positions recompute on resize and
+  // fullscreen changes.
+  const [viewportRects, setViewportRects] = useState<{
+    container: { height: number; left: number; top: number; width: number };
+    svg: { height: number; left: number; top: number; width: number };
+  } | null>(null);
   const [internalFullscreen, setInternalFullscreen] = useState(false);
   const [placeholderHeight, setPlaceholderHeight] = useState<number | null>(
     null,
   );
+
+  // Track rendered geometry of the SVG and its container. Pin positions and
+  // coordinate transforms depend on these measurements, so they must be
+  // reactive state rather than render-time ref reads.
+  useEffect(() => {
+    const svg = svgRef.current;
+    const container = containerRef.current;
+    if (!svg || !container || typeof ResizeObserver === "undefined") return;
+
+    const toRect = (el: Element) => {
+      const rect = el.getBoundingClientRect();
+      return {
+        height: rect.height,
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+      };
+    };
+    const update = () =>
+      setViewportRects({
+        container: toRect(container),
+        svg: toRect(svg),
+      });
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(svg);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const fullscreenEnabled = enableFullscreen !== false;
   const resolvedFullscreen =
@@ -566,7 +603,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
   // Convert screen coordinates to SVG coordinates with accurate aspect ratio handling
   // SVGの実際の描画領域を計算するヘルパー（viewBox比率と描画領域のズレを調整）
   const getSVGContentRect = useCallback(
-    (svgRect: DOMRect) => {
+    (svgRect: { height: number; width: number }) => {
       const inferredRatio =
         viewBox.height === 0
           ? effectiveBounds.width / effectiveBounds.height
@@ -597,9 +634,8 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
   const screenToSVG = useCallback(
     (screenX: number, screenY: number): Coordinate => {
-      if (!svgRef.current) return { x: 0, y: 0 };
-
-      const svgRect = svgRef.current.getBoundingClientRect();
+      const svgRect = viewportRects?.svg;
+      if (!svgRect) return { x: 0, y: 0 };
 
       // スクリーン座標をSVG要素内の相対座標に変換
       const relativeX = screenX - svgRect.left;
@@ -621,16 +657,15 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
       return { x: svgX, y: svgY };
     },
-    [viewBox, getSVGContentRect],
+    [viewBox, getSVGContentRect, viewportRects],
   );
 
   // SVG座標からコンテナ相対座標への変換（ピン配置用）
   const svgToScreen = useCallback(
     (svgX: number, svgY: number): { x: number; y: number } | null => {
-      if (!svgRef.current || !containerRef.current) return null;
+      if (!viewportRects) return null;
 
-      const svgRect = svgRef.current.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
+      const { container: containerRect, svg: svgRect } = viewportRects;
       const contentRect = getSVGContentRect(svgRect);
 
       // SVG座標からViewBox内の相対位置を計算
@@ -651,7 +686,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
       return { x: containerRelativeX, y: containerRelativeY };
     },
-    [viewBox, getSVGContentRect],
+    [viewBox, getSVGContentRect, viewportRects],
   );
 
   const emitMapClickFromClient = useCallback(
@@ -3025,14 +3060,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
     }> = [];
 
     // ビューポートの中心座標を計算
-    const viewportCenterX =
-      containerRef.current?.clientWidth != null
-        ? containerRef.current.clientWidth / 2
-        : 0;
-    const viewportCenterY =
-      containerRef.current?.clientHeight != null
-        ? containerRef.current.clientHeight / 2
-        : 0;
+    const viewportCenterX = viewportRects
+      ? viewportRects.container.width / 2
+      : 0;
+    const viewportCenterY = viewportRects
+      ? viewportRects.container.height / 2
+      : 0;
 
     // ビューポート中心からの距離でソート（中心に近いものから処理）
     const sortedIndices = visiblePositions
@@ -3149,7 +3182,14 @@ const VectorMap: React.FC<VectorMapProps> = ({
       const showLabel = direction !== undefined;
       return { ...pos, labelPosition: direction, showLabel };
     });
-  }, [clusters, svgToScreen, transformPinCoord, viewBox.width, viewBox.height]);
+  }, [
+    clusters,
+    svgToScreen,
+    transformPinCoord,
+    viewBox.width,
+    viewBox.height,
+    viewportRects,
+  ]);
 
   // ハイライトポイントのスクリーン座標
   const highlightScreenPosition = useMemo(() => {
