@@ -229,5 +229,3 @@ export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
     svgGroupId: "_第2体育館",
   },
 ];
-
-
