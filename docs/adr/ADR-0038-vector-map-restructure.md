@@ -37,14 +37,19 @@ React Compiler系ルール（refs/set-state-in-effect）の警告25件が残り�
 
 ### B. 責務ごとのモジュール抽出（採用）
 
-純粋な計算を `src/map/` 配下の検証可能モジュールへ抽出し、
+純粋な計算を `src/components/map/utils/` 配下の検証可能モジュールへ抽出し、
 コンポーネントは「状態の所有 + 合成」に限定する。
 
-- `src/map/viewport.ts`: viewBox/zoom/pan/回転の純粋変換（単体テスト可能）
-- `src/map/clustering.ts`: 既存utilsの重複実装を統合
+- `src/components/map/utils/viewport.ts`: viewBox/zoom/panの純粋変換（単体テスト可能）
+- `src/components/map/utils/pinTransform.ts`: 固定90°回転を含む座標変換
+- `src/components/map/utils/coordinateTransform.ts`: client↔viewBox↔map座標変換
+- `src/components/map/utils/cardPlacement.ts` / `pinLabelLayout.ts`:
+  カード配置・ラベル衝突回避の純粋関数
 - `src/components/map/useMapGestures.ts`: ポインタ/タッチ/ホイールの
   ジェスチャー状態機械をhookへ
 - `src/components/map/useFloorSelection.ts`: 建物検出・フロア選択状態
+- `src/components/map/useMapSelection.ts`: ポイント/クラスタ選択・カード状態
+- `src/components/map/useViewportMeasurement.ts`: SVG/コンテナの実測ジオメトリ
 - VectorMap.tsx: 上記を合成するオーケストレータ + SVG/描画
 
 - 改善: 座標変換・クラスタリングが純粋関数として直接テスト可能になり、
@@ -71,8 +76,9 @@ React Compiler系ルール（refs/set-state-in-effect）の警告25件が残り�
 
 回転モード（Rキー・isRotateMode）はUI非公開の上級者機能。
 要求F1–F7に含まれず、viewBox回転の複雑さが座標変換の主要な複雑性源の
-ひとつであるため、**撤去を第一候補**とし、撤去が他機能を壊す場合のみ
-根拠を明記して残す（#39で判定）。
+ひとつであるため、**#39で撤去を実施した**。SVGレイヤーの固定90°回転
+（`pinTransform.ts`）はデータ座標系の一部として残り、可変回転状態・
+回転ジェスチャー・回転UIはすべて除去した。
 
 ## Consequences
 

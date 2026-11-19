@@ -1,38 +1,25 @@
-interface Coordinate {
-  x: number;
-  y: number;
-}
-
-interface ViewBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface ContentRect {
-  width: number;
-  height: number;
-}
+import type { Coordinate, ViewBox } from "../../../types/map";
+import type { MapBoundsSize } from "./coordinateTransform";
 
 interface CalculatePanViewBoxParams {
   startClient: Coordinate;
   currentClient: Coordinate;
   startViewBox: ViewBox;
-  contentRect: ContentRect;
+  /** Painted content size of the SVG element (letterbox aware). */
+  contentSize: MapBoundsSize;
 }
 
 export const calculatePanViewBox = ({
   startClient,
   currentClient,
   startViewBox,
-  contentRect,
+  contentSize,
 }: CalculatePanViewBoxParams): ViewBox => {
   const deltaX = currentClient.x - startClient.x;
   const deltaY = currentClient.y - startClient.y;
 
-  const scaleX = startViewBox.width / contentRect.width;
-  const scaleY = startViewBox.height / contentRect.height;
+  const scaleX = startViewBox.width / contentSize.width;
+  const scaleY = startViewBox.height / contentSize.height;
 
   return {
     height: startViewBox.height,

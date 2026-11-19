@@ -1,8 +1,6 @@
 import {
   Maximize2,
   Minimize2,
-  RotateCcw,
-  RotateCw,
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
 } from "lucide-react";
@@ -14,29 +12,24 @@ interface ZoomControlsProps {
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   fullscreenLabel?: string;
-  scale: number;
-  minScale: number;
-  maxScale: number;
-  rotation?: number;
-  onRotateCW?: () => void;
-  onRotateCCW?: () => void;
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
 }
 
 const ZoomControls = ({
   fullscreenLabel,
   isFullscreen = false,
-  maxScale,
-  minScale,
-  onRotateCCW,
-  onRotateCW,
+  maxZoom,
+  minZoom,
   onToggleFullscreen,
   onZoomIn,
   onZoomOut,
-  scale,
+  zoom,
 }: ZoomControlsProps) => {
-  const zoomInDisabled = useMemo(() => scale >= maxScale, [scale, maxScale]);
-  const zoomOutDisabled = useMemo(() => scale <= minScale, [scale, minScale]);
-  //const formattedScale = useMemo(() => `${Math.round(scale * 100)}%`, [scale]);
+  const zoomInDisabled = useMemo(() => zoom >= maxZoom, [zoom, maxZoom]);
+  const zoomOutDisabled = useMemo(() => zoom <= minZoom, [zoom, minZoom]);
+  //const formattedScale = useMemo(() => `${Math.round(zoom * 100)}%`, [zoom]);
 
   const baseZoomButtonClass =
     "flex items-center justify-center bg-white text-slate-700 transition-colors duration-150 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 touch-manipulation h-11 w-11 text-base font-semibold";
@@ -151,44 +144,6 @@ const ZoomControls = ({
           />
         </button>
       </div>
-
-      {/* Rotation controls */}
-      {(onRotateCW || onRotateCCW) && (
-        <div className={utilityGroupClass}>
-          {onRotateCCW && (
-            <button
-              type="button"
-              onClick={onRotateCCW}
-              aria-label="左回転 (90°)"
-              className={`${baseUtilityButtonClass} border-b border-slate-100`}
-              title="左回転 (90°)"
-              style={{ touchAction: "manipulation" }}
-            >
-              <RotateCcw
-                strokeWidth={2.5}
-                className="h-5 w-5"
-                style={{ vectorEffect: "non-scaling-stroke" }}
-              />
-            </button>
-          )}
-          {onRotateCW && (
-            <button
-              type="button"
-              onClick={onRotateCW}
-              aria-label="右回転 (90°)"
-              className={`${baseUtilityButtonClass} border-b border-slate-100`}
-              title="右回転 (90°)"
-              style={{ touchAction: "manipulation" }}
-            >
-              <RotateCw
-                strokeWidth={2.5}
-                className="h-5 w-5"
-                style={{ vectorEffect: "non-scaling-stroke" }}
-              />
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Utility */}
       <div className={utilityGroupClass}>

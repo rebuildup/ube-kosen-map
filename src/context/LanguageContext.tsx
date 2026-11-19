@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import type { Language, Translations } from "../utils/translations";
@@ -25,16 +25,6 @@ const defaultContext: LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 export const useLanguage = () => useContext(LanguageContext);
-
-// HOC to inject language props into class components
-export function withLanguage<P extends object>(
-  Component: ComponentType<P & { t: (key: string) => string }>,
-): React.FC<P> {
-  return (props: P) => {
-    const { t } = useLanguage();
-    return <Component {...props} t={t} />;
-  };
-}
 
 interface LanguageProviderProps {
   children: ReactNode;

@@ -22,7 +22,7 @@ export interface ScreenCluster<T extends ClusterablePoint> {
 export function clusterPointsOnScreen<T extends ClusterablePoint>(
   points: readonly T[],
   toScreenPoint: (point: T) => { x: number; y: number },
-  distanceThresholdPx: (point: T) => number,
+  getDistanceThresholdPx: (point: T) => number,
   excludeIds?: ReadonlySet<string>,
 ): ScreenCluster<T>[] {
   const clusters: ScreenCluster<T>[] = [];
@@ -50,8 +50,8 @@ export function clusterPointsOnScreen<T extends ClusterablePoint>(
       }
       const otherScreen = getCachedScreenPoint(otherPoint);
       const pairThreshold = Math.max(
-        distanceThresholdPx(point),
-        distanceThresholdPx(otherPoint),
+        getDistanceThresholdPx(point),
+        getDistanceThresholdPx(otherPoint),
       );
       const distance = Math.hypot(
         otherScreen.x - pointScreen.x,

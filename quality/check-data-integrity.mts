@@ -12,7 +12,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CAMPUS_MAP_BOUNDS } from "../src/data/buildings.ts";
+import { CAMPUS_MAP_BOUNDS } from "../src/data/mapBounds.ts";
 import { BUILDING_FLOOR_CONFIGS } from "../src/data/floorConfig.ts";
 import amenitiesJson from "../src/data/mapAmenities.json" with { type: "json" };
 
