@@ -4,14 +4,14 @@ export interface Translations {
   [key: string]: string | Translations;
 }
 
-export const enTranslations: Translations = {
+const enTranslations: Translations = {
   map: {
     enterFullscreen: "Enter Fullscreen",
     exitFullscreen: "Exit Fullscreen",
   },
 };
 
-export const jaTranslations: Translations = {
+const jaTranslations: Translations = {
   map: {
     enterFullscreen: "全画面表示",
     exitFullscreen: "全画面を終了",

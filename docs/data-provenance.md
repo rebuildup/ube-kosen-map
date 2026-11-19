@@ -8,7 +8,7 @@
 | パス | 内容 | 出典 |
 | --- | --- | --- |
 | `public/campus-map3.svg` | キャンパス全体図（インラインSVGとして描画） | 宇部高等専門学校が公開している構内図をもとに作成 |
-| `src/data/buildings.ts` | 建物ポリゴン・中心座標・フロア情報 | `campus-map3.svg` のグループ構造から抽出 |
+| `src/data/buildings.ts` | キャンパス地図のviewBox範囲 | `campus-map3.svg` のviewBoxから抽出 |
 | `src/data/floorConfig.ts` | 建物ごとのフロア構成・SVGグループID | 同上 |
 | `src/data/mapAmenities.json` | トイレ・ごみ箱などの設備ポイント | 構内図上の位置を手作業でプロット |
 | `public/icon.svg` | ファビコン | このプロジェクトで作成 |

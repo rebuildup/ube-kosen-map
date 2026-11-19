@@ -22,8 +22,6 @@ export interface BuildingFloorConfig {
   svgGroupId?: string;
 }
 
-export const FLOOR_ZOOM_THRESHOLD = 0.35; // viewBox must be < 35% of map size to activate
-
 export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
   // --- upper campus ---
   {

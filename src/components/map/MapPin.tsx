@@ -14,16 +14,15 @@ import type { Coordinate, MapItemType } from "../../types/map";
 interface MapPinProps {
   id: string;
   position: { x: number; y: number };
-  svgCoordinate: Coordinate;
+  coordinate: Coordinate;
   type: MapItemType;
   label?: string;
   /** 指定時は円内にこの文字を小さく表示し、アイコンは出さない（子ピン用） */
-  pinLabel?: string;
+  innerLabel?: string;
   labelPosition?: "left" | "right";
   color?: string;
   isHovered?: boolean;
   isSelected?: boolean;
-  isMobileHovered?: boolean;
   onClick?: (e: React.MouseEvent | React.TouchEvent) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -71,10 +70,9 @@ export const MapPin: React.FC<MapPinProps> = ({
   color,
   id,
   isHovered = false,
-  isMobileHovered = false,
   isSelected = false,
   label,
-  pinLabel: pinLabelContent,
+  innerLabel,
   labelPosition = "right",
   onClick,
   onMouseEnter,
@@ -82,15 +80,14 @@ export const MapPin: React.FC<MapPinProps> = ({
   onTouchStart,
   onTouchEnd,
   position,
-  svgCoordinate,
+  coordinate,
   type,
 }) => {
   const baseColor = color || getPointColor(type);
   const IconComponent = POINT_TYPE_ICONS[type];
   const ICON_SIZE = 12;
-  const twoDigitOnly =
-    pinLabelContent != null && pinLabelContent !== "" ? pinLabelContent : null;
-  const showTextInsidePin = twoDigitOnly != null;
+  const innerText = innerLabel != null && innerLabel !== "" ? innerLabel : null;
+  const showTextInsidePin = innerText != null;
 
   // Google Maps standard pin size - shorter pointer
   const PIN_WIDTH = 24;
@@ -102,16 +99,18 @@ export const MapPin: React.FC<MapPinProps> = ({
   const SHADOW =
     "0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.2)";
   const resolvedLabel = toAccessibleText(label, id);
-  const pinLabel = resolvedLabel ? `${resolvedLabel} (${type})` : `${type} pin`;
+  const ariaLabel = resolvedLabel
+    ? `${resolvedLabel} (${type})`
+    : `${type} pin`;
 
   return (
     <button
       type="button"
       className="map-pin map-pin-wrapper"
-      aria-label={pinLabel}
+      aria-label={ariaLabel}
       data-pin-id={id}
-      data-svg-x={svgCoordinate.x}
-      data-svg-y={svgCoordinate.y}
+      data-map-x={coordinate.x}
+      data-map-y={coordinate.y}
       style={{
         cursor: "pointer",
         filter: `drop-shadow(${SHADOW})`,
@@ -124,13 +123,7 @@ export const MapPin: React.FC<MapPinProps> = ({
         transform: "translate(-50%, -100%)",
         transformOrigin: `${PIN_WIDTH / 2}px ${PIN_HEIGHT}px`,
         width: `${PIN_WIDTH}px`,
-        zIndex: isSelected
-          ? 2100
-          : isHovered || isMobileHovered
-            ? 2000
-            : label
-              ? 500
-              : 100,
+        zIndex: isSelected ? 2100 : isHovered ? 2000 : label ? 500 : 100,
         background: "none",
         border: "none",
         padding: 0,
@@ -185,7 +178,7 @@ export const MapPin: React.FC<MapPinProps> = ({
           strokeWidth="2"
         />
       </svg>
-      {/* Circle content: pinLabel のときは小さくテキスト、なければアイコン */}
+      {/* Circle content: innerLabel のときは小さくテキスト、なければアイコン */}
       {showTextInsidePin ? (
         <div
           style={{
@@ -203,7 +196,7 @@ export const MapPin: React.FC<MapPinProps> = ({
             lineHeight: 1,
           }}
         >
-          {twoDigitOnly}
+          {innerText}
         </div>
       ) : (
         <div
