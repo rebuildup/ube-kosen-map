@@ -123,6 +123,31 @@ export interface PanConstraints {
 export type MapItemType = "location" | "toilet" | "trash";
 
 /**
+ * Rectangular anchor area used to derive a point's effective coordinate
+ */
+export interface AnchorArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  z?: number;
+}
+
+/**
+ * Child point nested inside an area-focusable parent point
+ */
+export interface InteractiveChildPoint {
+  id: string;
+  coordinates: Coordinate;
+  title: string;
+  type: MapItemType;
+  buildingId?: string;
+  floorId?: string;
+  svgGroupId?: string;
+  color?: string;
+}
+
+/**
  * Interactive point on the map
  */
 export interface InteractivePoint {
@@ -130,8 +155,16 @@ export interface InteractivePoint {
   coordinates: Coordinate;
   title: string;
   type: MapItemType;
+  anchorArea?: AnchorArea;
+  isAreaFocusable?: boolean;
+  buildingId?: string;
+  floorId?: string;
+  svgGroupId?: string;
+  childPoints?: InteractiveChildPoint[];
   size?: number;
   color?: string;
+  /** 指定時は円内にこの文字を小さく表示（子ピン用） */
+  pinLabel?: string;
   isSelected?: boolean;
   isHovered?: boolean;
   contentItem?: unknown; // Generic content item reference
