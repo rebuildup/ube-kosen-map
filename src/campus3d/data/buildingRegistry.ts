@@ -48,7 +48,7 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     color: 0xc08552,
     floors: 4,
     rooms: "情報処理実習室・経営学科事務室",
-    note: "2階に B21（手前）・B22（奥）。B22 は 4S の HR 教室。",
+    note: "2階は手前・奥の2教室に分かれています。",
   },
   {
     key: "techno",
@@ -92,7 +92,7 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     floors: 4,
     rooms:
       "生産工学実験室（機械）・自然エネルギー実験室・専攻科教室・研究室（学生便覧の平面図より）",
-    note: "3階に久保田研究室（卒業研究）。",
+    note: "3階にも研究室があります。",
   },
   {
     key: "toshokan",

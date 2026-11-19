@@ -10,7 +10,7 @@
 | 寮各棟の内部区画（ryod/kokusai/ryof/shokudo） | 寮生手帳の棟別平面図を図面座標へR180変換して書き起こし（**restricted、公開Gitには含めない**。D棟2Fのみ campus-map.svg 収録の公開平面） | 出典どおり。公開モデルでは寮は外観マッシングまで |
 | 補完4棟の内部区画（eroom/bbld/cbld/yokujo） | 寮生手帳の棟別平面図（**restricted**）。外形のみ学生便覧の建物配置図トレースとして公開 | 同上 |
 | `HP_BUILDING_INFO` | 学校HP「各種データ」の建物一覧（構造・建面積・延面積） | 公表値 |
-| 個人ピン（旧 `PIN_DEFINITIONS`/`HUB_INFO`） | 部屋同定は本人の説明・記憶に基づく（B22教室・久保田研究室・居室5111） | **restricted。公開レジストリから除去済み** |
+| 個人ピン（旧 `PIN_DEFINITIONS`/`HUB_INFO`） | 教室・研究室・居室の同定は本人の説明・記憶に基づく | **restricted。公開レジストリから除去済み** |
 | 座標較正定数（`GEO`・`MODEL_UNITS_PER_DRAWING_UNIT`・`NORTH_OFFSET_DEGREES`） | 図面→実世界の縮尺0.84m/単位はHP建面積と写真で照合、回転15.5°は便覧配置図の方位磁針から実測、北 offset は配置図＋地理院地図で較正 | 較正値。微小な誤差を含む |
 | 標高（`elevationOfLayer`・`TERRAIN_BASE_ELEVATION_M`） | SRTM基準の概算。敷地全体の起伏約8m | **概算値。実測の測量値ではない** |
 | 階高（校舎3.6m/寮3.0m）・蹴上0.19m・踏面0.26m・コンクリ壇0.4m | 一般的な建築寸法からの既定値。出典文書での個別実測ではない | 既定値 |
