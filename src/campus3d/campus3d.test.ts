@@ -1,6 +1,11 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import { CAMPUS_MODEL_DATA } from "./data/campusModelData";
+import { withComplementedBuildings } from "./data/complemented";
 import {
   BUILDING_REGISTRY,
   resolveBuildingRegistry,
@@ -90,6 +95,73 @@ describe("campus model data", () => {
     const keiei = resolved.find((b) => b.key === "keiei");
     expect(ryod?.floorHeightM).toBe(3.0);
     expect(keiei?.floorHeightM).toBe(SCHOOL_FLOOR_HEIGHT_M);
+  });
+});
+
+describe("public data boundary", () => {
+  // Dormitory room numbers and handbook-derived interior descriptions are
+  // restricted (docs/campus3d-data-policy.md). The registry must never carry
+  // them: this repo is public, so UI hiding cannot protect the data.
+  const DORM_KEYS = new Set([
+    "ryod",
+    "kokusai",
+    "ryof",
+    "shokudo",
+    "eroom",
+    "bbld",
+    "cbld",
+    "yokujo",
+  ]);
+
+  it("keeps dorm room numbers and handbook citations out of the registry", () => {
+    for (const b of BUILDING_REGISTRY) {
+      if (!DORM_KEYS.has(b.key)) continue;
+      const text = `${b.rooms ?? ""} ${b.note ?? ""}`;
+      expect(text, b.key).not.toMatch(/[0-9]{4}/);
+      expect(text, b.key).not.toContain("寮生手帳");
+    }
+  });
+
+  it("keeps four-digit room numbers out of every registry entry", () => {
+    for (const b of BUILDING_REGISTRY) {
+      const text = `${b.rooms ?? ""} ${b.note ?? ""}`;
+      expect(text, b.key).not.toMatch(/\b\d{4}\b/);
+    }
+  });
+
+  it("never attaches hand-transcribed interior plans to dormitories", () => {
+    // `rooms`/`fr` on a floor is the hand-transcribed plan channel, which is
+    // restricted for dormitories. campus-map.svg floor plates (`f`/`w`/`st`)
+    // are publishable and may remain.
+    const data = withComplementedBuildings(CAMPUS_MODEL_DATA);
+    for (const b of BUILDING_REGISTRY) {
+      if (!b.category.startsWith("寮")) continue;
+      for (const fl of data.bld[b.key]?.fl ?? []) {
+        expect(fl.rooms, `${b.key}#${fl.n}`).toBeUndefined();
+        expect(fl.fr, `${b.key}#${fl.n}`).toBeUndefined();
+      }
+    }
+  });
+
+  it("keeps restricted pin identifiers out of the public source tree", () => {
+    const root = fileURLToPath(new URL(".", import.meta.url));
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        const p = join(dir, name);
+        if (statSync(p).isDirectory()) {
+          walk(p);
+          continue;
+        }
+        if (!name.endsWith(".ts") || name.endsWith(".test.ts")) continue;
+        const text = readFileSync(p, "utf8");
+        for (const marker of ["PIN_DEFINITIONS", "HUB_INFO"]) {
+          if (text.includes(marker)) offenders.push(`${p}: ${marker}`);
+        }
+      }
+    };
+    walk(root);
+    expect(offenders).toEqual([]);
   });
 });
 

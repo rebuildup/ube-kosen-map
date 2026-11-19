@@ -173,6 +173,46 @@ export const addRegionStairs = (
   addStairBoxes(list, cx, cy, tx, ty, ux, uy, flight, width, y0, totalH);
 };
 
+/** Generated stair placement {cx, cy, ang(rad), len, wid} in drawing coords. */
+export interface GeneratedStairRegion {
+  readonly cx: number;
+  readonly cy: number;
+  readonly ang: number;
+  readonly len: number;
+  readonly wid: number;
+}
+
+/** Stair from a generated region (legacy addStairsGen). */
+export const addGeneratedStairs = (
+  list: StepSpec[],
+  g: GeneratedStairRegion,
+  y0: number,
+  totalH: number,
+): void => {
+  const tx = Math.cos(g.ang);
+  const ty = Math.sin(g.ang);
+  const ux = Math.sin(g.ang);
+  const uy = -Math.cos(g.ang);
+  addStairBoxes(list, g.cx, g.cy, tx, ty, ux, uy, g.len, g.wid, y0, totalH);
+};
+
+/**
+ * Dispatch for the two stair-region encodings used in floor data:
+ * legacy tuple regions [cx,cy,w,h,angDeg] and generated {g,...} objects.
+ */
+export const addAnyStairs = (
+  list: StepSpec[],
+  region: StepRegion | (GeneratedStairRegion & { readonly g: number }),
+  y0: number,
+  totalH: number,
+): void => {
+  if ("g" in region) {
+    addGeneratedStairs(list, region, y0, totalH);
+  } else {
+    addRegionStairs(list, region, y0, totalH);
+  }
+};
+
 /** Outdoor steps from DATA.osteps: one layer-step rise, 4 steps. */
 export const outdoorSteps = (
   osteps: readonly { readonly r: StepRegion; readonly l: number }[],

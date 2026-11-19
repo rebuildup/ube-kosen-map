@@ -31,13 +31,9 @@ export interface BuildingRegistryEntry {
   readonly estimatedBase?: boolean;
   /** Building was transcribed from source documents, not the base map. */
   readonly complemented?: boolean;
-  /** Interior floor plans were complemented from source documents. */
-  readonly complementedFloors?: boolean;
+  /** Room-type names for display (never room numbers; see data policy). */
   readonly rooms?: string;
   readonly note?: string;
-  /** Hub pin key when this building hosts a point of interest. */
-  readonly hub?: string;
-  readonly hubFloor?: number;
   /** For nodata entries: the registry key this entry was merged into. */
   readonly mergedInto?: string;
 }
@@ -51,10 +47,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "教室・学科",
     color: 0xc08552,
     floors: 4,
-    hub: "b22",
-    hubFloor: 2,
     rooms: "情報処理実習室・経営学科事務室",
-    note: "2階に B21（手前）・B22（奥）。B22 は 4S の HR 教室。",
+    note: "2階は手前・奥の2教室に分かれています。",
   },
   {
     key: "techno",
@@ -63,8 +57,6 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "研究・教室",
     color: 0x4a7fa5,
     floors: 4,
-    hub: "dept",
-    hubFloor: 4,
     rooms:
       "制御情報演習室・専攻科学生研究室・研究室・準備室（学生便覧の平面図より）",
     note: "制御情報工学科棟と地域共同テクノセンターは、フロア図では1棟として描かれています。",
@@ -98,11 +90,9 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "研究",
     color: 0x6a7f6e,
     floors: 4,
-    hub: "lab",
-    hubFloor: 3,
     rooms:
       "生産工学実験室（機械）・自然エネルギー実験室・専攻科教室・研究室（学生便覧の平面図より）",
-    note: "3階に久保田研究室（卒業研究）。",
+    note: "3階にも研究室があります。",
   },
   {
     key: "toshokan",
@@ -149,10 +139,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "寮",
     color: 0xd9a441,
     floors: 4,
-    complementedFloors: true,
-    rooms:
-      "居室 4201・4203〜4205／4301〜4305／4401・4403〜4406・寮務室・寮生相談室・宿直室・補食室・浴室シャワー室",
-    note: "2F は campus-map.svg 収録の平面（そのまま）。1F・3F・4F は同じ外形に寮生手帳 p.28 の平面図を書き起こし、階段位置は収録済み2Fの階段に全階で合わせた。1F は玄関・寮務室・寮生相談室・宿直室・給湯室、3F は補食室、4F は浴室シャワー室・WC洗面室がある。番号は手帳どおりで、施設の分だけ欠番がある（例：4402なし）。",
+    rooms: "居室・寮務室・寮生相談室・宿直室・補食室・浴室シャワー室",
+    note: "内部区画の詳細は公開対象外（docs/campus3d-data-policy.md）。2F の平面は campus-map.svg 収録。",
   },
   {
     key: "kokusai",
@@ -161,10 +149,9 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "寮",
     color: 0xc9973a,
     floors: 3,
-    complementedFloors: true,
     rooms:
-      "寮室 8101〜8314・9101〜9314・交流スペース・光庭・キッチン・シャワー室・管理室・ハラル室・スタディルーム",
-    note: "外形は campus-map.svg 収録。内部は寮生手帳 pp.32–33 の平面図をそのまま書き起こし： 南側（8xxx）と北側（9xxx）の2ユニットが並び、各ユニットは両側の居室列と中央の交流スペース・光庭、水回り（洗面所・シャワー室・WC・キッチン）の構成。1F は各ユニット6室＋管理室・ハラル室・スタディルーム、2・3F は各ユニット14室。",
+      "寮室・交流スペース・光庭・キッチン・シャワー室・管理室・ハラル室・スタディルーム",
+    note: "内部区画の詳細は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "ryof",
@@ -173,10 +160,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "寮",
     color: 0xd9a441,
     floors: 3,
-    complementedFloors: true,
-    rooms:
-      "居室 6101〜6110・6201〜6212・6301〜6312・交流ホール・多目的学習室・洗濯室",
-    note: "外形は campus-map.svg 収録。内部は寮生手帳 p.29 の平面図をそのまま書き起こし： 片廊下（北側が廊下）、西端に階段・WC・洗面室と洗濯室、交流ホール。2・3Fは各12室、1Fは交流ホールと多目的学習室を挟んで6101〜6110の10室。",
+    rooms: "居室・交流ホール・多目的学習室・洗濯室",
+    note: "内部区画の詳細は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "shokudo",
@@ -185,9 +170,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     category: "寮・厚生",
     color: 0x86a860,
     floors: 2,
-    complementedFloors: true,
-    rooms: "1F 食堂ホール・厨房・倉庫・食堂業者控え室／2F 集会所",
-    note: "外形は campus-map.svg 収録。内部は寮生手帳 p.25 食堂棟の平面図をそのまま書き起こし： 1F は南が食堂ホール、北東が厨房、北西に倉庫・食堂業者控え室。2F は集会所。",
+    rooms: "食堂ホール・厨房・倉庫・食堂業者控え室・集会所",
+    note: "内部区画の詳細は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "gym1",
@@ -264,10 +248,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     color: 0xd9a441,
     floors: 4,
     complemented: true,
-    hub: "room",
-    hubFloor: 1,
-    rooms: "居室 5101〜5411・学習室・洗面・洗濯室・湯沸室・共用室・倉庫",
-    note: "campus-map.svg 未収録だったため補完した棟。外形は学生便覧の建物配置図からトレース（建面積は学校HPの783㎡と一致）。内部は寮生手帳 pp.30–31 の平面図をそのまま書き起こし： 西側と東側の2翼からなり、西側1Fは共用室のみ（居室番号なし）、2Fは北列5201〜5208・南列5209〜5218＋接続部5223・5224、4Fは東端の部分（5406・倉庫・階段）のみ。東側は4階建てで、1F北列5101〜5104（大部屋）・南列5105〜5112（小部屋）、5111は南列の西から7番目。水回りと階段は各翼の両端。",
+    rooms: "居室・学習室・洗面・洗濯室・湯沸室・共用室・倉庫",
+    note: "campus-map.svg 未収録のため外形を学生便覧の建物配置図からトレース（建面積は学校HPの783㎡と一致）。内部区画は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "bbld",
@@ -277,9 +259,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     color: 0xd9a441,
     floors: 4,
     complemented: true,
-    rooms:
-      "居室 2102〜2407（2〜4Fは各7室、1Fは洗濯室＋2102〜2107）・補食室・洗面室・WC",
-    note: "補完した棟。外形は建物配置図からトレース（建面積217㎡はHPと一致）。内部は寮生手帳 p.26 の平面図をそのまま書き起こし： 片廊下（北側が廊下）で南列に居室、張り出し部分に階段・WC・補食室・洗面室。1Fの西端の居室位置は洗濯室のため、1Fの居室は2102から始まる。",
+    rooms: "居室・補食室・洗面室・WC",
+    note: "外形は建物配置図からトレース（建面積217㎡はHPと一致）。内部区画は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "cbld",
@@ -289,9 +270,8 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     color: 0xd9a441,
     floors: 3,
     complemented: true,
-    rooms:
-      "居室 3101〜3311（2・3F各11室、1Fは3101〜3106）・談話室・洗濯室・療養室・寮母室・宿直室・浴場・脱衣室",
-    note: "補完した棟。外形は建物配置図からトレース（段型の平面）。内部は寮生手帳 p.27 の平面図をそのまま書き起こし： 片廊下（北側が廊下）、階段＋WC・洗面所のブロックが棟内に2か所（2・3Fの東側ブロック下は談話室）。1Fは居室6室のほか下足置場・浴場・脱衣室・談話室・洗濯室、西端に療養室・寮母室・宿直室。北側に駐輪場。",
+    rooms: "居室・談話室・洗濯室・療養室・寮母室・宿直室・浴場・脱衣室",
+    note: "外形は建物配置図からトレース（段型の平面）。内部区画は公開対象外（docs/campus3d-data-policy.md）。北側に駐輪場。",
   },
   {
     key: "yokujo",
@@ -302,7 +282,7 @@ export const BUILDING_REGISTRY: readonly BuildingRegistryEntry[] = [
     floors: 1,
     complemented: true,
     rooms: "大浴場・脱衣室・シャワー室・洗濯室・玄関・前室",
-    note: "補完した棟。外形は建物配置図からトレース（建面積はHPの180㎡とほぼ一致）。内部は寮生手帳 p.25 浴場棟の平面図をそのまま書き起こし： 洗濯室／玄関・前室・シャワー室／脱衣室／大浴場の帯構成。",
+    note: "外形は建物配置図からトレース（建面積はHPの180㎡とほぼ一致）。内部区画は公開対象外（docs/campus3d-data-policy.md）。",
   },
   {
     key: "jisshu2",
@@ -365,81 +345,6 @@ export const HP_BUILDING_INFO: Readonly<
     structure: "RC造・SS造 2階建（浴場は1階部分）",
     footprintM2: 180,
     grossM2: 180,
-  },
-};
-
-export interface HubInfo {
-  readonly label: string;
-  readonly title: string;
-  readonly description: string;
-}
-
-export const HUB_INFO: Readonly<Record<string, HubInfo>> = {
-  room: {
-    label: "居室 5111",
-    title: "E棟 1階 — 居室 5111号室",
-    description:
-      "白鳥寮 E棟1階、5111号室。あなたの生活・作業の本拠です。E棟は学生便覧の建物配置図と寮生手帳の平面図（E棟東側 1F）から補完し、5111 も部屋として成立させました。ピンは平面図の並び（1F東側・南列 5105〜5112 の7番目）からの書き起こし位置です。",
-  },
-  b22: {
-    label: "HR教室 B22",
-    title: "経営情報学科棟 2階 — B22教室",
-    description:
-      "4S の HR 教室。同じ2階で B21 が手前、B22 が奥という並びです（部屋の同定は本人の説明に基づく。図面に部屋名ラベルはありません）。",
-  },
-  lab: {
-    label: "久保田研究室",
-    title: "専攻科棟 3階 — 久保田研究室",
-    description:
-      "卒業研究IIの研究室。専攻科棟3階です（配置の出典は本人の記憶。公式サイトに研究室所在地の明記はありません）。",
-  },
-  dept: {
-    label: "所属学科の棟",
-    title: "制御情報工学科棟（地域共同テクノセンター・制御棟）",
-    description:
-      "あなたの所属学科（制御情報工学科）の棟。フロア図では地域共同テクノセンターと一体の1棟として描かれています。",
-  },
-};
-
-export interface PinDefinition {
-  /** Registry key of the building hosting the pin. */
-  readonly building: string;
-  /** Drawing coordinates of the pin. */
-  readonly drawX: number;
-  readonly drawY: number;
-  /** 1-based floor number. */
-  readonly floor: number;
-  readonly label: string;
-}
-
-export const PIN_DEFINITIONS: Readonly<Record<string, PinDefinition>> = {
-  b22: {
-    building: "keiei",
-    drawX: 109.4,
-    drawY: 594.0,
-    floor: 2,
-    label: "B22教室（奥）",
-  },
-  lab: {
-    building: "senkouka",
-    drawX: 266.1,
-    drawY: 644.0,
-    floor: 3,
-    label: "久保田研究室",
-  },
-  dept: {
-    building: "techno",
-    drawX: 149.0,
-    drawY: 582.0,
-    floor: 4,
-    label: "制御情報工学科棟 4F",
-  },
-  room: {
-    building: "eroom",
-    drawX: 151.3,
-    drawY: 283.3,
-    floor: 1,
-    label: "居室 5111",
   },
 };
 
