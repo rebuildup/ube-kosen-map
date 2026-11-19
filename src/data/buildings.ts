@@ -1,8 +1,6 @@
-// Building data extracted from the updated accurate campus map SVG
-// Each building corresponds to a polygon in the id="building" group
-// Copyright (c) 2025 Ube National College of Technology. All Rights Reserved.
-// このファイルの内容は宇部高等専門学校の著作権により保護されています。
-// 許可なく使用することはできません。
+// Building data derived from the campus map SVG (public/campus-map3.svg).
+// Map geometry originates from materials published by Ube National College
+// of Technology; see docs/data-provenance.md for details.
 
 export interface Building {
   id: string;
