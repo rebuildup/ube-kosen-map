@@ -32,6 +32,12 @@
       "entry": "bun run check:data",
       "scope": "src/data/**, public/campus-map3.svg"
     },
+    "reference_impl": {
+      "meaning": "templates/** のproject-init参照実装（アプリの実行経路・成果物ではない）のnode:test検証",
+      "runner": "node --test",
+      "entry": "bun run test:templates",
+      "scope": "templates/**/*.test.mts"
+    },
     "smoke": {
       "meaning": "production buildの起動と主要boundary(地図描画・主要操作UI)の成立",
       "runner": "vite preview + playwright DOM/console確認",
@@ -51,7 +57,7 @@
     },
     "integration": {
       "command": ["bun", "run", "validate:integration"],
-      "meaning": "worker gate + production build。ticket PR統合前"
+      "meaning": "worker gate + reference impl tests + production build。ticket PR統合前"
     },
     "release": {
       "command": ["bun", "run", "validate:release"],
@@ -70,9 +76,9 @@
   "ci": {
     "workflow": ".github/workflows/ci.yml",
     "triggers": {
-      "pull_request": "check(integration相当) + contract(base比較)",
+      "pull_request": "check(integration相当) + contract(base比較、trusted側checkerで実行)",
       "push_main": "check",
-      "push_release": "check + release-gate(challenge含む)"
+      "push_release": "check のみ。release-gateはrelease PR(base=main)またはworkflow_dispatchでfreeze時にsame SHAへ実施"
     },
     "concurrency": "workflow+ref単位でcancel-in-progress",
     "runner": "ubuntu-latest",
@@ -81,8 +87,8 @@
   "contract": {
     "manifest": "quality-contract.json",
     "checker": ".agents/skills/system-quality/scripts/verify-contract.mts",
-    "semantics": "protected pathsの変更をbase比較で検出。gate rule変更はrelease branch直接のレビュー済みcommitでbaseline更新してから利用側ticketをrebaseする。challenge/verify-contractのrunner script自体も保護対象（gate弱体化の自己合格を防ぐ）",
-    "known_gap": "bun.lockは対象外(依存更新の頻度対ノイズ)。package.jsonはgate scriptsを含むため対象。templates/**は文書のみで実行コードなし、.agents/.claudeのSkill群はskills-lockのhashで管理されapp lint対象外（system-quality scriptsのみcontract保護）。"
+    "semantics": "protected pathsの変更をbase比較で検出。gate rule変更はrelease branch直接のレビュー済みcommitでbaseline更新してから利用側ticketをrebaseする。challenge/verify-contractのrunner script自体も保護対象（gate弱体化の自己合格を防ぐ）。contract照合はtrusted(base)側のverify-contract.mtsを実行し、candidate側scriptの改変による自己合格を排除する",
+    "known_gap": "bun.lockは対象外(依存更新の頻度対ノイズ)。package.jsonはgate scriptsを含むため対象。eslintはreact系ruleをsrc/**へ適用し、quality/・root設定ファイル等の残りの実行TSへはglobal ruleを適用する。templates/**はproject-init由来の参照実装でアプリ成果物ではなくeslint対象外だがnode:testで検証する。.agents/.claudeのSkill群はskills-lockのhash管理でlint対象外、gate実行に使うsystem-quality scriptsはcontract保護かつCI上で実際に実行される。docs/**,public/**は非実行資産。"
   },
   "challenge": {
     "runner": ".agents/skills/system-quality/scripts/challenge.mts",

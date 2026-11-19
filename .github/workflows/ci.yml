@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, "release-*"]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -48,10 +49,21 @@ jobs:
             echo "quality-contract.json is not present on the base revision; skipping."
             exit 0
           fi
-          node candidate/.agents/skills/system-quality/scripts/verify-contract.mts trusted candidate
+          if [ ! -f trusted/.agents/skills/system-quality/scripts/verify-contract.mts ]; then
+            echo "verify-contract.mts is not present on the base revision; skipping."
+            exit 0
+          fi
+          # Run the checker from the trusted (base) revision so a candidate
+          # cannot weaken the verifier and self-approve.
+          node trusted/.agents/skills/system-quality/scripts/verify-contract.mts trusted candidate
 
+  # Comprehensive release validation runs only at freeze time: on the
+  # release PR targeting main, or on demand via workflow_dispatch against a
+  # chosen ref. Ordinary pushes to release-* run the `check` job only.
   release-gate:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release-')
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

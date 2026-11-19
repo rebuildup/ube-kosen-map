@@ -12,9 +12,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:templates": "node --test templates/",
     "check:data": "node quality/check-data-integrity.mts",
     "validate:fast": "bun run typecheck && bun run lint && bun run test && bun run format:check && bun run check:data",
-    "validate:integration": "bun run validate:fast && bun run build",
+    "validate:integration": "bun run validate:fast && bun run test:templates && bun run build",
     "validate:release": "bun run validate:integration && node .agents/skills/system-quality/scripts/challenge.mts . quality/challenge-suite.json"
   },
   "dependencies": {
