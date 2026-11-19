@@ -1,5 +1,11 @@
 import type { ItemType } from "../../types/common";
-import { EventIcon, ExhibitIcon, MapIcon, SponsorIcon } from "../icons";
+import {
+  EventIcon,
+  ExhibitIcon,
+  MapIcon,
+  SponsorIcon,
+  StallIcon,
+} from "../icons";
 
 interface ItemTypeIconProps {
   type: ItemType;
@@ -19,7 +25,7 @@ const ItemTypeIcon = ({ size = "medium", type }: ItemTypeIconProps) => {
     const sizePx = getSize();
     if (type === "event") return <EventIcon size={sizePx} />;
     if (type === "exhibit") return <ExhibitIcon size={sizePx} />;
-    if (type === "stall") return <MapIcon size={sizePx} />;
+    if (type === "stall") return <StallIcon size={sizePx} />;
     if (type === "sponsor") return <SponsorIcon size={sizePx} />;
     return <MapIcon size={sizePx} />;
   };

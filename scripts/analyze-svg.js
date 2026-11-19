@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "node:fs";
 
 const content = fs.readFileSync("public/campus-map.svg", "utf8");
 
@@ -20,7 +19,7 @@ while ((m = gRe.exec(content)) !== null) {
 }
 console.log("groups found:", groupStarts.length);
 groupStarts.forEach((g, i) => {
-  const nextPos = i + 1 < groupStarts.length ? groupStarts[i+1].pos : content.length;
+  const nextPos = i + 1 < groupStarts.length ? groupStarts[i + 1].pos : content.length;
   const snippet = content.substring(g.pos, Math.min(g.pos + 2000, nextPos));
   // path classを集める
   const classes = [...new Set([...snippet.matchAll(/class="([^"]+)"/g)].map(x => x[1].split(" ")).flat())];

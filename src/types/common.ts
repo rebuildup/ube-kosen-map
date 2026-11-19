@@ -1,9 +1,6 @@
-export type ItemType = "event" | "exhibit" | "stall" | "sponsor";
+import type { Coordinate } from "./map";
 
-export interface Coordinate {
-  x: number;
-  y: number;
-}
+export type ItemType = "event" | "exhibit" | "stall" | "sponsor";
 
 export interface BaseItem {
   id: string;

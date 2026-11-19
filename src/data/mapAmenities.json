@@ -1,65 +1,72 @@
 [
   {
-    "id": "toilet-1",
-    "name": "経営棟トイレ",
+    "id": "toilet-mens-ippan-1f",
+    "name": "男子トイレ(一般棟1F)",
     "type": "toilet",
-    "x": 400,
-    "y": 390
+    "x": 2075.2,
+    "y": 2243.46,
+    "z": 1,
+    "buildingId": "building-ippan",
+    "floorId": "1F"
   },
   {
-    "id": "toilet-2",
-    "name": "第一体育館トイレ 男",
+    "id": "toilet-universal-ippan-1f",
+    "name": "多目的トイレ(一般棟1F)",
     "type": "toilet",
-    "x": 985,
-    "y": 972
+    "x": 2075.03,
+    "y": 2281.04,
+    "z": 1,
+    "buildingId": "building-ippan",
+    "floorId": "1F"
   },
   {
-    "id": "toilet-2-2",
-    "name": "第一体育館トイレ 女",
+    "id": "toilet-womens-ippan-1f",
+    "name": "女子トイレ(一般棟1F)",
     "type": "toilet",
-    "x": 1045,
-    "y": 972
+    "x": 2020.83,
+    "y": 2261.86,
+    "z": 1,
+    "buildingId": "building-ippan",
+    "floorId": "1F"
   },
   {
-    "id": "toilet-3",
-    "name": "学生会館トイレ",
+    "id": "toilet-mens-ippan-2f",
+    "name": "男子トイレ(一般棟2F)",
     "type": "toilet",
-    "x": 590,
-    "y": 700
+    "x": 2073.07,
+    "y": 2261.26,
+    "z": 2,
+    "buildingId": "building-ippan",
+    "floorId": "2F"
   },
   {
-    "id": "toilet-4",
-    "name": "図書館棟トイレ",
+    "id": "toilet-womens-ippan-2f",
+    "name": "女子トイレ(一般棟2F)",
     "type": "toilet",
-    "x": 530,
-    "y": 560
+    "x": 2028.2,
+    "y": 2261.26,
+    "z": 2,
+    "buildingId": "building-ippan",
+    "floorId": "2F"
   },
   {
-    "id": "toilet-5",
-    "name": "一般棟トイレ",
+    "id": "toilet-mens-ippan-3f",
+    "name": "男子トイレ(一般棟3F)",
     "type": "toilet",
-    "x": 730,
-    "y": 950
+    "x": 2072.89,
+    "y": 2261.27,
+    "z": 3,
+    "buildingId": "building-ippan",
+    "floorId": "3F"
   },
   {
-    "id": "toilet-6",
-    "name": "物質棟トイレ",
+    "id": "toilet-womens-ippan-3f",
+    "name": "女子トイレ(一般棟3F)",
     "type": "toilet",
-    "x": 590,
-    "y": 1090
-  },
-  {
-    "id": "trash-1",
-    "name": "学生会館 ゴミ箱",
-    "type": "trash",
-    "x": 540,
-    "y": 700
-  },
-  {
-    "id": "trash-2",
-    "name": "学生会館 ゴミ箱",
-    "type": "trash",
-    "x": 520,
-    "y": 826
+    "x": 2028.02,
+    "y": 2261.37,
+    "z": 3,
+    "buildingId": "building-ippan",
+    "floorId": "3F"
   }
 ]

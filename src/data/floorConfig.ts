@@ -5,8 +5,8 @@
 // SVG source: ube-k-map-layers-2.svg (inline in campus-map.svg)
 
 export interface FloorInfo {
-  id: string;         // floor identifier (e.g. "1F", "2F")
-  label: string;      // Display label (e.g. "1F", "2F")
+  id: string; // floor identifier (e.g. "1F", "2F")
+  label: string; // Display label (e.g. "1F", "2F")
   // svgGroupId: group in inline campus-map.svg containing fill path + nested room dividers
   svgGroupId: string;
 }
@@ -57,9 +57,7 @@ export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
     id: "building-ryo-d",
     name: "寮D棟",
     center: { x: 2009, y: 3478, radius: 230 },
-    floors: [
-      { id: "2F", label: "2F", svgGroupId: "_寮D棟2F" },
-    ],
+    floors: [{ id: "2F", label: "2F", svgGroupId: "_寮D棟2F" }],
     defaultFloor: "2F",
   },
   {
@@ -172,12 +170,23 @@ export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
     defaultFloor: "1F",
   },
   {
-    id: "building-ippan-busshitsu",
-    name: "一般棟・物質棟",
-    center: { x: 2703, y: 4960, radius: 600 },
+    id: "building-ippan",
+    name: "一般棟",
+    center: { x: 2310, y: 5100, radius: 420 },
     floors: [
-      { id: "1F", label: "1F", svgGroupId: "_一般棟_物質棟1F" },
-      { id: "2F", label: "2F", svgGroupId: "_一般棟_物質棟2F" },
+      { id: "1F", label: "1F", svgGroupId: "_一般棟1F" },
+      { id: "2F", label: "2F", svgGroupId: "_一般棟2F" },
+      { id: "3F", label: "3F", svgGroupId: "_一般棟3F" },
+    ],
+    defaultFloor: "1F",
+  },
+  {
+    id: "building-busshitsu",
+    name: "物質棟",
+    center: { x: 2610, y: 5050, radius: 430 },
+    floors: [
+      { id: "1F", label: "1F", svgGroupId: "_物質棟1F" },
+      { id: "2F", label: "2F", svgGroupId: "_物質棟2F" },
       { id: "3F", label: "3F", svgGroupId: "_一般棟_物質棟3F" },
       { id: "4F", label: "4F", svgGroupId: "_物質棟4F" },
     ],
@@ -220,3 +229,15 @@ export const BUILDING_FLOOR_CONFIGS: BuildingFloorConfig[] = [
     svgGroupId: "_第2体育館",
   },
 ];
+
+export interface MapLayerOptions {
+  eventMode: boolean;
+  globalFloor: string | null; // "1F" | "2F" | "3F" | "4F" | null
+  hiddenBuildingIds: Set<string>;
+}
+
+export const DEFAULT_LAYER_OPTIONS: MapLayerOptions = {
+  eventMode: false,
+  globalFloor: null,
+  hiddenBuildingIds: new Set(),
+};
