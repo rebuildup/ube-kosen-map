@@ -629,7 +629,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
 
       return { height: contentHeight, offsetX, offsetY, width: contentWidth };
     },
-    [viewBox.height, viewBox.width, mapRotation],
+    [effectiveBounds, viewBox.height, viewBox.width],
   );
 
   const screenToSVG = useCallback(
@@ -822,7 +822,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       };
     });
     endInteraction();
-  }, [maxZoom, mapRotation, startInteraction, endInteraction]);
+  }, [effectiveAdjustedBounds, maxZoom, startInteraction, endInteraction]);
 
   const zoomOut = useCallback(() => {
     startInteraction();
@@ -868,7 +868,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       };
     });
     endInteraction();
-  }, [minZoom, mapRotation, startInteraction, endInteraction]);
+  }, [effectiveAdjustedBounds, minZoom, startInteraction, endInteraction]);
 
   const zoomToPoint = useCallback(
     (point: Coordinate, zoomLevel = 2) => {
@@ -903,7 +903,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       });
       endInteraction();
     },
-    [mapRotation, startInteraction, endInteraction],
+    [effectiveBounds, startInteraction, endInteraction],
   );
 
   // Hide mouse cursor when leaving the map
@@ -1114,6 +1114,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       isRotateMode,
       screenToSVG,
       inverseTransformPinCoord,
+      resolveBuildingFromElement,
     ],
   );
 
@@ -1562,13 +1563,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
       minZoom,
       maxZoom,
       getSVGContentRect,
-      viewBox.width,
-      viewBox.height,
       getTouchDistance,
       getTouchAngle,
       normalizeAngleDelta,
       closeCard,
       applyRotation,
+      effectiveAdjustedBounds,
     ],
   );
 
@@ -1726,6 +1726,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       endInteraction,
       getSVGContentRect,
       viewBox,
+      effectiveBounds.height,
       effectiveBounds.width,
       initialZoom,
       resolveBuildingFromElement,
@@ -2013,6 +2014,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
     [
       applyRotation,
       closeCard,
+      effectiveAdjustedBounds,
       getSVGContentRect,
       getTouchAngle,
       getTouchDistance,
@@ -2155,7 +2157,6 @@ const VectorMap: React.FC<VectorMapProps> = ({
       resolvedFullscreen,
       screenToSVG,
       viewBox,
-      viewBox.width,
       zoomToPoint,
     ],
   );
@@ -2281,10 +2282,10 @@ const VectorMap: React.FC<VectorMapProps> = ({
       screenToSVG,
       minZoom,
       maxZoom,
-      mapRotation,
       closeCard,
       startInteraction,
       endInteraction,
+      effectiveAdjustedBounds,
     ],
   );
 
@@ -2609,17 +2610,12 @@ const VectorMap: React.FC<VectorMapProps> = ({
       }
     },
     [
-      mode,
       onMapClick,
-      mapRotation,
-      viewBox,
       selectedPoint,
       selectedCluster,
       activePinPoint,
       emitMapClickFromClient,
       isClientPointInActiveArea,
-      screenToSVG,
-      transformPinCoord,
       resolveBuildingFromElement,
       focusBuilding,
     ],
@@ -3182,14 +3178,7 @@ const VectorMap: React.FC<VectorMapProps> = ({
       const showLabel = direction !== undefined;
       return { ...pos, labelPosition: direction, showLabel };
     });
-  }, [
-    clusters,
-    svgToScreen,
-    transformPinCoord,
-    viewBox.width,
-    viewBox.height,
-    viewportRects,
-  ]);
+  }, [clusters, svgToScreen, transformPinCoord, viewBox.width, viewportRects]);
 
   // ハイライトポイントのスクリーン座標
   const highlightScreenPosition = useMemo(() => {
