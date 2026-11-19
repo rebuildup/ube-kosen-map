@@ -81,7 +81,12 @@ describe("transform properties", () => {
         x: vb.x + vb.width * randRange(0.1, 0.9),
         y: vb.y + vb.height * randRange(0.1, 0.9),
       };
-      const next = zoomViewBoxAtPoint(vb, anchor, randRange(0.6, 1.6), GENEROUS_LIMITS);
+      const next = zoomViewBoxAtPoint(
+        vb,
+        anchor,
+        randRange(0.6, 1.6),
+        GENEROUS_LIMITS,
+      );
       const fracBeforeX = (anchor.x - vb.x) / vb.width;
       const fracAfterX = (anchor.x - next.x) / next.width;
       const fracBeforeY = (anchor.y - vb.y) / vb.height;
@@ -122,7 +127,11 @@ describe("transform properties", () => {
   it("zoomViewBoxCentered preserves the center when unclamped", () => {
     for (let i = 0; i < 200; i += 1) {
       const vb = randomViewBox();
-      const next = zoomViewBoxCentered(vb, randRange(0.6, 1.6), GENEROUS_LIMITS);
+      const next = zoomViewBoxCentered(
+        vb,
+        randRange(0.6, 1.6),
+        GENEROUS_LIMITS,
+      );
       expect(next.x + next.width / 2).toBeCloseTo(vb.x + vb.width / 2, 6);
       expect(next.y + next.height / 2).toBeCloseTo(vb.y + vb.height / 2, 6);
     }
@@ -173,13 +182,9 @@ describe("transform properties", () => {
       const padT = bounds.height * 0.3;
       const padB = bounds.height * 0.1;
       expect(vb.x).toBeGreaterThanOrEqual(-padL - 1e-6);
-      expect(vb.x).toBeLessThanOrEqual(
-        bounds.width + padR - vb.width + 1e-6,
-      );
+      expect(vb.x).toBeLessThanOrEqual(bounds.width + padR - vb.width + 1e-6);
       expect(vb.y).toBeGreaterThanOrEqual(-padT - 1e-6);
-      expect(vb.y).toBeLessThanOrEqual(
-        bounds.height + padB - vb.height + 1e-6,
-      );
+      expect(vb.y).toBeLessThanOrEqual(bounds.height + padB - vb.height + 1e-6);
     }
   });
 });
