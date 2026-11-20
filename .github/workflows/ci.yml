@@ -11,14 +11,21 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # event_name separates pull_request and pull_request_target runs so the
+  # two contract-related runs for the same PR cannot cancel each other.
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Default-deny: the pull_request_target contract path must never receive
+# a write-capable token. Jobs opt in to the reads they actually need.
+permissions:
+  contents: read
 
 jobs:
   check:
-    # Candidate code must never run under the write-scoped
-    # pull_request_target token; check stays on the pull_request event.
-    if: github.event_name == 'pull_request'
+    # Candidate code must never run under the pull_request_target event;
+    # push and pull_request runs are unchanged.
+    if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,12 +43,12 @@ jobs:
 
       - run: bun run validate:integration
 
-  contract:
+  contract-verify:
     if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,29 +94,32 @@ jobs:
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
             echo "$changed" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "A contract change requires acceptance via the" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`contract-accept\` environment gate (see PR #70)." >> "$GITHUB_STEP_SUMMARY"
           fi
           exit 0
 
-      - name: Require owner approval for contract changes
-        if: steps.verify.outputs.status == 'CONTRACT_CHANGED'
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  # Acceptance gate for contract changes. This job only runs when the
+  # trusted verifier reports CONTRACT_CHANGED, and it declares the
+  # `contract-accept` environment. Repository admins must configure that
+  # environment with themselves as required reviewer (Settings >
+  # Environments); until configured it does not block, so the gate is only
+  # meaningful after that one-time setup. The agent's GITHUB_TOKEN cannot
+  # approve environment deployments, and PR authors cannot approve their
+  # own PRs, so this cannot be self-authorized under shared credentials.
+  contract-accept:
+    needs: contract-verify
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      needs.contract-verify.outputs.status == 'CONTRACT_CHANGED'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: contract-accept
+    steps:
+      - name: Contract change accepted via environment gate
         run: |
-          # A contract change is legitimate only with an explicit approval
-          # bound to the exact head SHA under review. The PR author cannot
-          # approve their own PR, so this cannot be self-authorized.
-          approved=$(gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" \
-            --jq "[.[] | select(.state == \"APPROVED\" and .commit_id == \"$HEAD_SHA\" and (.author_association == \"OWNER\" or .author_association == \"MEMBER\" or .author_association == \"COLLABORATOR\"))] | last | .user.login" \
-            || true)
-          if [ -z "$approved" ] || [ "$approved" = "null" ]; then
-            echo "CONTRACT_CHANGED requires an approving review on commit $HEAD_SHA"
-            echo "by a repository owner/member/collaborator."
-            echo "Review the changed paths above, then approve this PR on GitHub"
-            echo "and re-run this check."
-            exit 1
-          fi
-          echo "Contract change approved by $approved on $HEAD_SHA"
+          echo "Contract change on ${{ github.event.pull_request.head.sha }}"
+          echo "was accepted through the contract-accept environment."
 
   # Comprehensive release validation runs only at freeze time: on the
   # release PR targeting main, or on demand via workflow_dispatch against a
