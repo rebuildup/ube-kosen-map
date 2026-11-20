@@ -4,13 +4,17 @@
 インタラクティブなキャンパスマップです。3Dビューでは建物が立体で浮かび、
 フロアごとの部屋の形まで見られます。
 
-<img src="docs/evidence/readme/readme-01-campus.png" alt="3Dキャンパス全体の俯瞰" width="720">
+<img src="docs/evidence/readme/readme-00-cluster.png" alt="3Dキャンパスの建物群クラスター" width="720">
 
-_キャンパス全体を3Dで俯瞰した画面。地形・建物・線画が立体表示されます。_
+_キャンパス中央の建物群を3Dで表示した画面。各建物のボリュームと高さが立体で確認できます。_
 
 ## 3Dキャンパスビューでできること
 
 ヘッダーの **2D / 3D** トグルで切り替えます（初回は読み込みに数秒かかります）。
+
+<img src="docs/evidence/readme/readme-01-campus.png" alt="3Dキャンパス全体の俯瞰" width="720">
+
+_キャンパス全体を3Dで俯瞰した画面。地形・建物・線画が立体表示されます。_
 
 <img src="docs/evidence/readme/readme-02-building.png" alt="専攻科棟を選択した3D画面" width="720">
 

@@ -113,7 +113,30 @@ const pressButton = async (
       : [...root.querySelectorAll('button')].find(
           (x) => x.textContent.trim() === ${JSON.stringify(text)});
     if (!b) return null;
-    b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    // scroll-behavior:smooth animates scrollIntoView and programmatic
+    // scrollTop, so a rect measured right after scrolling can be stale
+    // and the tap lands on the canvas. Iterate: instant-scroll the
+    // nearest overflow container, re-measure, verify the hit target.
+    for (let i = 0; i < 4; i++) {
+      const r = b.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      if (document.elementFromPoint(cx, cy) === b) {
+        return { x: cx, y: cy };
+      }
+      let p = b.parentElement, moved = false;
+      while (p && p !== root && !moved) {
+        const cs = getComputedStyle(p);
+        if (/(auto|scroll)/.test(cs.overflowY) && p.scrollHeight > p.clientHeight) {
+          const pr = p.getBoundingClientRect();
+          p.style.scrollBehavior = "auto";
+          p.scrollTop += cy - (pr.top + pr.height / 2);
+          p.style.scrollBehavior = "";
+          moved = true;
+        }
+        p = p.parentElement;
+      }
+      if (!moved) break;
+    }
     const r = b.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   })()`)) as { x: number; y: number } | null;

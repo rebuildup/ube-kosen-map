@@ -432,7 +432,7 @@ export const buildCampus3DScene = (
         new THREE.MeshBasicMaterial({
           color: dark ? darkColor : light,
           transparent: true,
-          opacity: 0.28,
+          opacity: 0.4,
           side: THREE.DoubleSide,
           depthWrite: false,
         }),
@@ -549,6 +549,9 @@ export const buildCampus3DScene = (
               ? rec.dark
               : rec.light,
         );
+        // The highlight must read at a glance: raise opacity only for
+        // the selected room so neighbours stay translucent context.
+        rec.mat.opacity = active ? 0.9 : 0.4;
       }
     }
   };
