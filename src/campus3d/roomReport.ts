@@ -32,6 +32,7 @@ const r6 = (x: number): number => {
 
 export type RoomReportFloorStatus =
   | "partitioned"
+  | "unverified"
   | "single-face"
   | "no-linework"
   | "massing"
@@ -71,6 +72,8 @@ export interface RoomReportFloor {
   readonly faces: number | null;
   readonly slivers: number | null;
   readonly orphanHoles: number | null;
+  /** Machine-detected anomaly candidates needing human/source review. */
+  readonly anomalies: readonly string[];
   readonly rooms: readonly RoomReportRoom[];
 }
 
@@ -98,6 +101,8 @@ export interface RoomReport {
     readonly buildings: number;
     readonly floors: number;
     readonly floorsWithRooms: number;
+    /** Floors whose partitions have no machine-detected anomaly candidates. */
+    readonly floorsVerified: number;
     readonly totalRooms: number;
     readonly massingOnly: readonly string[];
   };
@@ -182,6 +187,51 @@ const floorStatus = (
   return { status: "partitioned", reason: "" };
 };
 
+/**
+ * Machine-detectable anomaly candidates. A floor with any of these is
+ * reported as "unverified" — the polygons exist but their semantic
+ * correctness (real room vs open hall vs drafting artifact) still needs
+ * comparison against the source plan. orphanHoles <= 1 is baseline noise
+ * (the unbounded exterior walk); >1 means extra unattached hole walks.
+ */
+const floorAnomalies = (
+  b: BuildingModel,
+  floor: number,
+  stats: {
+    orphanHoles: number;
+    plateAreaU2: number;
+    faceAreaU2: number;
+  },
+): string[] => {
+  const out: string[] = [];
+  const M2 = METERS_PER_DRAWING_UNIT ** 2;
+  const plateM2 = stats.plateAreaU2 * M2;
+  if (stats.orphanHoles > 1) {
+    out.push(`${stats.orphanHoles - 1} excess unattached hole walk(s)`);
+  }
+  if (
+    Math.abs(stats.faceAreaU2 - stats.plateAreaU2) / stats.plateAreaU2 >
+    0.02
+  ) {
+    out.push("face/plate area divergence > 2%");
+  }
+  for (const r of b.rooms.filter((x) => x.floor === floor)) {
+    const share = plateM2 ? r.areaM2 / plateM2 : 0;
+    const minDim = Math.min(r.widthM, r.depthM);
+    if (share > 0.45) {
+      out.push(
+        `${r.id}: ${r.areaM2.toFixed(0)}m2 is ${(share * 100).toFixed(0)}% of the floor plate — verify open-plan vs under-partitioned`,
+      );
+    }
+    if (r.areaM2 < 0.5 || minDim < 0.5) {
+      out.push(
+        `${r.id}: degenerate ${r.areaM2.toFixed(2)}m2 (${r.widthM.toFixed(1)}x${r.depthM.toFixed(1)}m bbox) — likely wall pocket`,
+      );
+    }
+  }
+  return out;
+};
+
 export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
   const scene = withComplementedBuildings(data);
   const model = buildCampusModel(scene);
@@ -225,6 +275,7 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
         faces: null,
         slivers: null,
         orphanHoles: null,
+        anomalies: [],
         rooms: [],
       });
       continue;
@@ -239,12 +290,17 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
     ].sort((a, c) => a - c);
 
     for (const n of allFloors) {
-      const { status, reason } = floorStatus(b, n);
+      let { status, reason } = floorStatus(b, n);
       const rep = repByFloor.get(n);
       const rooms = b.rooms
         .filter((r) => r.floor === n)
         .sort((a, c) => a.id.localeCompare(c.id))
         .map(roomEntry);
+      const anomalies = rep ? floorAnomalies(b, n, rep.stats) : [];
+      if (status === "partitioned" && anomalies.length) {
+        status = "unverified";
+        reason = "anomaly candidates require source-plan review";
+      }
       floors.push({
         building: b.key,
         buildingName: b.name,
@@ -264,6 +320,7 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
         faces: rep ? rep.stats.faces : null,
         slivers: rep ? rep.stats.slivers : null,
         orphanHoles: rep ? rep.stats.orphanHoles : null,
+        anomalies,
         rooms,
       });
     }
@@ -280,6 +337,7 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
       buildings: buildings.length,
       floors: floors.length,
       floorsWithRooms: floors.filter((f) => f.rooms.length > 0).length,
+      floorsVerified: floors.filter((f) => f.status === "partitioned").length,
       totalRooms: floors.reduce((a, f) => a + f.rooms.length, 0),
       massingOnly: buildings
         .filter(
