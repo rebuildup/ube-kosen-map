@@ -1,7 +1,7 @@
 {
   "name": "ube-kosen-map",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,13 +23,15 @@
     "lucide-react": "^0.545.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.10",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.1",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "@types/three": "^0.187.0",
     "@vitejs/plugin-react-swc": "^3.8.0",
     "eslint": "^10.15.0",
     "eslint-plugin-react-hooks": "^7.1.1",
