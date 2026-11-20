@@ -224,7 +224,11 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       const w = host.clientWidth;
       const h = host.clientHeight;
       if (!w || !h) return;
-      renderer.setSize(w, h, false);
+      // updateStyle must stay enabled: with setPixelRatio(dpr>1) the
+      // backing store is dpr× larger, and leaving the CSS size at the
+      // attribute size would display the canvas dpr× too large (cropped
+      // and zoomed) on high-DPI displays.
+      renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       if (threeRef.current) threeRef.current.needsRender = true;
@@ -473,14 +477,14 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
         <button
           type="button"
           onClick={() => requestFocus(presetPosition(sceneData, "overview"))}
-          className="rounded bg-white/85 px-2 py-1 text-xs shadow hover:bg-white"
+          className="rounded bg-white/85 px-2 py-1 text-xs text-gray-800 shadow hover:bg-white"
         >
           全体
         </button>
         <button
           type="button"
           onClick={() => requestFocus(presetPosition(sceneData, "dorms"))}
-          className="rounded bg-white/85 px-2 py-1 text-xs shadow hover:bg-white"
+          className="rounded bg-white/85 px-2 py-1 text-xs text-gray-800 shadow hover:bg-white"
         >
           寮地区
         </button>
@@ -488,7 +492,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
           type="button"
           aria-pressed={showLabels}
           onClick={() => setShowLabels((v) => !v)}
-          className={`rounded px-2 py-1 text-xs shadow ${showLabels ? "bg-gray-900 text-white" : "bg-white/85 hover:bg-white"}`}
+          className={`rounded px-2 py-1 text-xs shadow ${showLabels ? "bg-gray-900 text-white" : "bg-white/85 text-gray-800 hover:bg-white"}`}
         >
           ラベル
         </button>
@@ -496,7 +500,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
           type="button"
           aria-pressed={dark}
           onClick={() => setDark((v) => !v)}
-          className={`rounded px-2 py-1 text-xs shadow ${dark ? "bg-gray-900 text-white" : "bg-white/85 hover:bg-white"}`}
+          className={`rounded px-2 py-1 text-xs shadow ${dark ? "bg-gray-900 text-white" : "bg-white/85 text-gray-800 hover:bg-white"}`}
         >
           {dark ? "ダーク" : "ライト"}
         </button>
@@ -504,7 +508,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
           type="button"
           aria-pressed={showList}
           onClick={() => setShowList((v) => !v)}
-          className={`rounded px-2 py-1 text-xs shadow ${showList ? "bg-gray-900 text-white" : "bg-white/85 hover:bg-white"}`}
+          className={`rounded px-2 py-1 text-xs shadow ${showList ? "bg-gray-900 text-white" : "bg-white/85 text-gray-800 hover:bg-white"}`}
         >
           建物一覧
         </button>
@@ -519,7 +523,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="建物を検索"
             aria-label="建物を検索"
-            className="border-b border-gray-200 px-2 py-1.5 text-xs outline-none"
+            className="border-b border-gray-200 px-2 py-1.5 text-xs text-gray-800 outline-none"
           />
           <ul className="overflow-y-auto py-1">
             {filtered.map((b) => (
@@ -541,7 +545,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
               </li>
             ))}
             {filtered.length === 0 && (
-              <li className="px-2 py-2 text-xs text-gray-500">
+              <li className="px-2 py-2 text-sm text-gray-500">
                 該当する建物がありません
               </li>
             )}
@@ -552,11 +556,11 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       {/* Selection info panel */}
       {selection && selectedBuilding && (
         <section
-          className="absolute bottom-2 right-2 w-64 rounded-lg border border-gray-200 bg-white/95 p-3 text-xs shadow-lg backdrop-blur"
+          className="absolute bottom-2 right-2 w-64 rounded-lg border border-gray-200 bg-white/95 p-3 text-base shadow-lg backdrop-blur"
           aria-label="建物情報"
         >
           <div className="flex items-start justify-between gap-2">
-            <h2 className="text-sm font-semibold text-gray-900">
+            <h2 className="text-base font-semibold text-gray-900">
               {selectedBuilding.name}
             </h2>
             <button
@@ -568,7 +572,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
               ✕
             </button>
           </div>
-          <p className="mt-0.5 text-[11px] text-gray-500">
+          <p className="mt-0.5 text-sm text-gray-500">
             {selectedBuilding.category}・{selectedBuilding.floors}階
           </p>
           {selection.roomLabel && (
@@ -578,11 +582,11 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
                 {selection.roomFloor ? `（${selection.roomFloor}F）` : ""}
               </p>
               {selectedRoom && (
-                <p className="mt-0.5 text-[10px] text-emerald-800">
+                <p className="mt-0.5 text-sm text-emerald-800">
                   {selectedRoom.widthM.toFixed(1)}×
                   {selectedRoom.depthM.toFixed(1)}m（外形）・面積 約
                   {selectedRoom.areaM2.toFixed(1)}m²
-                  <span className="block text-emerald-700/80">
+                  <span className="block text-sm text-emerald-700/80">
                     平面図ポリゴンから算出した推定値（実測ではありません）
                   </span>
                 </p>
@@ -591,13 +595,13 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
           )}
           {roomFloors.length > 0 && (
             <div className="mt-1.5">
-              <p className="text-[10px] text-gray-500">フロア表示</p>
+              <p className="text-sm text-gray-500">フロア表示</p>
               <div className="mt-0.5 flex flex-wrap gap-1">
                 <button
                   type="button"
                   aria-pressed={!isolation}
                   onClick={() => setIsolation(null)}
-                  className={`rounded px-1.5 py-0.5 text-[10px] ${
+                  className={`rounded px-1.5 py-0.5 text-xs ${
                     !isolation
                       ? "bg-gray-900 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -617,7 +621,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
                           : { key: selectedBuilding.key, floor: f },
                       )
                     }
-                    className={`rounded px-1.5 py-0.5 text-[10px] ${
+                    className={`rounded px-1.5 py-0.5 text-xs ${
                       isolation?.floor === f
                         ? "bg-gray-900 text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -630,24 +634,24 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
             </div>
           )}
           {selectedBuilding.roomsInfo && (
-            <p className="mt-1 text-[11px] text-gray-600">
+            <p className="mt-1 text-sm text-gray-600">
               {selectedBuilding.roomsInfo}
             </p>
           )}
           {selectedBuilding.note && (
-            <p className="mt-1 text-[11px] text-gray-600">
+            <p className="mt-1 text-sm text-gray-600">
               {selectedBuilding.note}
             </p>
           )}
           {roomCount > 0 && (
-            <p className="mt-1 text-[11px] text-gray-500">
+            <p className="mt-1 text-sm text-gray-500">
               区画 {roomCount} 件（3D上の区画をクリックすると選択できます）
             </p>
           )}
         </section>
       )}
 
-      <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/45 px-2 py-1 text-[10px] text-white sm:text-xs">
+      <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/45 px-2 py-1 text-[11px] text-white sm:text-xs">
         ドラッグで回転・ホイールでズーム・区画クリックでフロア単位表示
       </div>
     </div>

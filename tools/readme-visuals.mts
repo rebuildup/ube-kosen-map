@@ -90,19 +90,46 @@ const clickAt = async (x: number, y: number) => {
 };
 
 const pressButton = async (text: string, scope?: string) => {
-  const rect = (await evaluate(`(() => {
+  // scroll-behavior:smooth animates both scrollIntoView and programmatic
+  // scrollTop, so a rect measured right after scrolling can be stale and
+  // the click lands on the canvas. Iterate: instant-scroll the nearest
+  // overflow container, re-measure, verify the hit target is the button.
+  const found = (await evaluate(`(() => {
     const root = ${scope ? `document.querySelector(${JSON.stringify(scope)})` : "document"};
     if (!root) return null;
     const b = [...root.querySelectorAll('button')].find(
       (x) => x.textContent.trim() === ${JSON.stringify(text)});
     if (!b) return null;
-    b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    for (let i = 0; i < 4; i++) {
+      const r = b.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      if (document.elementFromPoint(cx, cy) === b) {
+        return { x: cx, y: cy, hit: true };
+      }
+      let p = b.parentElement, moved = false;
+      while (p && p !== root && !moved) {
+        const cs = getComputedStyle(p);
+        if (/(auto|scroll)/.test(cs.overflowY) && p.scrollHeight > p.clientHeight) {
+          const pr = p.getBoundingClientRect();
+          p.style.scrollBehavior = "auto";
+          p.scrollTop += cy - (pr.top + pr.height / 2);
+          p.style.scrollBehavior = "";
+          moved = true;
+        }
+        p = p.parentElement;
+      }
+      if (!moved) break;
+    }
     const r = b.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  })()`)) as { x: number; y: number } | null;
-  if (!rect) return false;
-  await clickAt(rect.x, rect.y);
-  return true;
+    return {
+      x: r.left + r.width / 2,
+      y: r.top + r.height / 2,
+      hit: document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === b,
+    };
+  })()`)) as { x: number; y: number; hit: boolean } | null;
+  if (!found) return false;
+  await clickAt(found.x, found.y);
+  return found.hit;
 };
 
 /* ------------------------------------------------------------------ */
@@ -125,8 +152,16 @@ const bboxExpr = (keepSrc: string) => `(() => {
     let vis = true;
     for (let n = o; n; n = n.parent) if (n.visible === false) { vis = false; break; }
     if (!vis) return;
-    if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
-    const bb = o.geometry.boundingBox;
+    // InstancedMesh needs object-level bounds: geometry.boundingBox is
+    // only the unit box and ignores per-instance transforms.
+    let bb = null;
+    if (o.isInstancedMesh) {
+      o.computeBoundingBox();
+      bb = o.boundingBox;
+    } else {
+      if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      bb = o.geometry.boundingBox;
+    }
     if (!bb) return;
     for (const x of [bb.min.x, bb.max.x])
       for (const y of [bb.min.y, bb.max.y])
@@ -292,9 +327,11 @@ interface Metrics {
 
 await send("Page.enable");
 await send("Runtime.enable");
+// Narrower viewport keeps UI text proportionally larger so it stays
+// legible when the PNG is shown at GitHub README width (~720px).
 await send("Emulation.setDeviceMetricsOverride", {
-  width: 1440,
-  height: 900,
+  width: 1024,
+  height: 640,
   deviceScaleFactor: 2,
   mobile: false,
 });
@@ -302,8 +339,22 @@ await send("Page.navigate", { url: APP });
 await sleep(2500);
 
 console.log("3D tab:", await pressButton("3D"));
-await sleep(8000);
+// Scene build can take a while; poll for the dev hook instead of a
+// fixed sleep so later steps never race an unmounted canvas.
+for (let i = 0; i < 40; i++) {
+  if (await evaluate(`!!window.__campus3d`)) break;
+  await sleep(1000);
+}
 console.log("hook:", await evaluate(`!!window.__campus3d`));
+
+const sectionExists = `!!document.querySelector('section[aria-label="建物情報"]')`;
+const waitFor = async (expr: string, tries: number, ms: number) => {
+  for (let i = 0; i < tries; i++) {
+    if (await evaluate(expr)) return true;
+    await sleep(ms);
+  }
+  return false;
+};
 
 const setBBox = async (name: string, expr: string) => {
   const v = (await evaluate(expr)) as unknown;
@@ -351,10 +402,48 @@ const keepBuilding = (key: string) => `(o) => {
   return chain.some((n) => n.userData?.buildingKey === ${JSON.stringify(key)});
 }`;
 
-/* ---- Shot 1: campus overview -------------------------------------- */
+const keepKeys = (keys: string[]) => `(o) => {
+  const chain = []; for (let n = o; n; n = n.parent) chain.push(n);
+  const bk = chain.find((n) => n.userData?.buildingKey)?.userData.buildingKey;
+  return ${JSON.stringify(keys)}.includes(bk);
+}`;
+
+/* ---- Shot 0: dense campus cluster (hero) --------------------------- */
 await pressButton("建物一覧"); // close list for a clean hero frame
 await sleep(400);
+console.log("labels off:", await pressButton("ラベル")); // declutter hero
+await sleep(400);
 
+// Northern/central academic cluster: buildings packed enough that the
+// group reads as a 3D district rather than isolated blocks on empty land.
+const CLUSTER_KEYS = [
+  "keiei",
+  "techno",
+  "kikiden",
+  "ippan",
+  "senkouka",
+  "toshokan",
+  "gakuseikan",
+  "tamokuteki",
+  "shokudo",
+  "gym1",
+  "budo",
+  "monodukuri",
+  "jisshu",
+  "kikaijikken",
+];
+await setBBox("cluster", bboxExpr(keepKeys(CLUSTER_KEYS)));
+await compose("cluster", {
+  elevDeg: 60,
+  azimDeg: 80,
+  fill: 0.82,
+  at: { fx: 0.5, fy: 0.46 },
+});
+await sleep(900);
+await shot("readme-00-cluster.png");
+await report("cluster");
+
+/* ---- Shot 1: campus overview -------------------------------------- */
 await setBBox(
   "campus",
   bboxExpr(`(o) => {
@@ -363,10 +452,10 @@ await setBBox(
   }`),
 );
 await compose("campus", {
-  elevDeg: 52,
-  azimDeg: 0,
-  fill: 0.85,
-  at: { fx: 0.5, fy: 0.5 },
+  elevDeg: 62,
+  azimDeg: 90,
+  fill: 0.8,
+  at: { fx: 0.5, fy: 0.47 },
 });
 await sleep(900);
 await shot("readme-01-campus.png");
@@ -375,26 +464,50 @@ await report("campus");
 /* ---- Shot 2: building close-up (senkouka, selected) --------------- */
 await pressButton("建物一覧");
 await sleep(400);
-console.log("building select:", await pressButton("専攻科棟"));
-await sleep(2500); // camera focus animation settles
+console.log("labels on:", await pressButton("ラベル")); // name the building
+await sleep(400);
+// Selecting a building auto-closes the list; retry the whole open+pick
+// sequence if the first click did not produce the info panel.
+let selected = false;
+for (let attempt = 0; attempt < 3 && !selected; attempt++) {
+  if (attempt > 0) {
+    await pressButton("建物一覧"); // reopen if the list is closed
+    await sleep(400);
+  }
+  console.log("building select:", await pressButton("専攻科棟"));
+  selected = await waitFor(sectionExists, 10, 400);
+}
+console.log("building panel:", selected);
+await sleep(2000); // camera focus animation settles
 
 await setBBox("building", bboxExpr(keepBuilding("senkouka")));
 await compose("building", {
-  elevDeg: 58,
-  azimDeg: 18,
-  fill: 0.85,
-  at: { fx: 0.48, fy: 0.46 },
+  elevDeg: 55,
+  azimDeg: 20,
+  fill: 0.68,
+  at: { fx: 0.5, fy: 0.44 },
 });
 await sleep(900);
 await shot("readme-02-building.png");
 await report("building");
 
 /* ---- Shot 3: floor isolation (senkouka 2F) ------------------------ */
-console.log(
-  "floor chip:",
-  await pressButton("2F", 'section[aria-label="建物情報"]'),
-);
-await sleep(1500);
+const isoActive = `(() => {
+  const s = window.__campus3d; if (!s) return false;
+  let h = 0;
+  s.built.root.traverse((o) => {
+    if (o.userData?.isoFloor !== undefined && !o.visible) h++;
+  });
+  return h > 0;
+})()`;
+let chipOk = await waitFor(isoActive, 8, 400);
+for (let attempt = 0; attempt < 3 && !chipOk; attempt++) {
+  await pressButton("2F", 'section[aria-label="建物情報"]');
+  chipOk = await waitFor(isoActive, 8, 400);
+}
+console.log("floor chip:", chipOk);
+console.log("labels off:", await pressButton("ラベル")); // clean plan view
+await sleep(400);
 
 await setBBox(
   "floor",
@@ -407,10 +520,10 @@ await setBBox(
   }`),
 );
 await compose("floor", {
-  elevDeg: 78,
+  elevDeg: 80,
   azimDeg: 90,
-  fill: 0.95,
-  at: { fx: 0.45, fy: 0.45 },
+  fill: 0.82,
+  at: { fx: 0.36, fy: 0.45 },
 });
 await sleep(900);
 await shot("readme-03-floor.png");
@@ -530,15 +643,15 @@ if (!pickedRoomId) {
   // Pad the framing box so neighbouring walls/corridor stay in shot.
   await evaluate(`(() => {
     const b = window.__bb.room; if (!b) return null;
-    b.min = b.min.map((v, i) => v - (i === 1 ? 0.25 : 0.9));
-    b.max = b.max.map((v, i) => v + (i === 1 ? 0.25 : 0.9));
+    b.min = b.min.map((v, i) => v - (i === 1 ? 0.3 : 0.35));
+    b.max = b.max.map((v, i) => v + (i === 1 ? 0.3 : 0.35));
     return true;
   })()`);
   await compose("room", {
-    elevDeg: 55,
-    azimDeg: 10,
-    fill: 0.7,
-    at: { fx: 0.33, fy: 0.45 },
+    elevDeg: 80,
+    azimDeg: 20,
+    fill: 0.88,
+    at: { fx: 0.5, fy: 0.47 },
   });
   await sleep(900);
   await shot("readme-04-room.png");
