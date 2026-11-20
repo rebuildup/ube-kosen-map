@@ -101,12 +101,9 @@ jobs:
 
   # Acceptance gate for contract changes. This job only runs when the
   # trusted verifier reports CONTRACT_CHANGED, and it declares the
-  # `contract-accept` environment. Repository admins must configure that
-  # environment with themselves as required reviewer (Settings >
-  # Environments); until configured it does not block, so the gate is only
-  # meaningful after that one-time setup. The agent's GITHUB_TOKEN cannot
-  # approve environment deployments, and PR authors cannot approve their
-  # own PRs, so this cannot be self-authorized under shared credentials.
+  # `contract-accept` environment, which is configured with a required
+  # reviewer. Environment approvals are a human gate: an agent token
+  # cannot approve them, so a contract change cannot be self-authorized.
   contract-accept:
     needs: contract-verify
     if: >-
