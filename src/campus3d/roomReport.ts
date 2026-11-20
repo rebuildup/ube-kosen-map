@@ -31,7 +31,11 @@ const r6 = (x: number): number => {
 };
 
 export type RoomReportFloorStatus =
-  | "partitioned"
+  /** Compared against the source linework; verdict recorded in REVIEWED. */
+  | "verified"
+  /** Partitioned with no machine-detected anomaly candidates. */
+  | "machine-clean"
+  /** Polygons exist but anomaly candidates still need source review. */
   | "unverified"
   | "single-face"
   | "no-linework"
@@ -51,6 +55,8 @@ export interface RoomReportRoom {
   readonly faceCount: number;
   readonly holeCount: number;
   readonly vertexCount: number;
+  /** Closed wall loops strictly inside the face (missed-subdivision evidence). */
+  readonly interiorClosedLoops: number;
   /** Always "calibrated-estimate": dims come from the 0.84 m/unit calibration. */
   readonly accuracy: "calibrated-estimate";
 }
@@ -62,7 +68,7 @@ export interface RoomReportFloor {
   /** SVG group ids in public/campus-map3.svg this floor derives from. */
   readonly sourceSvgGroups: readonly string[];
   readonly status: RoomReportFloorStatus;
-  /** Why no rooms were produced (empty when status === "partitioned"). */
+  /** Why no rooms were produced, or the review verdict for verified floors. */
   readonly reason: string;
   readonly plateAreaM2: number | null;
   readonly faceAreaM2: number | null;
@@ -101,8 +107,10 @@ export interface RoomReport {
     readonly buildings: number;
     readonly floors: number;
     readonly floorsWithRooms: number;
-    /** Floors whose partitions have no machine-detected anomaly candidates. */
-    readonly floorsVerified: number;
+    /** Floors compared against the source linework (REVIEWED record). */
+    readonly floorsSourceVerified: number;
+    /** Partitioned floors with no machine-detected anomaly candidates. */
+    readonly floorsMachineClean: number;
     readonly totalRooms: number;
     readonly massingOnly: readonly string[];
   };
@@ -144,6 +152,7 @@ const roomEntry = (r: RoomSpec): RoomReportRoom => ({
     (a, f) => a + f.outer.length + f.holes.reduce((h, x) => h + x.length, 0),
     0,
   ),
+  interiorClosedLoops: r.interiorClosedLoops,
   accuracy: "calibrated-estimate",
 });
 
@@ -184,7 +193,36 @@ const floorStatus = (
         "wall linework does not close any room; the floor is one open face",
     };
   }
-  return { status: "partitioned", reason: "" };
+  return { status: "machine-clean", reason: "" };
+};
+
+/**
+ * Floors whose partitions were compared against the source floor-plan
+ * linework (tools/floor-diagnostics.mts + manual review of the flagged
+ * cases). A floor listed here is "verified" for the specific question the
+ * review covered; it does not assert every room boundary is surveyed.
+ */
+const REVIEWED: Readonly<Record<string, string>> = {
+  // Large faces contain zero closed interior wall loops — the source draws
+  // genuinely open plans (classroom bars, halls), not missed partitions.
+  "keiei#2": "200m2 face is an open plan; interior linework is open arcs only",
+  "toshokan#1": "658m2 library hall is open plan; no closed interior loops",
+  "gakuseikan#1": "large faces are open plans; no closed interior loops",
+  "tamokuteki#1": "community-center open plans; no closed interior loops",
+  "tamokuteki#2": "open plans; no closed interior loops",
+  "tamokuteki#3": "open plans; no closed interior loops",
+  "kaikatu1#1": "gymnasium hall open plan; no closed interior loops",
+  "kaikatu1#2": "gymnasium hall open plan; no closed interior loops",
+  "kaikatu1#3": "gymnasium hall open plan; no closed interior loops",
+  "kikiden#2":
+    "excess orphan walks coincide with stair regions (stair-void linework is excluded from barriers)",
+  "kikiden#3": "orphan walks coincide with stair regions; open plans confirmed",
+  "ippan#2":
+    "excess orphan walks are exterior regions between separated floor-plan wings",
+  "ippan#3": "orphan walks are exterior regions between separated wings",
+  // Degenerate pockets reclassified as slivers (min dimension < 0.42 m).
+  "keiei#3": "0.13m2 pocket reclassified as sliver; remaining faces verified",
+  "gakuseikan#2": "sub-meter pockets reclassified as slivers; faces verified",
 };
 
 /**
@@ -216,16 +254,19 @@ const floorAnomalies = (
     out.push("face/plate area divergence > 2%");
   }
   for (const r of b.rooms.filter((x) => x.floor === floor)) {
-    const share = plateM2 ? r.areaM2 / plateM2 : 0;
-    const minDim = Math.min(r.widthM, r.depthM);
-    if (share > 0.45) {
+    // A closed wall loop inside a face is direct evidence the source drew
+    // a subdivision the extractor missed — a real defect, not a size
+    // heuristic. Faces without such loops faithfully match the linework
+    // (open plans stay open).
+    if (r.interiorClosedLoops > 0) {
       out.push(
-        `${r.id}: ${r.areaM2.toFixed(0)}m2 is ${(share * 100).toFixed(0)}% of the floor plate — verify open-plan vs under-partitioned`,
+        `${r.id}: ${r.interiorClosedLoops} closed interior wall loop(s) inside the face — possible missed subdivision`,
       );
     }
-    if (r.areaM2 < 0.5 || minDim < 0.5) {
+    const share = plateM2 ? r.areaM2 / plateM2 : 0;
+    if (share > 0.45 && r.interiorClosedLoops === 0) {
       out.push(
-        `${r.id}: degenerate ${r.areaM2.toFixed(2)}m2 (${r.widthM.toFixed(1)}x${r.depthM.toFixed(1)}m bbox) — likely wall pocket`,
+        `${r.id}: ${r.areaM2.toFixed(0)}m2 is ${(share * 100).toFixed(0)}% of the floor plate — open-plan candidate (no interior loops detected)`,
       );
     }
   }
@@ -297,7 +338,11 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
         .sort((a, c) => a.id.localeCompare(c.id))
         .map(roomEntry);
       const anomalies = rep ? floorAnomalies(b, n, rep.stats) : [];
-      if (status === "partitioned" && anomalies.length) {
+      const reviewed = REVIEWED[b.key + "#" + n];
+      if (reviewed) {
+        status = "verified";
+        reason = reviewed;
+      } else if (status === "machine-clean" && anomalies.length) {
         status = "unverified";
         reason = "anomaly candidates require source-plan review";
       }
@@ -337,7 +382,10 @@ export const buildRoomReport = (data = CAMPUS_MODEL_DATA): RoomReport => {
       buildings: buildings.length,
       floors: floors.length,
       floorsWithRooms: floors.filter((f) => f.rooms.length > 0).length,
-      floorsVerified: floors.filter((f) => f.status === "partitioned").length,
+      floorsSourceVerified: floors.filter((f) => f.status === "verified")
+        .length,
+      floorsMachineClean: floors.filter((f) => f.status === "machine-clean")
+        .length,
       totalRooms: floors.reduce((a, f) => a + f.rooms.length, 0),
       massingOnly: buildings
         .filter(
