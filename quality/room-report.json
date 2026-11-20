@@ -259,9 +259,7 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_経営情報棟1F"
-      ],
+      "sourceSvgGroups": ["_経営情報棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 372.034656,
@@ -405,9 +403,7 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_経営情報棟2F"
-      ],
+      "sourceSvgGroups": ["_経営情報棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 380.269008,
@@ -481,9 +477,7 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_経営情報棟3F"
-      ],
+      "sourceSvgGroups": ["_経営情報棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 378.639072,
@@ -627,9 +621,7 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 4,
-      "sourceSvgGroups": [
-        "_経営情報棟4F"
-      ],
+      "sourceSvgGroups": ["_経営情報棟4F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 379.316448,
@@ -815,9 +807,7 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_地域共同テクノセンター_制御棟1F"
-      ],
+      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 571.095,
@@ -1017,9 +1007,7 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_地域共同テクノセンター_制御棟2F"
-      ],
+      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 567.694008,
@@ -1149,9 +1137,7 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_地域共同テクノセンター_制御棟3F"
-      ],
+      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 525.615552,
@@ -1281,9 +1267,7 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 4,
-      "sourceSvgGroups": [
-        "_地域共同テクノセンター_制御棟4F"
-      ],
+      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟4F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 520.242408,
@@ -1455,9 +1439,7 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_機電棟_管理棟1F"
-      ],
+      "sourceSvgGroups": ["_機電棟_管理棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1606.107888,
@@ -1867,9 +1849,7 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_機電棟_管理棟2F"
-      ],
+      "sourceSvgGroups": ["_機電棟_管理棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1645.886088,
@@ -2405,9 +2385,7 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_機電棟_管理棟3F"
-      ],
+      "sourceSvgGroups": ["_機電棟_管理棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1645.692048,
@@ -2915,10 +2893,7 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_一般棟1F",
-        "_物質棟1F"
-      ],
+      "sourceSvgGroups": ["_一般棟1F", "_物質棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1813.476672,
@@ -3258,10 +3233,7 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_一般棟2F",
-        "_物質棟2F"
-      ],
+      "sourceSvgGroups": ["_一般棟2F", "_物質棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1757.130984,
@@ -3713,10 +3685,7 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_一般棟3F",
-        "_一般棟_物質棟3F"
-      ],
+      "sourceSvgGroups": ["_一般棟3F", "_一般棟_物質棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1705.085928,
@@ -4154,9 +4123,7 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 4,
-      "sourceSvgGroups": [
-        "_物質棟4F"
-      ],
+      "sourceSvgGroups": ["_物質棟4F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1020.484584,
@@ -4412,9 +4379,7 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_専攻科棟1F"
-      ],
+      "sourceSvgGroups": ["_専攻科棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 542.895696,
@@ -4614,9 +4579,7 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_専攻科棟2F"
-      ],
+      "sourceSvgGroups": ["_専攻科棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 525.08988,
@@ -4858,9 +4821,7 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_専攻科棟3F"
-      ],
+      "sourceSvgGroups": ["_専攻科棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 524.811168,
@@ -5060,9 +5021,7 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 4,
-      "sourceSvgGroups": [
-        "_専攻科棟4F"
-      ],
+      "sourceSvgGroups": ["_専攻科棟4F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 524.221992,
@@ -5276,9 +5235,7 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_図書館棟1F"
-      ],
+      "sourceSvgGroups": ["_図書館棟1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1044.478512,
@@ -5506,9 +5463,7 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_図書館棟2F"
-      ],
+      "sourceSvgGroups": ["_図書館棟2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 1042.778016,
@@ -5666,9 +5621,7 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_図書館棟3F"
-      ],
+      "sourceSvgGroups": ["_図書館棟3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 363.937896,
@@ -5812,9 +5765,7 @@
       "building": "gakuseikan",
       "buildingName": "学生会館",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_学生会館1F"
-      ],
+      "sourceSvgGroups": ["_学生会館1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 410.630976,
@@ -5944,9 +5895,7 @@
       "building": "gakuseikan",
       "buildingName": "学生会館",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_学生会館2F"
-      ],
+      "sourceSvgGroups": ["_学生会館2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 438.4422,
@@ -6146,9 +6095,7 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_多目的交流施設1F"
-      ],
+      "sourceSvgGroups": ["_多目的交流施設1F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 195.091344,
@@ -6208,9 +6155,7 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_多目的交流施設2F"
-      ],
+      "sourceSvgGroups": ["_多目的交流施設2F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 195.017256,
@@ -6256,9 +6201,7 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_多目的交流施設3F"
-      ],
+      "sourceSvgGroups": ["_多目的交流施設3F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 194.90436,
@@ -6332,9 +6275,7 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_課外活動棟11F"
-      ],
+      "sourceSvgGroups": ["_課外活動棟11F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 291.074112,
@@ -6436,9 +6377,7 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_課外活動棟12F"
-      ],
+      "sourceSvgGroups": ["_課外活動棟12F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 290.294424,
@@ -6512,9 +6451,7 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_課外活動棟13F"
-      ],
+      "sourceSvgGroups": ["_課外活動棟13F"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 291.074112,
@@ -6689,9 +6626,7 @@
       "building": "ryod",
       "buildingName": "寮D棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_寮D棟2F"
-      ],
+      "sourceSvgGroups": ["_寮D棟2F"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6742,9 +6677,7 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_国際寮"
-      ],
+      "sourceSvgGroups": ["_国際寮"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6761,9 +6694,7 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_国際寮"
-      ],
+      "sourceSvgGroups": ["_国際寮"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6780,9 +6711,7 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_国際寮"
-      ],
+      "sourceSvgGroups": ["_国際寮"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6799,9 +6728,7 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_寮F棟"
-      ],
+      "sourceSvgGroups": ["_寮F棟"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6818,9 +6745,7 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_寮F棟"
-      ],
+      "sourceSvgGroups": ["_寮F棟"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6837,9 +6762,7 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 3,
-      "sourceSvgGroups": [
-        "_寮F棟"
-      ],
+      "sourceSvgGroups": ["_寮F棟"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6856,9 +6779,7 @@
       "building": "shokudo",
       "buildingName": "寮食堂",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_寮食堂"
-      ],
+      "sourceSvgGroups": ["_寮食堂"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6875,9 +6796,7 @@
       "building": "shokudo",
       "buildingName": "寮食堂",
       "floor": 2,
-      "sourceSvgGroups": [
-        "_寮食堂"
-      ],
+      "sourceSvgGroups": ["_寮食堂"],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6894,9 +6813,7 @@
       "building": "gym1",
       "buildingName": "第一体育館",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_第1体育館"
-      ],
+      "sourceSvgGroups": ["_第1体育館"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6913,9 +6830,7 @@
       "building": "gym2",
       "buildingName": "第二体育館",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_第2体育館"
-      ],
+      "sourceSvgGroups": ["_第2体育館"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6932,9 +6847,7 @@
       "building": "budo",
       "buildingName": "武道場",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_武道場"
-      ],
+      "sourceSvgGroups": ["_武道場"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6951,9 +6864,7 @@
       "building": "monodukuri",
       "buildingName": "ものづくり工房",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_ものづくり工房"
-      ],
+      "sourceSvgGroups": ["_ものづくり工房"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6970,9 +6881,7 @@
       "building": "jisshu",
       "buildingName": "実習工場",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_実習工場"
-      ],
+      "sourceSvgGroups": ["_実習工場"],
       "status": "partitioned",
       "reason": "",
       "plateAreaM2": 973.996128,
@@ -7228,9 +7137,7 @@
       "building": "kikaijikken",
       "buildingName": "機械工学科実験棟",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_機械工学科実験棟"
-      ],
+      "sourceSvgGroups": ["_機械工学科実験棟"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -7247,9 +7154,7 @@
       "building": "kaikatu2",
       "buildingName": "課外活動棟2",
       "floor": 1,
-      "sourceSvgGroups": [
-        "_課外活動棟2"
-      ],
+      "sourceSvgGroups": ["_課外活動棟2"],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
