@@ -10,40 +10,38 @@ import * as THREE from "three";
 
 import type { CampusScene } from "../scene";
 import { buildLineworkGeometry } from "../geo/lineworkGeometry";
-import {
-  drawingToModel,
-  MODEL_UNITS_PER_DRAWING_UNIT,
-} from "../geo/drawingTransform";
-import type { BuildingModel, PrismSpec, RoomSpec } from "../geo/buildings";
+import { drawingToModel } from "../geo/drawingTransform";
+import type {
+  PrismSpec,
+  RoomKind,
+  RoomRingSpec,
+  RoomSpec,
+} from "../geo/buildings";
 import type { StepSpec } from "../geo/stairs";
 import type { MeshSpec, PostSpec } from "../geo/lineworkGeometry";
 
 /** Result of resolving a pointer pick against the built scene. */
 export interface CampusPick {
   readonly buildingKey: string;
-  /** Present when the pick landed on a room partition plate. */
+  /** Present when the pick landed on a room footprint mesh. */
   readonly room?: RoomSpec;
 }
 
 /**
  * Walk raycast intersections and resolve the domain-level pick target.
- * Building meshes live under a Group tagged with `userData.buildingKey`;
- * room plates are an InstancedMesh whose `instanceId` indexes
- * `userData.instanceRoom` -> `userData.roomTable`.
+ * Room meshes carry `userData.room` (the RoomSpec); building meshes live
+ * under a Group tagged with `userData.buildingKey`.
  */
 export const resolvePick = (
   intersects: readonly THREE.Intersection[],
 ): CampusPick | null => {
   for (const hit of intersects) {
-    const obj = hit.object;
     let room: RoomSpec | undefined;
-    if (obj.userData.isRoomPick && typeof hit.instanceId === "number") {
-      const table = obj.userData.roomTable as readonly RoomSpec[];
-      const map = obj.userData.instanceRoom as readonly number[];
-      room = table[map[hit.instanceId]];
-    }
-    let node: THREE.Object3D | null = obj;
+    let node: THREE.Object3D | null = hit.object;
     while (node) {
+      if (!room && node.userData.room) {
+        room = node.userData.room as RoomSpec;
+      }
       const key = node.userData.buildingKey;
       if (typeof key === "string") {
         return room ? { buildingKey: key, room } : { buildingKey: key };
@@ -53,6 +51,21 @@ export const resolvePick = (
   }
   return null;
 };
+
+/**
+ * THREE.Raycaster ignores `Object3D.visible`, so floor-isolated (hidden)
+ * geometry still produces intersections. Filter hits to objects whose whole
+ * ancestor chain is visible before resolving a pick.
+ */
+export const visibleIntersections = (
+  intersects: readonly THREE.Intersection[],
+): THREE.Intersection[] =>
+  intersects.filter((h) => {
+    for (let n: THREE.Object3D | null = h.object; n; n = n.parent) {
+      if (!n.visible) return false;
+    }
+    return true;
+  });
 
 export interface Campus3DScene {
   readonly root: THREE.Group;
@@ -68,6 +81,19 @@ export interface Campus3DScene {
    * renderer, or the WebGL context.
    */
   readonly setTheme: (dark: boolean) => void;
+  /**
+   * Isolate one floor of a building (hides other floors and the isolated
+   * floor's ceiling/cap so the interior is visible). `null` restores all.
+   */
+  readonly setFloorIsolation: (
+    buildingKey: string,
+    floor: number | null,
+  ) => void;
+  /** Highlight one room footprint; `null` clears the highlight. */
+  readonly setSelectedRoom: (
+    buildingKey: string,
+    roomId: string | null,
+  ) => void;
   /** Release all GPU resources owned by this scene. */
   readonly dispose: () => void;
 }
@@ -93,7 +119,7 @@ const prismGeometry = (
     bevelEnabled: false,
   });
   geo.rotateX(-Math.PI / 2);
-  geo.translate(0, yBottom + height, 0);
+  geo.translate(0, yBottom, 0);
   return geo;
 };
 
@@ -282,66 +308,101 @@ export const buildCampus3DScene = (
   const capMat = lambert(0xc4bcae, 0x7a7468);
   const labelAnchors: Campus3DScene["labelAnchors"][number][] = [];
 
+  /* Floor isolation tags: every building child that belongs to a floor
+     carries userData.isoFloor + isoKind so setFloorIsolation() can hide
+     whole floors (and the isolated floor's ceiling/cap) per building. */
+  type IsoKind = "slab" | "ceiling" | "cap" | "wall" | "stair" | "room";
+  const tagIso = (
+    obj: THREE.Object3D,
+    floor: number | undefined,
+    kind: IsoKind,
+  ) => {
+    obj.userData.isoFloor = floor ?? -1;
+    obj.userData.isoKind = kind;
+  };
+
   const addPrisms = (
     prisms: readonly PrismSpec[],
     mat: THREE.Material,
     parent: THREE.Object3D,
-    castShadow = false,
+    opts: { castShadow?: boolean; kind: IsoKind } = { kind: "slab" },
   ) => {
     for (const p of prisms) {
       const mesh = new THREE.Mesh(
         track(prismGeometry(p.polygon, p.yBottom, p.height)),
         mat,
       );
-      mesh.castShadow = castShadow;
+      mesh.castShadow = opts.castShadow ?? false;
       mesh.receiveShadow = true;
+      tagIso(mesh, p.floor, opts.kind);
       parent.add(mesh);
     }
   };
 
-  /* Room partition plates: one instanced quad per grid cell, tagged so a
-     raycast instanceId resolves back to the RoomSpec via userData tables. */
-  const roomMat = themed(
-    track(
-      new THREE.MeshBasicMaterial({
-        color: dark ? 0x8ba173 : 0x74855c,
-        transparent: true,
-        opacity: 0.2,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      }),
-    ),
-    0x74855c,
-    0x8ba173,
-  );
-  const roomPickMesh = (b: BuildingModel): THREE.InstancedMesh | null => {
-    if (!b.rooms.length) return null;
-    const size = b.rooms[0].cellSize * MODEL_UNITS_PER_DRAWING_UNIT;
-    const geo = track(
-      new THREE.PlaneGeometry(size, size).rotateX(-Math.PI / 2),
-    );
-    let count = 0;
-    for (const r of b.rooms) count += r.cells.length;
-    const mesh = new THREE.InstancedMesh(geo, roomMat, count);
-    const instanceRoom = new Array<number>(count);
-    const m = new THREE.Matrix4();
-    let i = 0;
-    b.rooms.forEach((r, ri) => {
-      const y = b.baseY + (r.floor - 1) * b.floorHeight + 0.034;
-      for (const [cx, cy] of r.cells) {
-        const p = drawingToModel(cx, cy);
-        m.makeTranslation(p.x, y, p.z);
-        mesh.setMatrixAt(i, m);
-        instanceRoom[i] = ri;
-        i++;
-      }
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    mesh.userData.isRoomPick = true;
-    mesh.userData.roomTable = b.rooms;
-    mesh.userData.instanceRoom = instanceRoom;
-    return mesh;
+  /** Instanced boxes grouped per floor so isolation can hide them. */
+  const instancedBoxesByFloor = (
+    specs: readonly (StepSpec & { floor?: number })[],
+    material: THREE.Material,
+    kind: IsoKind,
+  ): THREE.InstancedMesh[] => {
+    const byFloor = new Map<number, (StepSpec & { floor?: number })[]>();
+    for (const s of specs) {
+      const f = s.floor ?? -1;
+      const arr = byFloor.get(f) ?? [];
+      arr.push(s);
+      byFloor.set(f, arr);
+    }
+    const out: THREE.InstancedMesh[] = [];
+    for (const [floor, group] of byFloor) {
+      const mesh = instancedBoxes(group, material);
+      if (!mesh) continue;
+      tagIso(mesh, floor, kind);
+      out.push(mesh);
+    }
+    return out;
   };
+
+  /* Room footprints: one mesh per room face built from the actual
+     floor-plan polygon (outer ring + holes), tagged with the domain
+     RoomSpec for stable id-based picking and per-room highlighting. */
+  const ROOM_KIND_COLORS: Record<RoomKind, readonly [number, number]> = {
+    room: [0x74855c, 0x8ba173],
+    corridor: [0x5c7a8c, 0x7d9db0],
+    stair: [0x8c7a5c, 0xa89573],
+  };
+  const ROOM_HIGHLIGHT = 0xffd166;
+
+  const ringToShape = (ring: RoomRingSpec): THREE.Shape => {
+    const shape = new THREE.Shape();
+    ring.outer.forEach(([dx, dy], i) => {
+      const m = drawingToModel(dx, dy);
+      if (i === 0) shape.moveTo(m.x, -m.z);
+      else shape.lineTo(m.x, -m.z);
+    });
+    shape.closePath();
+    for (const hole of ring.holes) {
+      const path = new THREE.Path();
+      hole.forEach(([dx, dy], i) => {
+        const m = drawingToModel(dx, dy);
+        if (i === 0) path.moveTo(m.x, -m.z);
+        else path.lineTo(m.x, -m.z);
+      });
+      path.closePath();
+      shape.holes.push(path);
+    }
+    return shape;
+  };
+
+  const buildingGroups = new Map<string, THREE.Group>();
+  const roomMats = new Map<
+    string,
+    {
+      mat: THREE.MeshBasicMaterial;
+      light: THREE.Color;
+      dark: THREE.Color;
+      roomId: string;
+    }[]
+  >();
 
   for (const b of scene.buildings.buildings) {
     if (b.status !== "ok") continue;
@@ -349,16 +410,60 @@ export const buildCampus3DScene = (
     // results resolve to stable building/room ids, not mesh identities.
     const bg = new THREE.Group();
     bg.userData.buildingKey = b.key;
-    addPrisms(b.slabs, slabMat, bg);
-    addPrisms(b.ceilings, slabMat, bg);
-    addPrisms(b.caps, capMat, bg, true);
-    const walls = instancedBoxes(b.walls, wallMat);
-    if (walls) bg.add(walls);
-    const stairs = instancedBoxes(b.stairs, stairMat);
-    if (stairs) bg.add(stairs);
-    const rooms = roomPickMesh(b);
-    if (rooms) bg.add(rooms);
+    addPrisms(b.slabs, slabMat, bg, { kind: "slab" });
+    addPrisms(b.ceilings, slabMat, bg, { kind: "ceiling" });
+    addPrisms(b.caps, capMat, bg, { kind: "cap", castShadow: true });
+    for (const w of instancedBoxesByFloor(b.walls, wallMat, "wall")) {
+      bg.add(w);
+    }
+    for (const s of instancedBoxesByFloor(b.stairs, stairMat, "stair")) {
+      bg.add(s);
+    }
+
+    const mats: {
+      mat: THREE.MeshBasicMaterial;
+      light: THREE.Color;
+      dark: THREE.Color;
+      roomId: string;
+    }[] = [];
+    for (const r of b.rooms) {
+      const [light, darkColor] = ROOM_KIND_COLORS[r.kind];
+      const mat = track(
+        new THREE.MeshBasicMaterial({
+          color: dark ? darkColor : light,
+          transparent: true,
+          opacity: 0.28,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
+      themeMats.push({
+        mat,
+        light: new THREE.Color(light),
+        dark: new THREE.Color(darkColor),
+      });
+      mats.push({
+        mat,
+        light: new THREE.Color(light),
+        dark: new THREE.Color(darkColor),
+        roomId: r.id,
+      });
+      const y = b.baseY + (r.floor - 1) * b.floorHeight + 0.034;
+      for (const face of r.faces) {
+        const geo = track(new THREE.ShapeGeometry(ringToShape(face), 1));
+        geo.rotateX(-Math.PI / 2);
+        geo.translate(0, y, 0);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.userData.room = r;
+        mesh.userData.isRoomPick = true;
+        tagIso(mesh, r.floor, "room");
+        bg.add(mesh);
+      }
+    }
+    if (mats.length) roomMats.set(b.key, mats);
+
     root.add(bg);
+    buildingGroups.set(b.key, bg);
     labelAnchors.push({
       key: b.key,
       name: b.name,
@@ -430,12 +535,52 @@ export const buildCampus3DScene = (
     return mesh;
   };
   let currentDark = dark;
+  let selectedRoom: { key: string; roomId: string } | null = null;
+
+  const applyRoomHighlight = () => {
+    for (const [key, mats] of roomMats) {
+      for (const rec of mats) {
+        const active =
+          selectedRoom?.key === key && selectedRoom.roomId === rec.roomId;
+        rec.mat.color.copy(
+          active
+            ? new THREE.Color(ROOM_HIGHLIGHT)
+            : currentDark
+              ? rec.dark
+              : rec.light,
+        );
+      }
+    }
+  };
+
+  const setFloorIsolation = (key: string, floor: number | null) => {
+    const bg = buildingGroups.get(key);
+    if (!bg) return;
+    bg.traverse((o) => {
+      const f = o.userData.isoFloor;
+      if (typeof f !== "number") return;
+      const kind = o.userData.isoKind as IsoKind;
+      o.visible =
+        floor === null
+          ? true
+          : f === floor && kind !== "ceiling" && kind !== "cap";
+    });
+  };
+
+  const setSelectedRoom = (key: string, roomId: string | null) => {
+    selectedRoom = roomId ? { key, roomId } : null;
+    applyRoomHighlight();
+  };
+
   const setTheme = (next: boolean) => {
     if (next === currentDark) return;
     currentDark = next;
     for (const t of themeMats) {
       t.mat.color?.copy(next ? t.dark : t.light);
     }
+    // Room materials are themed too; re-apply the selection highlight on
+    // top of the theme colors.
+    applyRoomHighlight();
     // Swap in the cached (or lazily built) theme variant of the marking
     // mesh; geometry and GPU resources are never rebuilt wholesale.
     const nextMesh = markingMeshFor(next);
@@ -450,6 +595,8 @@ export const buildCampus3DScene = (
     root,
     labelAnchors,
     setTheme,
+    setFloorIsolation,
+    setSelectedRoom,
     dispose: () => {
       for (const d of disposables) d.dispose();
       root.traverse((obj) => {
