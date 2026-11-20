@@ -4,22 +4,23 @@
 インタラクティブなキャンパスマップです。3Dビューでは建物が立体で浮かび、
 フロアごとの部屋の形まで見られます。
 
-<img src="docs/evidence/campus3d-demo.gif" alt="3Dキャンパスの操作デモ（回転・フロア分離・部屋選択）" width="720">
+<img src="docs/evidence/readme/readme-01-campus.png" alt="3Dキャンパス全体の俯瞰" width="720">
 
-_実際の画面収録。部屋選択から全体表示への復帰までの操作を確認できます。_
-
-<details>
-<summary>静止画: キャンパス全体の3D俯瞰</summary>
-
-<img src="docs/evidence/shots/01-3d-overview.png" alt="3Dキャンパスの俯瞰" width="720">
-
-</details>
+_キャンパス全体を3Dで俯瞰した画面。地形・建物・線画が立体表示されます。_
 
 ## 3Dキャンパスビューでできること
 
 ヘッダーの **2D / 3D** トグルで切り替えます（初回は読み込みに数秒かかります）。
 
-<img src="docs/evidence/shots/04-room-selected.png" alt="部屋を選択して寸法を表示した画面" width="720">
+<img src="docs/evidence/readme/readme-02-building.png" alt="専攻科棟を選択した3D画面" width="720">
+
+_建物を選択すると情報パネルにフロア階層が表示されます。_
+
+<img src="docs/evidence/readme/readme-03-floor.png" alt="専攻科棟2階を分離表示した3D画面" width="720">
+
+_フロアチップで1つの階だけを取り出すと、平面図由来の部屋ポリゴンと廊下の配置が見えます。_
+
+<img src="docs/evidence/readme/readme-04-room.png" alt="部屋を選択して寸法を表示した画面" width="720">
 
 _専攻科棟2階の部屋を選択した画面。部屋の輪郭と推定寸法がパネルに表示されます。_
 
@@ -50,6 +51,10 @@ _スマートフォンでも同じ操作ができます。_
 ## 使い方
 
 ### 3Dビュー
+
+<img src="docs/evidence/campus3d-demo.gif" alt="3Dビューの操作デモ（フロア分離・部屋選択・カメラ移動）" width="640">
+
+_実際の画面収録。フロア分離から部屋選択までの操作の流れを確認できます。_
 
 - **ドラッグ**: 視点の回転・移動（タッチは1本指ドラッグ、ピンチでズーム）
 - **ホイール / ピンチ**: ズーム
