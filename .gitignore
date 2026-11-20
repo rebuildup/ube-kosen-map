@@ -1,5 +1,14 @@
 node_modules/
 dist/
 *.tsbuildinfo
+.worktrees/
 .DS_Store
 Thumbs.db
+
+# Working/reference artifacts that must not re-enter the tree (Issue #41)
+data/
+docs/reference/
+.claude/agent-log.txt
+CORE_POLICY.md
+AGENT.md
+CLAUDE.md

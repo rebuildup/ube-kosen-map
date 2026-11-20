@@ -2,89 +2,62 @@ import { useMemo } from "react";
 
 import VectorMap from "./components/map/VectorMap";
 import { LanguageProvider } from "./context/LanguageContext";
-import eventsJson from "./data/events.json";
-import exhibitsJson from "./data/exhibits.json";
 import amenitiesJson from "./data/mapAmenities.json";
-import stallsJson from "./data/stalls.json";
-import type { Event, Exhibit, Stall } from "./types/common";
 
-const events = eventsJson as Event[];
-const exhibits = exhibitsJson as Exhibit[];
-const stalls = stallsJson as Stall[];
-const amenities = amenitiesJson as Array<{
+type AmenityPoint = {
   id: string;
-  type: "toilet" | "trash" | "water" | "info";
   name?: string;
+  type: "toilet" | "trash";
   x: number;
   y: number;
-}>;
+  z?: number;
+  buildingId?: string;
+  floorId?: string;
+};
 
-type NonSponsorItem = Event | Exhibit | Stall;
+const amenities = amenitiesJson as AmenityPoint[];
 
-const MapPage = () => {
-  const mapHeight = "90vh";
-
-  const mapEvents = useMemo(() => events.filter((event) => event.showOnMap), []);
-  const items = useMemo<NonSponsorItem[]>(
-    () => [...mapEvents, ...exhibits, ...stalls],
-    [mapEvents],
+const App = () => {
+  const points = useMemo(
+    () =>
+      amenities.map((amenity) => ({
+        buildingId: amenity.buildingId,
+        coordinates: {
+          x: amenity.x,
+          y: amenity.y,
+          z: amenity.z,
+        },
+        floorId: amenity.floorId,
+        id: amenity.id,
+        title: amenity.name ?? "",
+        type: amenity.type,
+      })),
+    [],
   );
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--color-bg-primary)" }}>
-      <div className="mx-auto max-w-7xl px-4 py-4">
-        <div
-          className="relative overflow-hidden rounded-lg"
-          style={{ backgroundColor: "var(--color-bg-secondary)" }}
-        >
+    <LanguageProvider>
+      <div className="flex h-dvh flex-col bg-white">
+        <header className="flex h-12 shrink-0 items-center border-b border-gray-200 px-4">
+          <h1 className="text-sm font-semibold text-gray-900 sm:text-base">
+            宇部高専キャンパスマップ
+          </h1>
+        </header>
+        <main className="relative min-h-0 flex-1">
           <VectorMap
             mode="display"
-            points={[
-              ...items
-                .filter(
-                  (item): item is typeof item & { coordinates: NonNullable<typeof item.coordinates> } =>
-                    item.coordinates !== undefined,
-                )
-                .map((item) => ({
-                  contentItem: item,
-                  coordinates: item.coordinates,
-                  id: item.id,
-                  isHovered: false,
-                  isSelected: false,
-                  onClick: () => {},
-                  onHover: () => {},
-                  title: item.title,
-                  type: item.type as "event" | "exhibit" | "stall" | "location",
-                })),
-              ...amenities.map((amenity) => ({
-                coordinates: { x: amenity.x, y: amenity.y },
-                id: amenity.id,
-                isHovered: false,
-                isSelected: false,
-                onClick: () => {},
-                onHover: () => {},
-                title: "",
-                type: amenity.type as "toilet" | "trash",
-              })),
-            ]}
-            height={mapHeight}
-            className="rounded-lg"
-            maxZoom={8}
+            points={points}
+            height="100%"
+            maxZoom={80}
             minZoom={0.3}
-            showControls={true}
+            showControls
             initialZoom={2}
             showGrid={false}
           />
-        </div>
+        </main>
       </div>
-    </div>
+    </LanguageProvider>
   );
 };
-
-const App = () => (
-  <LanguageProvider>
-    <MapPage />
-  </LanguageProvider>
-);
 
 export default App;

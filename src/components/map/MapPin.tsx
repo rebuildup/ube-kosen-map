@@ -6,22 +6,23 @@
  */
 
 import type { LucideIcon } from "lucide-react";
-import { Image, Speaker, Toilet, Trash2, UtensilsCrossed } from "lucide-react";
+import { Image, Toilet, Trash2 } from "lucide-react";
 import type React from "react";
 
-import type { Coordinate } from "../../types/map";
+import type { Coordinate, MapItemType } from "../../types/map";
 
 interface MapPinProps {
   id: string;
   position: { x: number; y: number };
-  svgCoordinate: Coordinate;
-  type: "event" | "exhibit" | "stall" | "toilet" | "trash";
+  coordinate: Coordinate;
+  type: MapItemType;
   label?: string;
+  /** 指定時は円内にこの文字を小さく表示し、アイコンは出さない（子ピン用） */
+  innerLabel?: string;
   labelPosition?: "left" | "right";
   color?: string;
   isHovered?: boolean;
   isSelected?: boolean;
-  isMobileHovered?: boolean;
   onClick?: (e: React.MouseEvent | React.TouchEvent) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -29,27 +30,17 @@ interface MapPinProps {
   onTouchEnd?: (e: React.TouchEvent) => void;
 }
 
-const POINT_TYPE_ICONS: Record<string, LucideIcon> = {
-  event: Speaker,
-  exhibit: Image,
-  stall: UtensilsCrossed,
+const POINT_TYPE_ICONS: Record<MapItemType, LucideIcon> = {
+  location: Image,
   toilet: Toilet,
   trash: Trash2,
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function getPointColor(type: string): string {
+export function getPointColor(type: MapItemType): string {
   switch (type) {
-    case "event": {
-      return "#EA4335";
-    } // Google Maps red
-    case "exhibit": {
-      return "#4285F4";
-    } // Google Maps blue
-    case "stall": {
-      return "#FF6B35";
-    } // Orange (better contrast with white)
-    case "toilet": {
+    case "toilet":
+    case "location": {
       return "#34A853";
     } // Google Maps green
     case "trash": {
@@ -57,8 +48,18 @@ export function getPointColor(type: string): string {
     } // Gray
     default: {
       return "#34A853";
-    } // Google Maps green
+    }
   }
+}
+
+function toAccessibleText(
+  value: React.ReactNode | undefined,
+  fallback: string,
+): string {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  return fallback;
 }
 
 /**
@@ -67,9 +68,11 @@ export function getPointColor(type: string): string {
  */
 export const MapPin: React.FC<MapPinProps> = ({
   color,
+  id,
   isHovered = false,
-  isMobileHovered = false,
+  isSelected = false,
   label,
+  innerLabel,
   labelPosition = "right",
   onClick,
   onMouseEnter,
@@ -77,11 +80,14 @@ export const MapPin: React.FC<MapPinProps> = ({
   onTouchStart,
   onTouchEnd,
   position,
+  coordinate,
   type,
 }) => {
   const baseColor = color || getPointColor(type);
   const IconComponent = POINT_TYPE_ICONS[type];
   const ICON_SIZE = 12;
+  const innerText = innerLabel != null && innerLabel !== "" ? innerLabel : null;
+  const showTextInsidePin = innerText != null;
 
   // Google Maps standard pin size - shorter pointer
   const PIN_WIDTH = 24;
@@ -90,19 +96,21 @@ export const MapPin: React.FC<MapPinProps> = ({
   // transform: translate(-50%, -100%) で下端中央がpositionに来る
 
   // Google Maps shadow values - enhanced for better visibility
-  const SHADOW = "0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.2)";
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick?.(e as unknown as React.MouseEvent);
-    }
-  };
+  const SHADOW =
+    "0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.2)";
+  const resolvedLabel = toAccessibleText(label, id);
+  const ariaLabel = resolvedLabel
+    ? `${resolvedLabel} (${type})`
+    : `${type} pin`;
 
   return (
     <button
       type="button"
-      className="map-pin-wrapper"
+      className="map-pin map-pin-wrapper"
+      aria-label={ariaLabel}
+      data-pin-id={id}
+      data-map-x={coordinate.x}
+      data-map-y={coordinate.y}
       style={{
         cursor: "pointer",
         filter: `drop-shadow(${SHADOW})`,
@@ -115,13 +123,12 @@ export const MapPin: React.FC<MapPinProps> = ({
         transform: "translate(-50%, -100%)",
         transformOrigin: `${PIN_WIDTH / 2}px ${PIN_HEIGHT}px`,
         width: `${PIN_WIDTH}px`,
-        zIndex: isHovered || isMobileHovered ? 2000 : label ? 500 : 100,
+        zIndex: isSelected ? 2100 : isHovered ? 2000 : label ? 500 : 100,
         background: "none",
         border: "none",
         padding: 0,
       }}
       onClick={onClick}
-      onKeyDown={handleKeyDown}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
@@ -171,21 +178,42 @@ export const MapPin: React.FC<MapPinProps> = ({
           strokeWidth="2"
         />
       </svg>
-      {/* Icon overlay - positioned at circle center */}
-      <div
-        style={{
-          alignItems: "center",
-          display: "flex",
-          justifyContent: "center",
-          left: `${PIN_WIDTH / 2}px`,
-          pointerEvents: "none",
-          position: "absolute",
-          top: `${PIN_WIDTH / 2}px`,
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        <IconComponent size={ICON_SIZE} color="white" strokeWidth={2.5} />
-      </div>
+      {/* Circle content: innerLabel のときは小さくテキスト、なければアイコン */}
+      {showTextInsidePin ? (
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            justifyContent: "center",
+            left: `${PIN_WIDTH / 2}px`,
+            pointerEvents: "none",
+            position: "absolute",
+            top: `${PIN_WIDTH / 2}px`,
+            transform: "translate(-50%, -50%)",
+            color: "white",
+            fontSize: "10px",
+            fontWeight: 700,
+            lineHeight: 1,
+          }}
+        >
+          {innerText}
+        </div>
+      ) : (
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            justifyContent: "center",
+            left: `${PIN_WIDTH / 2}px`,
+            pointerEvents: "none",
+            position: "absolute",
+            top: `${PIN_WIDTH / 2}px`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <IconComponent size={ICON_SIZE} color="white" strokeWidth={2.5} />
+        </div>
+      )}
 
       {/* Label - positioned next to pin */}
       {label && (
@@ -193,19 +221,16 @@ export const MapPin: React.FC<MapPinProps> = ({
           style={{
             position: "absolute",
             top: `${PIN_WIDTH / 2 + 1}px`,
-            ...(labelPosition === "right" ? { left: "32px" } : { right: "32px" }),
-            cursor: "pointer", // カーソルをポインターに
+            ...(labelPosition === "right"
+              ? { left: "32px" }
+              : { right: "32px" }),
+            cursor: "default",
             maxWidth: "200px",
             minWidth: "40px",
-            pointerEvents: "auto", // クリック可能に変更
+            pointerEvents: "none",
             transform: "translateY(-50%)",
             zIndex: 1000, // ピンよりも上に表示
           }}
-          onClick={onClick}
-          onKeyDown={handleKeyDown}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          role="presentation"
         >
           <div
             style={{
@@ -279,9 +304,13 @@ export const ClusterPin: React.FC<ClusterPinProps> = ({
 
   // Google Maps cluster color
   const CLUSTER_COLOR = "#4285F4"; // Google blue
-  const SHADOW = "0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.2)";
+  const SHADOW =
+    "0 2px 4px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 2px rgba(0, 0, 0, 0.2)";
+  const resolvedClusterLabel = toAccessibleText(label, `${count} items`);
+  const clusterLabel = `${resolvedClusterLabel} (${count} items)`;
 
-  const normalizedSegments = typeSegments?.filter((segment) => segment.count > 0) ?? [];
+  const normalizedSegments =
+    typeSegments?.filter((segment) => segment.count > 0) ?? [];
 
   let pieBackground = CLUSTER_COLOR;
   if (normalizedSegments.length > 0 && count > 0) {
@@ -307,17 +336,11 @@ export const ClusterPin: React.FC<ClusterPinProps> = ({
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick?.(e as unknown as React.MouseEvent);
-    }
-  };
-
   return (
     <button
       type="button"
-      className="map-cluster-pin"
+      className="cluster-pin map-cluster-pin"
+      aria-label={clusterLabel}
       style={{
         cursor: "pointer",
         // Add drop shadow to the container
@@ -338,7 +361,6 @@ export const ClusterPin: React.FC<ClusterPinProps> = ({
         padding: 0,
       }}
       onClick={onClick}
-      onKeyDown={handleKeyDown}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
@@ -423,19 +445,16 @@ export const ClusterPin: React.FC<ClusterPinProps> = ({
           style={{
             position: "absolute",
             top: `${PIN_WIDTH / 2 + 1}px`,
-            ...(labelPosition === "right" ? { left: "32px" } : { right: "32px" }),
-            cursor: "pointer", // カーソルをポインターに
+            ...(labelPosition === "right"
+              ? { left: "32px" }
+              : { right: "32px" }),
+            cursor: "default",
             maxWidth: "200px",
             minWidth: "40px",
-            pointerEvents: "auto", // クリック可能に変更
+            pointerEvents: "none",
             transform: "translateY(-50%)",
             zIndex: 1000, // ピンよりも上に表示
           }}
-          onClick={onClick}
-          onKeyDown={handleKeyDown}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          role="presentation"
         >
           <div
             style={{
@@ -480,7 +499,8 @@ export const HighlightPin: React.FC<HighlightPinProps> = ({ position }) => {
   const SIZE = 32;
   const PULSE_SIZE = SIZE + 16;
   const HIGHLIGHT_COLOR = "#EA4335"; // Google Maps red
-  const SHADOW = "0 2px 4px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15)";
+  const SHADOW =
+    "0 2px 4px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15)";
 
   return (
     <div

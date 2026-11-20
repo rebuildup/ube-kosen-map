@@ -8,22 +8,14 @@
 // ============================================================================
 
 /**
- * 2D coordinate point
+ * 2D coordinate point. `z` carries the floor number for amenity points and is
+ * part of the external data contract (see mapAmenities.json).
  */
 export interface Coordinate {
   x: number;
   y: number;
+  z?: number;
 }
-
-/**
- * Legacy alias for backward compatibility
- * @deprecated Use Coordinate instead
- */
-export type Point = Coordinate;
-
-// ============================================================================
-// ViewBox and Transform Types
-// ============================================================================
 
 /**
  * SVG ViewBox definition for pan/zoom
@@ -36,26 +28,6 @@ export interface ViewBox {
 }
 
 /**
- * Transform matrix for map transformations
- */
-export interface Transform {
-  scale: number;
-  translateX: number;
-  translateY: number;
-}
-
-/**
- * Map bounds definition
- */
-export interface MapBounds {
-  width: number;
-  height: number;
-  viewBox: string;
-  marginX?: number;
-  marginY?: number;
-}
-
-/**
  * Rectangle bounds for area calculations
  */
 export interface Rect {
@@ -65,27 +37,9 @@ export interface Rect {
   height: number;
 }
 
-/**
- * SVG content rendering area (accounting for preserveAspectRatio)
- */
-export interface ContentRect extends Rect {
-  offsetX: number;
-  offsetY: number;
-}
-
 // ============================================================================
-// Map State Types
+// Point and Marker Types
 // ============================================================================
-
-/**
- * Current map view state
- */
-export interface MapViewState {
-  viewBox: ViewBox;
-  zoom: number;
-  isDragging: boolean;
-  isPinching: boolean;
-}
 
 /**
  * Map display mode
@@ -93,33 +47,34 @@ export interface MapViewState {
 export type MapMode = "display" | "detail" | "interactive";
 
 /**
- * Zoom configuration
- */
-export interface ZoomConfig {
-  min: number;
-  max: number;
-  initial: number;
-  step: number;
-}
-
-/**
- * Pan constraints
- */
-export interface PanConstraints {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-}
-
-// ============================================================================
-// Point and Marker Types
-// ============================================================================
-
-/**
  * Base item type for map points
  */
-export type MapItemType = "event" | "exhibit" | "stall" | "location" | "sponsor";
+export type MapItemType = "location" | "toilet" | "trash";
+
+/**
+ * Rectangular anchor area used to derive a point's effective coordinate
+ */
+export interface AnchorArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  z?: number;
+}
+
+/**
+ * Child point nested inside an area-focusable parent point
+ */
+export interface InteractiveChildPoint {
+  id: string;
+  coordinates: Coordinate;
+  title: string;
+  type: MapItemType;
+  buildingId?: string;
+  floorId?: string;
+  svgGroupId?: string;
+  color?: string;
+}
 
 /**
  * Interactive point on the map
@@ -129,8 +84,16 @@ export interface InteractivePoint {
   coordinates: Coordinate;
   title: string;
   type: MapItemType;
+  anchorArea?: AnchorArea;
+  isAreaFocusable?: boolean;
+  buildingId?: string;
+  floorId?: string;
+  svgGroupId?: string;
+  childPoints?: InteractiveChildPoint[];
   size?: number;
   color?: string;
+  /** 指定時は円内にこの文字を小さく表示（子ピン用） */
+  innerLabel?: string;
   isSelected?: boolean;
   isHovered?: boolean;
   contentItem?: unknown; // Generic content item reference
@@ -146,94 +109,4 @@ export interface PointCluster {
   coordinates: Coordinate;
   points: InteractivePoint[];
   count: number;
-}
-
-/**
- * Location marker for building/area identification
- */
-export interface LocationMarker {
-  id: string;
-  location: string;
-  coordinates: Coordinate;
-  isSelected?: boolean;
-  isHovered?: boolean;
-}
-
-// ============================================================================
-// Event Handler Types
-// ============================================================================
-
-/**
- * Point click handler
- */
-export type PointClickHandler = (pointId: string) => void;
-
-/**
- * Point hover handler
- */
-export type PointHoverHandler = (pointId: string | null) => void;
-
-/**
- * Map click handler
- */
-export type MapClickHandler = (coordinate: Coordinate) => void;
-
-/**
- * Transform change handler
- */
-export type TransformChangeHandler = (transform: Transform) => void;
-
-/**
- * ViewBox change handler
- */
-export type ViewBoxChangeHandler = (viewBox: ViewBox) => void;
-
-// ============================================================================
-// Touch/Gesture Types
-// ============================================================================
-
-/**
- * Touch gesture state
- */
-export interface TouchState {
-  startTime: number;
-  startPosition: Coordinate;
-  isGesture: boolean;
-  distance: number;
-  lastTapTime: number;
-}
-
-/**
- * Drag state
- */
-export interface DragState {
-  isDragging: boolean;
-  startPosition: Coordinate;
-  startViewBox: ViewBox;
-}
-
-// ============================================================================
-// Clustering Types
-// ============================================================================
-
-/**
- * Clustering configuration
- */
-export interface ClusterConfig {
-  enabled: boolean;
-  radius: number;
-  minPoints: number;
-}
-
-// ============================================================================
-// Utility Types
-// ============================================================================
-
-/**
- * Result of coordinate validation
- */
-export interface CoordinateValidation {
-  isValid: boolean;
-  clamped: Coordinate;
-  outOfBounds: boolean;
 }
