@@ -18,6 +18,7 @@ import { buildCampusScene, type CampusScene } from "../../campus3d/scene";
 import {
   buildCampus3DScene,
   resolvePick,
+  visibleIntersections,
   type Campus3DScene,
 } from "../../campus3d/three/campusScene3D";
 
@@ -249,7 +250,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
         -((e.clientY - rect.top) / rect.height) * 2 + 1,
       );
       raycaster.setFromCamera(pointer, camera);
-      const hit = resolvePick(raycaster.intersectObjects([built.root], true));
+      const hit = resolvePick(
+        visibleIntersections(raycaster.intersectObjects([built.root], true)),
+      );
       if (hit?.room) {
         const b = sceneData.buildings.buildings.find(
           (x) => x.key === hit.buildingKey,
@@ -282,6 +285,10 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       sun,
     };
     threeRef.current = state;
+    if (import.meta.env.DEV) {
+      (window as unknown as { __campus3d?: typeof state | null }).__campus3d =
+        state;
+    }
 
     /* On-demand rendering: only draw when the camera actually moved or a
        focus animation / resize / selection change is pending. */
@@ -347,6 +354,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       renderer.domElement.remove();
       labelLayer.replaceChildren();
       threeRef.current = null;
+      if (import.meta.env.DEV) {
+        (window as unknown as { __campus3d?: unknown }).__campus3d = null;
+      }
     };
   }, [supported, sceneData]);
 

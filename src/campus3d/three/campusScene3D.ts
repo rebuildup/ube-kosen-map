@@ -52,6 +52,21 @@ export const resolvePick = (
   return null;
 };
 
+/**
+ * THREE.Raycaster ignores `Object3D.visible`, so floor-isolated (hidden)
+ * geometry still produces intersections. Filter hits to objects whose whole
+ * ancestor chain is visible before resolving a pick.
+ */
+export const visibleIntersections = (
+  intersects: readonly THREE.Intersection[],
+): THREE.Intersection[] =>
+  intersects.filter((h) => {
+    for (let n: THREE.Object3D | null = h.object; n; n = n.parent) {
+      if (!n.visible) return false;
+    }
+    return true;
+  });
+
 export interface Campus3DScene {
   readonly root: THREE.Group;
   /** World-space anchor points for HTML label overlays. */
@@ -104,7 +119,7 @@ const prismGeometry = (
     bevelEnabled: false,
   });
   geo.rotateX(-Math.PI / 2);
-  geo.translate(0, yBottom + height, 0);
+  geo.translate(0, yBottom, 0);
   return geo;
 };
 
