@@ -9,6 +9,7 @@
 import * as THREE from "three";
 
 import type { CampusScene } from "../scene";
+import { buildLineworkGeometry } from "../geo/lineworkGeometry";
 import {
   drawingToModel,
   MODEL_UNITS_PER_DRAWING_UNIT,
@@ -61,6 +62,12 @@ export interface Campus3DScene {
     readonly name: string;
     readonly position: THREE.Vector3;
   }[];
+  /**
+   * Swap light/dark theme in place: material colors and the vertex-colored
+   * ground-marking mesh are updated without rebuilding geometry, the
+   * renderer, or the WebGL context.
+   */
+  readonly setTheme: (dark: boolean) => void;
   /** Release all GPU resources owned by this scene. */
   readonly dispose: () => void;
 }
@@ -178,15 +185,42 @@ export const buildCampus3DScene = (
     return x;
   };
 
-  const lambert = (color: number) =>
-    track(new THREE.MeshLambertMaterial({ color }));
+  /* Theme registry: every themed material carries its light/dark colors so
+     setTheme() can swap them without touching geometry or the context. */
+  const themeMats: {
+    mat: THREE.Material & { color?: THREE.Color };
+    light: THREE.Color;
+    dark: THREE.Color;
+  }[] = [];
+  const themed = <T extends THREE.Material & { color?: THREE.Color }>(
+    mat: T,
+    light: number,
+    darkColor: number,
+  ): T => {
+    themeMats.push({
+      mat,
+      light: new THREE.Color(light),
+      dark: new THREE.Color(darkColor),
+    });
+    return mat;
+  };
+  const lambert = (light: number, darkColor: number) =>
+    themed(
+      track(new THREE.MeshLambertMaterial({ color: dark ? darkColor : light })),
+      light,
+      darkColor,
+    );
 
   /* Terrain: one material per layer, color ramped low->high. */
   const terrMats = new Map<number, THREE.Material>();
-  const sheetMat = track(
-    new THREE.MeshLambertMaterial({
-      color: dark ? 0x3a4148 : 0xb9c0c2,
-    }),
+  const sheetMat = themed(
+    track(
+      new THREE.MeshLambertMaterial({
+        color: dark ? 0x3a4148 : 0xb9c0c2,
+      }),
+    ),
+    0xb9c0c2,
+    0x3a4148,
   );
   for (const p of scene.terrain.prisms) {
     let mat = terrMats.get(p.layer);
@@ -194,12 +228,23 @@ export const buildCampus3DScene = (
       const t = scene.terrain.maxLayer ? p.layer / scene.terrain.maxLayer : 0;
       const cLow = new THREE.Color(dark ? 0x2a3324 : TERRAIN_COLORS.low);
       const cHigh = new THREE.Color(dark ? 0x46523a : TERRAIN_COLORS.high);
-      mat = track(
-        new THREE.MeshLambertMaterial({
-          color: cLow.clone().lerp(cHigh, t),
-          side: THREE.DoubleSide,
-        }),
+      const lowL = new THREE.Color(TERRAIN_COLORS.low);
+      const highL = new THREE.Color(TERRAIN_COLORS.high);
+      const lowD = new THREE.Color(0x2a3324);
+      const highD = new THREE.Color(0x46523a);
+      const m = themed(
+        track(
+          new THREE.MeshLambertMaterial({
+            color: cLow.clone().lerp(cHigh, t),
+            side: THREE.DoubleSide,
+          }),
+        ),
+        0,
+        0,
       );
+      themeMats[themeMats.length - 1].light = lowL.clone().lerp(highL, t);
+      themeMats[themeMats.length - 1].dark = lowD.clone().lerp(highD, t);
+      mat = m;
       terrMats.set(p.layer, mat);
     }
     const mesh = new THREE.Mesh(
@@ -215,10 +260,14 @@ export const buildCampus3DScene = (
   const groundGeo = track(new THREE.PlaneGeometry(60, 80));
   const ground = new THREE.Mesh(
     groundGeo,
-    track(
-      new THREE.MeshLambertMaterial({
-        color: dark ? 0x232b22 : 0xdfe4cd,
-      }),
+    themed(
+      track(
+        new THREE.MeshLambertMaterial({
+          color: dark ? 0x232b22 : 0xdfe4cd,
+        }),
+      ),
+      0xdfe4cd,
+      0x232b22,
     ),
   );
   ground.rotation.x = -Math.PI / 2;
@@ -227,10 +276,10 @@ export const buildCampus3DScene = (
   root.add(ground);
 
   /* Buildings. */
-  const slabMat = lambert(dark ? 0x8d8578 : 0xd8d2c4);
-  const wallMat = lambert(dark ? 0x6e6a60 : 0xb5ad9d);
-  const stairMat = lambert(dark ? 0x9a8f7c : 0xcbbfa5);
-  const capMat = lambert(dark ? 0x7a7468 : 0xc4bcae);
+  const slabMat = lambert(0xd8d2c4, 0x8d8578);
+  const wallMat = lambert(0xb5ad9d, 0x6e6a60);
+  const stairMat = lambert(0xcbbfa5, 0x9a8f7c);
+  const capMat = lambert(0xc4bcae, 0x7a7468);
   const labelAnchors: Campus3DScene["labelAnchors"][number][] = [];
 
   const addPrisms = (
@@ -252,14 +301,18 @@ export const buildCampus3DScene = (
 
   /* Room partition plates: one instanced quad per grid cell, tagged so a
      raycast instanceId resolves back to the RoomSpec via userData tables. */
-  const roomMat = track(
-    new THREE.MeshBasicMaterial({
-      color: dark ? 0x8ba173 : 0x74855c,
-      transparent: true,
-      opacity: 0.2,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    }),
+  const roomMat = themed(
+    track(
+      new THREE.MeshBasicMaterial({
+        color: dark ? 0x8ba173 : 0x74855c,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }),
+    ),
+    0x74855c,
+    0x8ba173,
   );
   const roomPickMesh = (b: BuildingModel): THREE.InstancedMesh | null => {
     if (!b.rooms.length) return null;
@@ -313,15 +366,22 @@ export const buildCampus3DScene = (
     });
   }
 
-  /* Linework geometry (markings/slopes/steps) and step boxes. */
+  /* Linework geometry (markings/slopes/steps) and step boxes. The marking
+     mesh carries theme-baked vertex colors, so setTheme() rebuilds just
+     this mesh's geometry; the solid-color siblings only need material
+     swaps. */
   const lw = scene.lineworkGeometry;
   const markingMat = track(
     new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }),
   );
-  root.add(meshFromSpec(lw.markings, markingMat));
-  const slopeMat = lambert(dark ? 0x5c6650 : 0x9aa583);
+  let markingsMesh: ReturnType<typeof meshFromSpec> = meshFromSpec(
+    lw.markings,
+    markingMat,
+  );
+  root.add(markingsMesh);
+  const slopeMat = lambert(0x9aa583, 0x5c6650);
   root.add(meshFromSpec(lw.slopes, slopeMat));
-  const stepEdgeMat = lambert(dark ? 0x4c5548 : 0x8f987c);
+  const stepEdgeMat = lambert(0x8f987c, 0x4c5548);
   root.add(meshFromSpec(lw.steps, stepEdgeMat));
 
   // Outdoor steps and linework step clusters sit on the terrain.
@@ -331,26 +391,65 @@ export const buildCampus3DScene = (
 
   /* Barriers: net/fence panels + posts. */
   const barrierMats: Record<"net" | "fence", THREE.Material> = {
-    net: track(
-      new THREE.MeshBasicMaterial({
-        color: dark ? 0x6f7f66 : 0x3f4a38,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.55,
-      }),
+    net: themed(
+      track(
+        new THREE.MeshBasicMaterial({
+          color: dark ? 0x6f7f66 : 0x3f4a38,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.55,
+        }),
+      ),
+      0x3f4a38,
+      0x6f7f66,
     ),
-    fence: lambert(dark ? 0x59645a : 0x8b9186),
+    fence: lambert(0x8b9186, 0x59645a),
   };
-  const postMat = lambert(dark ? 0x3c4438 : 0x6d745f);
+  const postMat = lambert(0x6d745f, 0x3c4438);
   for (const bar of lw.barriers) {
     root.add(meshFromSpec(bar.mesh, barrierMats[bar.kind]));
     const posts = instancedPosts(bar.posts, 0.012, postMat);
     if (posts) root.add(posts);
   }
 
+  // Theme-specific marking meshes are cached so repeated toggles swap an
+  // existing geometry instead of regenerating linework specs.
+  const markingCache = new Map<boolean, ReturnType<typeof meshFromSpec>>();
+  markingCache.set(dark, markingsMesh);
+  const markingMeshFor = (d: boolean): ReturnType<typeof meshFromSpec> => {
+    const cached = markingCache.get(d);
+    if (cached) return cached;
+    const lw2 = buildLineworkGeometry({
+      result: scene.linework,
+      data: scene.data,
+      dark: d,
+    });
+    const mesh = meshFromSpec(lw2.markings, markingMat);
+    track(mesh.geometry); // cached variant may be inactive at dispose time
+    markingCache.set(d, mesh);
+    return mesh;
+  };
+  let currentDark = dark;
+  const setTheme = (next: boolean) => {
+    if (next === currentDark) return;
+    currentDark = next;
+    for (const t of themeMats) {
+      t.mat.color?.copy(next ? t.dark : t.light);
+    }
+    // Swap in the cached (or lazily built) theme variant of the marking
+    // mesh; geometry and GPU resources are never rebuilt wholesale.
+    const nextMesh = markingMeshFor(next);
+    if (nextMesh !== markingsMesh) {
+      root.remove(markingsMesh);
+      markingsMesh = nextMesh;
+      root.add(markingsMesh);
+    }
+  };
+
   return {
     root,
     labelAnchors,
+    setTheme,
     dispose: () => {
       for (const d of disposables) d.dispose();
       root.traverse((obj) => {
