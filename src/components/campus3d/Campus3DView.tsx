@@ -420,6 +420,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
   const selectBuilding = (b: BuildingModel) => {
     setSelection({ buildingKey: b.key });
     setIsolation(null);
+    // Close the list so it stops covering the canvas (notably on mobile,
+    // where the 176px-wide list hides ~45% of the view after selection).
+    setShowList(false);
     requestFocus(buildingFocus(b));
   };
 

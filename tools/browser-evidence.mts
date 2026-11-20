@@ -95,6 +95,34 @@ const tapAt = async (x: number, y: number) => {
   }
 };
 
+/**
+ * Press a UI control by text (or aria-label) with real pointer/touch
+ * events at its on-screen center — the same path a user takes.
+ */
+const pressButton = async (
+  text: string,
+  opts: { touch?: boolean; scope?: string; aria?: string } = {},
+) => {
+  const rect = (await evaluate(`(() => {
+    const scopeSel = ${JSON.stringify(opts.scope ?? null)};
+    const root = scopeSel ? document.querySelector(scopeSel) : document;
+    if (!root) return null;
+    const aria = ${JSON.stringify(opts.aria ?? null)};
+    const b = aria
+      ? root.querySelector('button[aria-label="' + aria + '"]')
+      : [...root.querySelectorAll('button')].find(
+          (x) => x.textContent.trim() === ${JSON.stringify(text)});
+    if (!b) return null;
+    b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const r = b.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  })()`)) as { x: number; y: number } | null;
+  if (!rect) return false;
+  if (opts.touch) await tapAt(rect.x, rect.y);
+  else await clickAt(rect.x, rect.y);
+  return true;
+};
+
 /** Shared prelude: project a Vector3 `v` (world space) to CSS pixels. */
 const projectTail = `
   v.project(s.camera);
@@ -150,12 +178,8 @@ await send("Emulation.setDeviceMetricsOverride", {
 await send("Page.navigate", { url: APP });
 await sleep(2500);
 
-// Switch to 3D view.
-await evaluate(`(() => {
-  const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '3D');
-  if (b) b.click();
-  return !!b;
-})()`);
+// Switch to 3D view (real click on the tab button).
+console.log("3D tab pressed:", await pressButton("3D"));
 await sleep(7000); // lazy chunk + WebGL init under SwiftShader
 console.log("campus3d hook:", await evaluate(`!!window.__campus3d`));
 await shot("01-3d-overview.png");
@@ -176,27 +200,16 @@ console.log("panel after canvas pick:", panel ? panel.slice(0, 200) : null);
 
 // Fall back to the building list if the canvas pick missed.
 if (!panel) {
-  await evaluate(`(() => {
-    const b = [...document.querySelectorAll('button')].find(
-      (x) => x.textContent.trim() === '専攻科棟');
-    if (b) b.click();
-    return !!b;
-  })()`);
+  console.log("list select pressed:", await pressButton("専攻科棟"));
   await sleep(2500); // camera focus animation
   panel = (await panelText()) as string | null;
   console.log("panel after list select:", panel ? panel.slice(0, 200) : null);
 }
 await shot("02-building-selected.png");
 
-// Floor isolation: click the 2F chip inside the info panel.
-const chip = (await evaluate(`(() => {
-  const sec = document.querySelector('section[aria-label="建物情報"]');
-  if (!sec) return null;
-  const b = [...sec.querySelectorAll('button')].find((x) => x.textContent.trim() === '2F');
-  if (b) b.click();
-  return b ? b.textContent : null;
-})()`)) as string | null;
-console.log("floor chip:", chip);
+// Floor isolation: real click on the 2F chip inside the info panel.
+const PANEL = 'section[aria-label="建物情報"]';
+console.log("floor chip pressed:", await pressButton("2F", { scope: PANEL }));
 await sleep(1500);
 await shot("03-floor-2-isolated.png");
 console.log(
@@ -314,62 +327,38 @@ await send("Emulation.setDeviceMetricsOverride", {
 });
 await sleep(1200);
 await shot("05-mobile-overview.png");
-// Select via the building list on mobile.
-await evaluate(`(() => {
-  const sec = document.querySelector('section[aria-label="建物情報"]');
-  if (sec) { const c = sec.querySelector('button[aria-label="閉じる"]'); if (c) c.click(); }
-  return true;
-})()`);
+// Select via the building list on mobile (real touch presses).
+await pressButton("閉じる", { touch: true, scope: PANEL, aria: "閉じる" });
+await sleep(400);
 // Ensure the building list is open (toggle state persists across viewports).
+const listOpen = (await evaluate(`(() =>
+  [...document.querySelectorAll('button')].some(
+    (x) => x.textContent.trim() === '経営情報学科棟'))()`)) as boolean;
+if (!listOpen) {
+  console.log(
+    "list toggle pressed:",
+    await pressButton("建物一覧", { touch: true }),
+  );
+  await sleep(400);
+}
 console.log(
-  "list state:",
-  await evaluate(`(() => {
-    const has = [...document.querySelectorAll('button')].some(
-      (x) => x.textContent.trim() === '経営情報学科棟');
-    if (has) return 'already-open';
-    const toggle = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '建物一覧');
-    if (toggle) toggle.click();
-    return toggle ? 'toggled' : 'no-toggle';
-  })()`),
+  "mobile building pressed:",
+  await pressButton("経営情報学科棟", { touch: true }),
 );
-await sleep(400);
-const mobSel = (await evaluate(`(() => {
-  const b = [...document.querySelectorAll('button')].find(
-    (x) => x.textContent.trim() === '経営情報学科棟');
-  if (b) b.click();
-  return !!b;
-})()`)) as boolean;
-console.log("mobile building click found:", mobSel);
 await sleep(2500);
-// Close the building list so it does not overlay the canvas on mobile.
-await evaluate(`(() => {
-  const toggle = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '建物一覧');
-  if (toggle && toggle.getAttribute('aria-pressed') === 'true') toggle.click();
-  return true;
-})()`);
-await sleep(400);
+// The list must auto-close after selection (issue #75); verify it did.
+const listStillOpen = (await evaluate(`(() =>
+  [...document.querySelectorAll('button')].some(
+    (x) => x.textContent.trim() === '専攻科棟'))()`)) as boolean;
+console.log("building list auto-closed:", !listStillOpen);
 await shot("06-mobile-building.png");
 console.log("mobile panel:", JSON.stringify(await panelText()));
-if (!(await panelText())) {
-  // Retry once: the list may still have been animating open.
-  await evaluate(`(() => {
-    const b = [...document.querySelectorAll('button')].find(
-      (x) => x.textContent.trim() === '経営情報学科棟');
-    if (b) b.click();
-    return !!b;
-  })()`);
-  await sleep(2500);
-  console.log("mobile panel retry:", JSON.stringify(await panelText()));
-}
 
 // Mobile: floor chip -> room tap -> dimension panel -> restore overview.
-const mobChip = (await evaluate(`(() => {
-  const sec = document.querySelector('section[aria-label="建物情報"]');
-  const b = sec && [...sec.querySelectorAll('button')].find((x) => x.textContent.trim() === '2F');
-  if (b) b.click();
-  return !!b;
-})()`)) as boolean;
-console.log("mobile 2F chip:", mobChip);
+console.log(
+  "mobile 2F chip pressed:",
+  await pressButton("2F", { touch: true, scope: PANEL }),
+);
 await sleep(1500);
 await shot("07-mobile-floor-isolated.png");
 for (const rid of ["keiei:f2:r0", "keiei:f2:r1", "keiei:f2:r2"]) {
@@ -387,11 +376,10 @@ for (const rid of ["keiei:f2:r0", "keiei:f2:r1", "keiei:f2:r2"]) {
 }
 await shot("08-mobile-room-selected.png");
 console.log("mobile panel after room:", await panelText());
-await evaluate(`(() => {
-  const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '全体');
-  if (b) b.click();
-  return !!b;
-})()`);
+console.log(
+  "mobile overview pressed:",
+  await pressButton("全体", { touch: true }),
+);
 await sleep(2000);
 await shot("09-mobile-overview-restored.png");
 console.log(
