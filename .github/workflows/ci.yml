@@ -4,14 +4,28 @@ on:
   push:
     branches: [main, "release-*"]
   pull_request:
+  # pull_request_target runs this workflow definition from the BASE
+  # revision, so the contract job below cannot be weakened or removed by
+  # the candidate. The candidate tree is only read as data, never executed.
+  pull_request_target:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # event_name separates pull_request and pull_request_target runs so the
+  # two contract-related runs for the same PR cannot cancel each other.
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Default-deny: the pull_request_target contract path must never receive
+# a write-capable token. Jobs opt in to the reads they actually need.
+permissions:
+  contents: read
 
 jobs:
   check:
+    # Candidate code must never run under the pull_request_target event;
+    # push and pull_request runs are unchanged.
+    if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -29,33 +43,80 @@ jobs:
 
       - run: bun run validate:integration
 
-  contract:
-    if: github.event_name == 'pull_request'
+  contract-verify:
+    if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
     steps:
       - uses: actions/checkout@v4
         with:
-          path: candidate
-
-      - uses: actions/checkout@v4
-        with:
+          # trusted = base revision (default for pull_request_target)
           ref: ${{ github.base_ref }}
           path: trusted
 
+      - uses: actions/checkout@v4
+        with:
+          # candidate = exact PR head, read as data only
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+
       - name: Verify quality contract against base revision
+        id: verify
         run: |
           if [ ! -f trusted/quality-contract.json ]; then
             echo "quality-contract.json is not present on the base revision; skipping."
+            echo "status=skipped" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if [ ! -f trusted/.agents/skills/system-quality/scripts/verify-contract.mts ]; then
             echo "verify-contract.mts is not present on the base revision; skipping."
+            echo "status=skipped" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           # Run the checker from the trusted (base) revision so a candidate
           # cannot weaken the verifier and self-approve.
-          node trusted/.agents/skills/system-quality/scripts/verify-contract.mts trusted candidate
+          set +e
+          node trusted/.agents/skills/system-quality/scripts/verify-contract.mts trusted candidate > contract-result.json
+          code=$?
+          set -e
+          cat contract-result.json
+          status=$(grep -o '"status":"[^"]*"' contract-result.json | cut -d'"' -f4 || true)
+          if [ -z "$status" ]; then
+            echo "verifier did not produce a result (exit $code)"
+            exit "$code"
+          fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" = "CONTRACT_CHANGED" ]; then
+            changed=$(grep -o '"changed":\[[^]]*\]' contract-result.json || true)
+            echo "### Contract change detected" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            echo "$changed" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "A contract change requires acceptance via the" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`contract-accept\` environment gate (see PR #70)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit 0
+
+  # Acceptance gate for contract changes. This job only runs when the
+  # trusted verifier reports CONTRACT_CHANGED, and it declares the
+  # `contract-accept` environment, which is configured with a required
+  # reviewer. Environment approvals are a human gate: an agent token
+  # cannot approve them, so a contract change cannot be self-authorized.
+  contract-accept:
+    needs: contract-verify
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      needs.contract-verify.outputs.status == 'CONTRACT_CHANGED'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: contract-accept
+    steps:
+      - name: Contract change accepted via environment gate
+        run: |
+          echo "Contract change on ${{ github.event.pull_request.head.sha }}"
+          echo "was accepted through the contract-accept environment."
 
   # Comprehensive release validation runs only at freeze time: on the
   # release PR targeting main, or on demand via workflow_dispatch against a
