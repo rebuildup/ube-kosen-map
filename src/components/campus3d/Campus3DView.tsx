@@ -97,10 +97,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     showLabelsRef.current = showLabels;
   }, [showLabels]);
 
-  const sceneData = useMemo(
-    () => buildCampusScene(CAMPUS_MODEL_DATA, { dark }),
-    [dark],
-  );
+  // Geometry and GPU resources are theme-independent: the scene data is
+  // built once and setTheme() only swaps colors/marking vertex data.
+  const sceneData = useMemo(() => buildCampusScene(CAMPUS_MODEL_DATA), []);
   const buildings = useMemo(
     () =>
       sceneData.buildings.buildings
@@ -130,6 +129,8 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     labels: ProjectedLabel[];
     focus: { pos: THREE.Vector3; target: THREE.Vector3 } | null;
     needsRender: boolean;
+    hemi: THREE.HemisphereLight;
+    sun: THREE.DirectionalLight;
   } | null>(null);
 
   const requestFocus = (f: { pos: THREE.Vector3; target: THREE.Vector3 }) => {
@@ -156,7 +157,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(dark ? 0x14181a : 0xe8ecdf);
+    scene.background = new THREE.Color(0xe8ecdf);
 
     const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 200);
     const initial = presetPosition(sceneData, "overview");
@@ -170,17 +171,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     controls.minDistance = 1.5;
     controls.maxDistance = 60;
 
-    scene.add(
-      new THREE.HemisphereLight(
-        0xffffff,
-        dark ? 0x223 : 0x8a927f,
-        dark ? 0.55 : 0.9,
-      ),
-    );
-    const sun = new THREE.DirectionalLight(
-      dark ? 0xbfd0e8 : 0xfff4e0,
-      dark ? 0.9 : 1.6,
-    );
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x8a927f, 0.9);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xfff4e0, 1.6);
     sun.position.set(18, 30, 12);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -191,7 +184,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     sc.bottom = -20;
     scene.add(sun);
 
-    const built = buildCampus3DScene(sceneData, { dark });
+    const built = buildCampus3DScene(sceneData);
     scene.add(built.root);
 
     const labels: ProjectedLabel[] = built.labelAnchors.map((a) => {
@@ -257,6 +250,8 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       labels,
       focus: null as { pos: THREE.Vector3; target: THREE.Vector3 } | null,
       needsRender: true,
+      hemi,
+      sun,
     };
     threeRef.current = state;
 
@@ -325,8 +320,22 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       labelLayer.replaceChildren();
       threeRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supported, sceneData]);
+
+  /* Theme swap: update material colors, marking vertex colors, background
+     and lights in place. No geometry, renderer or context rebuild, so the
+     camera, selection and GPU resources are preserved. */
+  useEffect(() => {
+    const t = threeRef.current;
+    if (!t) return;
+    t.built.setTheme(dark);
+    t.scene.background = new THREE.Color(dark ? 0x14181a : 0xe8ecdf);
+    t.hemi.groundColor.setHex(dark ? 0x223 : 0x8a927f);
+    t.hemi.intensity = dark ? 0.55 : 0.9;
+    t.sun.color.setHex(dark ? 0xbfd0e8 : 0xfff4e0);
+    t.sun.intensity = dark ? 0.9 : 1.6;
+    t.needsRender = true;
+  }, [dark]);
 
   /* Label visibility + selection emphasis without rebuilding the scene. */
   useEffect(() => {

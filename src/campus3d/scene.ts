@@ -23,6 +23,8 @@ import { buildCampusModel, type CampusModel } from "./geo/buildings";
 import { outdoorSteps, type StepSpec } from "./geo/stairs";
 
 export interface CampusScene {
+  /** The complemented public dataset the scene was built from. */
+  readonly data: CampusModelData;
   readonly terrain: TerrainModel;
   readonly linework: LineworkResult;
   readonly lineworkGeometry: LineworkGeometry;
@@ -51,6 +53,7 @@ export const buildCampusScene = (
   });
   const buildings = buildCampusModel(data);
   return {
+    data,
     terrain,
     linework,
     lineworkGeometry,
