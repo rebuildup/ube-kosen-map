@@ -12,11 +12,13 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 import { CAMPUS_MODEL_DATA } from "../../campus3d/data/campusModelData";
-import type { BuildingModel } from "../../campus3d/geo/buildings";
+import type { BuildingModel, RoomSpec } from "../../campus3d/geo/buildings";
+import { drawingToModel } from "../../campus3d/geo/drawingTransform";
 import { buildCampusScene, type CampusScene } from "../../campus3d/scene";
 import {
   buildCampus3DScene,
   resolvePick,
+  visibleIntersections,
   type Campus3DScene,
 } from "../../campus3d/three/campusScene3D";
 
@@ -31,8 +33,15 @@ const webglAvailable = (): boolean => {
 
 interface Selection {
   readonly buildingKey: string;
+  readonly roomId?: string;
   readonly roomLabel?: string;
   readonly roomFloor?: number;
+}
+
+/** Floor isolation state: which building floor is shown alone. */
+interface Isolation {
+  readonly key: string;
+  readonly floor: number;
 }
 
 interface ProjectedLabel {
@@ -80,6 +89,19 @@ const buildingFocus = (
   ),
 });
 
+/** Camera focus on a room footprint (interior-ish oblique view). */
+const roomFocus = (
+  b: BuildingModel,
+  room: RoomSpec,
+): { pos: THREE.Vector3; target: THREE.Vector3 } => {
+  const m = drawingToModel(room.centroidDraw[0], room.centroidDraw[1]);
+  const y = b.baseY + (room.floor - 1) * b.floorHeight;
+  return {
+    pos: new THREE.Vector3(m.x + 2.2, y + b.floorHeight * 0.9, m.z + 2.2),
+    target: new THREE.Vector3(m.x, y + b.floorHeight * 0.35, m.z),
+  };
+};
+
 export default function Campus3DView({ height = "100%" }: { height?: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const labelLayerRef = useRef<HTMLDivElement>(null);
@@ -91,6 +113,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
   const [showList, setShowList] = useState(true);
   const [query, setQuery] = useState("");
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [isolation, setIsolation] = useState<Isolation | null>(null);
   // Read inside the render loop without re-subscribing the effect.
   const showLabelsRef = useRef(showLabels);
   useEffect(() => {
@@ -227,16 +250,24 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
         -((e.clientY - rect.top) / rect.height) * 2 + 1,
       );
       raycaster.setFromCamera(pointer, camera);
-      const hit = resolvePick(raycaster.intersectObjects([built.root], true));
-      setSelection(
-        hit
-          ? {
-              buildingKey: hit.buildingKey,
-              roomLabel: hit.room?.label,
-              roomFloor: hit.room?.floor,
-            }
-          : null,
+      const hit = resolvePick(
+        visibleIntersections(raycaster.intersectObjects([built.root], true)),
       );
+      if (hit?.room) {
+        const b = sceneData.buildings.buildings.find(
+          (x) => x.key === hit.buildingKey,
+        );
+        setSelection({
+          buildingKey: hit.buildingKey,
+          roomId: hit.room.id,
+          roomLabel: hit.room.label,
+          roomFloor: hit.room.floor,
+        });
+        setIsolation({ key: hit.buildingKey, floor: hit.room.floor });
+        if (b) requestFocus(roomFocus(b, hit.room));
+      } else {
+        setSelection(hit ? { buildingKey: hit.buildingKey } : null);
+      }
     };
     renderer.domElement.addEventListener("pointerdown", onDown);
     renderer.domElement.addEventListener("pointerup", onUp);
@@ -254,6 +285,10 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       sun,
     };
     threeRef.current = state;
+    if (import.meta.env.DEV) {
+      (window as unknown as { __campus3d?: typeof state | null }).__campus3d =
+        state;
+    }
 
     /* On-demand rendering: only draw when the camera actually moved or a
        focus animation / resize / selection change is pending. */
@@ -319,6 +354,9 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       renderer.domElement.remove();
       labelLayer.replaceChildren();
       threeRef.current = null;
+      if (import.meta.env.DEV) {
+        (window as unknown as { __campus3d?: unknown }).__campus3d = null;
+      }
     };
   }, [supported, sceneData]);
 
@@ -336,6 +374,29 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
     t.sun.intensity = dark ? 0.9 : 1.6;
     t.needsRender = true;
   }, [dark]);
+
+  /* Room highlight + floor isolation sync (no scene rebuild). */
+  const isoRef = useRef<Isolation | null>(null);
+  useEffect(() => {
+    const t = threeRef.current;
+    if (!t) return;
+    const prev = isoRef.current;
+    if (
+      prev &&
+      (!isolation ||
+        prev.key !== isolation.key ||
+        prev.floor !== isolation.floor)
+    ) {
+      t.built.setFloorIsolation(prev.key, null);
+    }
+    if (isolation) t.built.setFloorIsolation(isolation.key, isolation.floor);
+    isoRef.current = isolation;
+    t.built.setSelectedRoom(
+      selection?.buildingKey ?? "",
+      selection?.roomId ?? null,
+    );
+    t.needsRender = true;
+  }, [selection, isolation]);
 
   /* Label visibility + selection emphasis without rebuilding the scene. */
   useEffect(() => {
@@ -358,6 +419,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
 
   const selectBuilding = (b: BuildingModel) => {
     setSelection({ buildingKey: b.key });
+    setIsolation(null);
     requestFocus(buildingFocus(b));
   };
 
@@ -376,6 +438,14 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
   }
 
   const roomCount = selectedBuilding?.rooms.length ?? 0;
+  const selectedRoom = selection?.roomId
+    ? selectedBuilding?.rooms.find((r) => r.id === selection.roomId)
+    : undefined;
+  const roomFloors = selectedBuilding
+    ? [...new Set(selectedBuilding.rooms.map((r) => r.floor))].sort(
+        (a, b) => a - b,
+      )
+    : [];
 
   return (
     <div className="relative" style={{ height }}>
@@ -499,10 +569,62 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
             {selectedBuilding.category}・{selectedBuilding.floors}階
           </p>
           {selection.roomLabel && (
-            <p className="mt-1 rounded bg-emerald-50 px-1.5 py-1 text-emerald-900">
-              {selection.roomLabel}
-              {selection.roomFloor ? `（${selection.roomFloor}F）` : ""}
-            </p>
+            <div className="mt-1 rounded bg-emerald-50 px-1.5 py-1 text-emerald-900">
+              <p>
+                {selection.roomLabel}
+                {selection.roomFloor ? `（${selection.roomFloor}F）` : ""}
+              </p>
+              {selectedRoom && (
+                <p className="mt-0.5 text-[10px] text-emerald-800">
+                  {selectedRoom.widthM.toFixed(1)}×
+                  {selectedRoom.depthM.toFixed(1)}m（外形）・面積 約
+                  {selectedRoom.areaM2.toFixed(1)}m²
+                  <span className="block text-emerald-700/80">
+                    平面図ポリゴンから算出した推定値（実測ではありません）
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
+          {roomFloors.length > 0 && (
+            <div className="mt-1.5">
+              <p className="text-[10px] text-gray-500">フロア表示</p>
+              <div className="mt-0.5 flex flex-wrap gap-1">
+                <button
+                  type="button"
+                  aria-pressed={!isolation}
+                  onClick={() => setIsolation(null)}
+                  className={`rounded px-1.5 py-0.5 text-[10px] ${
+                    !isolation
+                      ? "bg-gray-900 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  全体
+                </button>
+                {roomFloors.map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    aria-pressed={isolation?.floor === f}
+                    onClick={() =>
+                      setIsolation(
+                        isolation?.floor === f
+                          ? null
+                          : { key: selectedBuilding.key, floor: f },
+                      )
+                    }
+                    className={`rounded px-1.5 py-0.5 text-[10px] ${
+                      isolation?.floor === f
+                        ? "bg-gray-900 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {f}F
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           {selectedBuilding.roomsInfo && (
             <p className="mt-1 text-[11px] text-gray-600">
@@ -523,7 +645,7 @@ export default function Campus3DView({ height = "100%" }: { height?: string }) {
       )}
 
       <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/45 px-2 py-1 text-[10px] text-white sm:text-xs">
-        ドラッグで回転・ホイールでズーム・建物クリックで情報表示
+        ドラッグで回転・ホイールでズーム・区画クリックでフロア単位表示
       </div>
     </div>
   );
