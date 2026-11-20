@@ -4,9 +4,16 @@
 インタラクティブなキャンパスマップです。3Dビューでは建物が立体で浮かび、
 フロアごとの部屋の形まで見られます。
 
+<img src="docs/evidence/campus3d-demo.gif" alt="3Dキャンパスの操作デモ（回転・フロア分離・部屋選択）" width="720">
+
+_実際の画面収録。部屋選択から全体表示への復帰までの操作を確認できます。_
+
+<details>
+<summary>静止画: キャンパス全体の3D俯瞰</summary>
+
 <img src="docs/evidence/shots/01-3d-overview.png" alt="3Dキャンパスの俯瞰" width="720">
 
-_キャンパス全体を3Dで俯瞰した画面。地形・建物・線画が立体表示されます。_
+</details>
 
 ## 3Dキャンパスビューでできること
 
