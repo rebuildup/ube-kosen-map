@@ -31,7 +31,7 @@ describe("room extraction report", () => {
 
   it("keeps partitioned floors area-conserving", () => {
     for (const f of report.floors) {
-      if (f.status !== "partitioned") continue;
+      if (f.status !== "machine-clean" && f.status !== "verified") continue;
       expect(f.areaDeltaRatio, `${f.building}#${f.floor}`).not.toBeNull();
       expect(
         Math.abs(f.areaDeltaRatio!),

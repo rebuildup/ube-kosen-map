@@ -85,6 +85,19 @@ const clickAt = async (x: number, y: number) => {
   }
 };
 
+/** Real touch tap for the mobile-emulated pass. */
+const tapAt = async (x: number, y: number) => {
+  for (const type of ["touchStart", "touchEnd"] as const) {
+    await send("Input.dispatchTouchEvent", {
+      type,
+      touchPoints:
+        type === "touchStart"
+          ? [{ x, y, id: 1 }]
+          : [],
+    });
+  }
+};
+
 /** Shared prelude: project a Vector3 `v` (world space) to CSS pixels. */
 const projectTail = `
   v.project(s.camera);
@@ -214,31 +227,104 @@ console.log(
 );
 
 // Pick a room with real pointer events -> raycast -> selection + focus.
-const rpos = (await findRoomScreenPos("senkouka:f2:r5")) as {
-  x: number;
-  y: number;
-  behind: boolean;
+// Frames the camera close to the room, then grid-searches the projected
+// bbox for a point whose ray resolves to the room (same resolvePick rules).
+const pickRoom = async (roomId: string) => {
+  const framed = await evaluate(`(() => {
+    const s = window.__campus3d; if (!s) return null;
+    const V3 = s.camera.position.constructor;
+    const v = new V3(); let mesh = null;
+    s.built.root.traverse((o) => {
+      if (!mesh && o.userData?.room?.id === ${JSON.stringify(roomId)}) mesh = o;
+    });
+    if (!mesh) return null;
+    s.focus = null; // cancel any in-flight camera focus animation
+    mesh.geometry.computeBoundingBox();
+    const c = mesh.geometry.boundingBox.getCenter(new V3());
+    mesh.localToWorld(c);
+    s.camera.position.set(c.x, c.y + 1.6, c.z + 0.02);
+    s.controls.target.copy(c);
+    s.controls.update();
+    return c.toArray();
+  })()`);
+  if (!framed) return { err: "no mesh" };
+  await sleep(800);
+  return evaluate(`(() => {
+    const s = window.__campus3d; if (!s) return { err: "no hook" };
+    const V3 = s.camera.position.constructor;
+    const canvas = document.querySelector('canvas');
+    const rect = canvas.getBoundingClientRect();
+    let mesh = null;
+    s.built.root.traverse((o) => {
+      if (!mesh && o.userData?.room?.id === ${JSON.stringify(roomId)}) mesh = o;
+    });
+    if (!mesh) return { err: "room mesh not found" };
+    mesh.geometry.computeBoundingBox();
+    const bb = mesh.geometry.boundingBox;
+    const corners = [];
+    for (const x of [bb.min.x, bb.max.x])
+      for (const y of [bb.min.y, bb.max.y])
+        for (const z of [bb.min.z, bb.max.z]) {
+          const c = new V3(x, y, z);
+          mesh.localToWorld(c);
+          c.project(s.camera);
+          corners.push({
+            x: (c.x * 0.5 + 0.5) * rect.width + rect.left,
+            y: (-c.y * 0.5 + 0.5) * rect.height + rect.top,
+            behind: c.z > 1,
+          });
+        }
+    const vis = corners.filter((c) => !c.behind);
+    if (!vis.length) return { err: "bbox behind camera" };
+    const xs = vis.map((c) => c.x), ys = vis.map((c) => c.y);
+    const x0 = Math.max(rect.left, Math.min(...xs)), x1 = Math.min(rect.right, Math.max(...xs));
+    const y0 = Math.max(rect.top, Math.min(...ys)), y1 = Math.min(rect.bottom, Math.max(...ys));
+    const resolve = (px, py) => {
+      const nx = ((px - rect.left) / rect.width) * 2 - 1;
+      const ny = -(((py - rect.top) / rect.height) * 2 - 1);
+      s.raycaster.setFromCamera({ x: nx, y: ny }, s.camera);
+      for (const h of s.raycaster.intersectObjects([s.built.root], true)) {
+        let invisible = false;
+        for (let n = h.object; n; n = n.parent) if (!n.visible) { invisible = true; break; }
+        if (invisible) continue;
+        // First visible hit decides, exactly like the app's resolvePick.
+        let room = null, node = h.object;
+        while (node) {
+          if (node.userData?.room) { room = node.userData.room.id; break; }
+          node = node.parent;
+        }
+        return room === ${JSON.stringify(roomId)};
+      }
+      return false;
+    };
+    const W = 24, H = 16;
+    for (let iy = 0; iy <= H; iy++) for (let ix = 0; ix <= W; ix++) {
+      const px = x0 + ((x1 - x0) * ix) / W;
+      const py = y0 + ((y1 - y0) * iy) / H;
+      if (px < rect.left || px > rect.right || py < rect.top || py > rect.bottom) continue;
+      // Skip points covered by DOM overlays (panels, lists) — a real tap
+      // there never reaches the canvas.
+      const el = document.elementFromPoint(px, py);
+      if (el !== canvas) continue;
+      if (resolve(px, py)) return { px, py };
+    }
+    return { err: "no point resolves to room", bbox: { x0, y0, x1, y1 } };
+  })()`);
+};
+
+const res = (await pickRoom("senkouka:f2:r5")) as {
+  px?: number;
+  py?: number;
+  err?: string;
 } | null;
-console.log("room screen pos:", rpos);
-if (rpos && !rpos.behind) {
-  await clickAt(rpos.x, rpos.y);
+console.log("room pick search:", JSON.stringify(res));
+if (res?.px !== undefined && res?.py !== undefined) {
+  await clickAt(res.px, res.py);
   await sleep(2500); // focus animation
   await shot("04-room-selected.png");
   console.log("panel after room:", await panelText());
 } else {
-  console.log("room centroid off-screen or missing; trying r0");
-  const r0 = (await findRoomScreenPos("senkouka:f2:r0")) as {
-    x: number;
-    y: number;
-    behind: boolean;
-  } | null;
-  console.log("r0 pos:", r0);
-  if (r0 && !r0.behind) {
-    await clickAt(r0.x, r0.y);
-    await sleep(2500);
-    await shot("04-room-selected.png");
-    console.log("panel after room:", await panelText());
-  }
+  console.log("room pick failed; panel:", await panelText());
 }
 
 // Mobile viewport pass.
@@ -254,22 +340,88 @@ await shot("05-mobile-overview.png");
 await evaluate(`(() => {
   const sec = document.querySelector('section[aria-label="建物情報"]');
   if (sec) { const c = sec.querySelector('button[aria-label="閉じる"]'); if (c) c.click(); }
-  const toggle = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '建物一覧');
-  if (toggle) toggle.click();
   return true;
 })()`);
+// Ensure the building list is open (toggle state persists across viewports).
+console.log(
+  "list state:",
+  await evaluate(`(() => {
+    const has = [...document.querySelectorAll('button')].some(
+      (x) => x.textContent.trim() === '経営情報学科棟');
+    if (has) return 'already-open';
+    const toggle = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '建物一覧');
+    if (toggle) toggle.click();
+    return toggle ? 'toggled' : 'no-toggle';
+  })()`),
+);
 await sleep(400);
-await evaluate(`(() => {
+const mobSel = (await evaluate(`(() => {
   const b = [...document.querySelectorAll('button')].find(
     (x) => x.textContent.trim() === '経営情報学科棟');
   if (b) b.click();
   return !!b;
-})()`);
+})()`)) as boolean;
+console.log("mobile building click found:", mobSel);
 await sleep(2500);
+// Close the building list so it does not overlay the canvas on mobile.
+await evaluate(`(() => {
+  const toggle = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '建物一覧');
+  if (toggle && toggle.getAttribute('aria-pressed') === 'true') toggle.click();
+  return true;
+})()`);
+await sleep(400);
 await shot("06-mobile-building.png");
 console.log(
   "mobile panel:",
-  ((await panelText()) as string | null)?.slice(0, 300),
+  JSON.stringify(await panelText()),
+);
+if (!(await panelText())) {
+  // Retry once: the list may still have been animating open.
+  await evaluate(`(() => {
+    const b = [...document.querySelectorAll('button')].find(
+      (x) => x.textContent.trim() === '経営情報学科棟');
+    if (b) b.click();
+    return !!b;
+  })()`);
+  await sleep(2500);
+  console.log("mobile panel retry:", JSON.stringify(await panelText()));
+}
+
+// Mobile: floor chip -> room tap -> dimension panel -> restore overview.
+const mobChip = (await evaluate(`(() => {
+  const sec = document.querySelector('section[aria-label="建物情報"]');
+  const b = sec && [...sec.querySelectorAll('button')].find((x) => x.textContent.trim() === '2F');
+  if (b) b.click();
+  return !!b;
+})()`)) as boolean;
+console.log("mobile 2F chip:", mobChip);
+await sleep(1500);
+await shot("07-mobile-floor-isolated.png");
+for (const rid of ["keiei:f2:r0", "keiei:f2:r1", "keiei:f2:r2"]) {
+  const pos = (await pickRoom(rid)) as {
+    px?: number;
+    py?: number;
+    err?: string;
+  } | null;
+  console.log(`mobile room ${rid}:`, JSON.stringify(pos));
+  if (pos?.px !== undefined && pos?.py !== undefined) {
+    await tapAt(pos.px, pos.py);
+    await sleep(2500);
+    break;
+  }
+}
+await shot("08-mobile-room-selected.png");
+console.log("mobile panel after room:", await panelText());
+await evaluate(`(() => {
+  const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '全体');
+  if (b) b.click();
+  return !!b;
+})()`);
+await sleep(2000);
+await shot("09-mobile-overview-restored.png");
+console.log(
+  "mobile panel after restore:",
+  ((await panelText()) as string | null)?.slice(0, 200),
 );
 
 ws.close();

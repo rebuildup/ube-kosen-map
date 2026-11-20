@@ -48,6 +48,12 @@ export interface PartitionedRoom {
   readonly centroid: DrawingPoint;
   /** Bounding box [x0, y0, x1, y1] in drawing coordinates. */
   readonly bbox: readonly [number, number, number, number];
+  /**
+   * Closed cycles of wall linework strictly inside this room's faces that
+   * did not partition it — evidence the source drew a subdivision the
+   * extractor missed. Zero means the face faithfully matches the linework.
+   */
+  readonly interiorClosedLoops: number;
 }
 
 export interface FloorPartitionStats {
@@ -67,6 +73,8 @@ export interface FloorPartitionStats {
   readonly plateAreaU2: number;
   /** (faceArea - plateArea) / plateArea; should be ~0. */
   readonly areaDeltaRatio: number;
+  /** Total closed interior wall loops found inside kept faces. */
+  readonly interiorClosedLoops: number;
 }
 
 export interface FloorPartition {
@@ -86,6 +94,8 @@ export interface FloorPartition {
 const SNAP = 0.08;
 /** Faces smaller than this (drawing units^2, ~0.085 m^2) are slivers. */
 const SLIVER_AREA_U2 = 0.12;
+/** Faces narrower than ~0.42 m are wall pockets, not rooms. */
+const SLIVER_MIN_DIM_U = 0.5;
 /** Margin when testing whether a segment is stair treads. */
 const STAIR_MARGIN = 0.15;
 
@@ -240,7 +250,7 @@ const EXTEND_MAX = 0.35;
  * axis until they touch another barrier (wall or plate edge). Never
  * shortens a segment; endpoints that already touch stay put.
  */
-const extendWallsToMeet = (
+export const extendWallsToMeet = (
   walls: readonly DrawingSegment[],
   targets: readonly DrawingSegment[],
 ): DrawingSegment[] => {
@@ -646,7 +656,7 @@ const cleanRing = (pts: readonly DrawingPoint[]): DrawingPoint[] => {
  * the vertex centroid first, then edge midpoints nudged toward the face
  * interior on both sides.
  */
-const interiorPoint = (
+export const interiorPoint = (
   outer: readonly DrawingPoint[],
   holes: readonly (readonly DrawingPoint[])[] = [],
 ): DrawingPoint | null => {
@@ -673,7 +683,7 @@ const interiorPoint = (
   return null;
 };
 
-interface WalkInfo {
+export interface WalkInfo {
   readonly pts: DrawingPoint[];
   readonly signedArea: number;
   readonly area: number;
@@ -684,7 +694,12 @@ interface WalkInfo {
 export const faceFromWalks = (
   verts: readonly DrawingPoint[],
   walks: readonly number[][],
-): { faces: RoomFace[]; orphanHoles: number } => {
+): {
+  faces: RoomFace[];
+  orphanHoles: number;
+  /** Geometry of unattached negative walks, for diagnostics. */
+  orphanRings: WalkInfo[];
+} => {
   const infos: WalkInfo[] = walks
     .map((w) => {
       const pts = cleanRing(w.map((id) => verts[id]));
@@ -711,7 +726,7 @@ export const faceFromWalks = (
 
   // Attach each hole to the smallest shell that strictly contains it.
   const holeRings = new Map<WalkInfo, DrawingPoint[][]>();
-  let orphanHoles = 0;
+  const orphanRings: WalkInfo[] = [];
   for (const h of holes) {
     let best: WalkInfo | null = null;
     for (const s of shells) {
@@ -727,7 +742,7 @@ export const faceFromWalks = (
       arr.push(h.pts);
       holeRings.set(best, arr);
     } else {
-      orphanHoles++;
+      orphanRings.push(h);
     }
   }
 
@@ -741,7 +756,7 @@ export const faceFromWalks = (
       areaU2: s.area - holeArea,
     });
   }
-  return { faces, orphanHoles };
+  return { faces, orphanHoles: orphanRings.length, orphanRings };
 };
 
 /* ------------------------------------------------------------------ */
@@ -804,6 +819,7 @@ export const partitionFloor = (
     faceAreaU2: 0,
     plateAreaU2,
     areaDeltaRatio: 0,
+    interiorClosedLoops: 0,
     ...extra,
   });
 
@@ -824,16 +840,91 @@ export const partitionFloor = (
     if (inPlate) kept.push({ face, sample });
   }
 
+  /* Interior linework audit: atomic edges strictly inside a kept face that
+     are not part of its boundary. A closed cycle of such edges is a room
+     outline the source drew but the partition failed to extract. */
+  const vidKey = new Map<string, number>();
+  verts.forEach((p, i) => vidKey.set(`${p[0]},${p[1]}`, i));
+  const ptInRing = (poly: readonly DrawingPoint[], p: DrawingPoint) =>
+    pointInPolygon(poly as DrawingPolygon, p[0], p[1]);
+  const interiorClosedLoopsOf = (face: RoomFace): number => {
+    const bset = new Set<string>();
+    const rings = [face.outer, ...face.holes];
+    for (const ring of rings) {
+      for (let i = 0; i < ring.length; i++) {
+        const a = vidKey.get(`${ring[i][0]},${ring[i][1]}`);
+        const b = vidKey.get(
+          `${ring[(i + 1) % ring.length][0]},${ring[(i + 1) % ring.length][1]}`,
+        );
+        if (a !== undefined && b !== undefined) {
+          bset.add(a < b ? `${a}|${b}` : `${b}|${a}`);
+        }
+      }
+    }
+    const adj = new Map<number, number[]>();
+    const link = (u: number, v: number) => {
+      const au = adj.get(u) ?? [];
+      au.push(v);
+      adj.set(u, au);
+      const av = adj.get(v) ?? [];
+      av.push(u);
+      adj.set(v, av);
+    };
+    for (const [a, b] of atomic) {
+      if (bset.has(a < b ? `${a}|${b}` : `${b}|${a}`)) continue;
+      const mx = (verts[a][0] + verts[b][0]) / 2;
+      const my = (verts[a][1] + verts[b][1]) / 2;
+      if (!ptInRing(face.outer, [mx, my])) continue;
+      if (face.holes.some((h) => ptInRing(h, [mx, my]))) continue;
+      link(a, b);
+    }
+    const seen = new Set<number>();
+    let loops = 0;
+    for (const start of adj.keys()) {
+      if (seen.has(start)) continue;
+      const stack = [start];
+      const comp: number[] = [];
+      while (stack.length) {
+        const n = stack.pop()!;
+        if (seen.has(n)) continue;
+        seen.add(n);
+        comp.push(n);
+        for (const m of adj.get(n) ?? []) if (!seen.has(m)) stack.push(m);
+      }
+      if (
+        comp.length >= 3 &&
+        comp.every((n) => (adj.get(n)?.length ?? 0) === 2)
+      ) {
+        loops++;
+      }
+    }
+    return loops;
+  };
+  const loopCount = new Map<RoomFace, number>();
+  let interiorClosedLoops = 0;
+  for (const k of kept) {
+    const n = interiorClosedLoopsOf(k.face);
+    loopCount.set(k.face, n);
+    interiorClosedLoops += n;
+  }
+
   const faceAreaU2 = kept.reduce((a, k) => a + k.face.areaU2, 0);
   const stats: FloorPartitionStats = {
     wallSegments: barrierWalls.length,
     stairSegments,
     faces: kept.length,
-    slivers: kept.filter((k) => k.face.areaU2 < SLIVER_AREA_U2).length,
+    slivers: kept.filter((k) => {
+      const bb = ringBBox(k.face.outer);
+      return (
+        k.face.areaU2 < SLIVER_AREA_U2 ||
+        Math.min(bb[2] - bb[0], bb[3] - bb[1]) < SLIVER_MIN_DIM_U
+      );
+    }).length,
     orphanHoles,
     faceAreaU2,
     plateAreaU2,
     areaDeltaRatio: plateAreaU2 ? (faceAreaU2 - plateAreaU2) / plateAreaU2 : 0,
+    interiorClosedLoops,
   };
 
   /* ---- classify faces into selectable rooms ---- */
@@ -841,6 +932,7 @@ export const partitionFloor = (
   interface FaceEntry {
     readonly face: RoomFace;
     readonly sample: DrawingPoint;
+    readonly closedLoops: number;
     stairIndex: number;
     kind: RoomPartitionKind;
   }
@@ -855,6 +947,7 @@ export const partitionFloor = (
     return {
       face: k.face,
       sample: k.sample,
+      closedLoops: loopCount.get(k.face) ?? 0,
       stairIndex,
       kind: "room" as RoomPartitionKind,
     };
@@ -875,8 +968,11 @@ export const partitionFloor = (
     }
   }
   for (const e of entries) {
-    if (e.face.areaU2 < SLIVER_AREA_U2) e.kind = "sliver";
-    else if (e.stairIndex >= 0) e.kind = "stair";
+    const bb = ringBBox(e.face.outer);
+    const minDim = Math.min(bb[2] - bb[0], bb[3] - bb[1]);
+    if (e.face.areaU2 < SLIVER_AREA_U2 || minDim < SLIVER_MIN_DIM_U) {
+      e.kind = "sliver";
+    } else if (e.stairIndex >= 0) e.kind = "stair";
   }
 
   /* ---- group stair faces per stair region, emit rooms ---- */
@@ -935,6 +1031,7 @@ export const partitionFloor = (
       areaU2,
       centroid: [cx, cy],
       bbox: bb,
+      interiorClosedLoops: group.reduce((a, e) => a + e.closedLoops, 0),
     });
   };
 

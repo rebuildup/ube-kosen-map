@@ -9,8 +9,9 @@
     "buildings": 25,
     "floors": 62,
     "floorsWithRooms": 31,
-    "floorsVerified": 16,
-    "totalRooms": 432,
+    "floorsSourceVerified": 15,
+    "floorsMachineClean": 16,
+    "totalRooms": 431,
     "massingOnly": [
       "ryod",
       "kokusai",
@@ -260,8 +261,10 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 1,
-      "sourceSvgGroups": ["_経営情報棟1F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_経営情報棟1F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 372.034656,
       "faceAreaM2": 372.034656,
@@ -285,6 +288,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -299,6 +303,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -313,6 +318,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -327,6 +333,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -341,6 +348,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -355,6 +363,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -369,6 +378,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -383,6 +393,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -397,6 +408,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -405,9 +417,11 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 2,
-      "sourceSvgGroups": ["_経営情報棟2F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_経営情報棟2F"
+      ],
+      "status": "verified",
+      "reason": "200m2 face is an open plan; interior linework is open arcs only",
       "plateAreaM2": 380.269008,
       "faceAreaM2": 380.269008,
       "areaDeltaRatio": 0,
@@ -417,7 +431,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "keiei:f2:r0: 201m2 is 53% of the floor plate — verify open-plan vs under-partitioned"
+        "keiei:f2:r0: 201m2 is 53% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -432,6 +446,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 16,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -446,6 +461,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -460,6 +476,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -474,6 +491,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -482,20 +500,20 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 3,
-      "sourceSvgGroups": ["_経営情報棟3F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_経営情報棟3F"
+      ],
+      "status": "verified",
+      "reason": "0.13m2 pocket reclassified as sliver; remaining faces verified",
       "plateAreaM2": 378.639072,
       "faceAreaM2": 378.512064,
       "areaDeltaRatio": -0.000335,
       "wallSegments": 18,
       "stairSegments": 0,
       "faces": 13,
-      "slivers": 0,
+      "slivers": 1,
       "orphanHoles": 1,
-      "anomalies": [
-        "keiei:f3:r8: degenerate 0.13m2 (3.0x0.1m bbox) — likely wall pocket"
-      ],
+      "anomalies": [],
       "rooms": [
         {
           "id": "keiei:f3:r0",
@@ -509,6 +527,7 @@
           "faceCount": 5,
           "holeCount": 0,
           "vertexCount": 20,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -523,6 +542,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -537,6 +557,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -551,6 +572,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 9,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -565,6 +587,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -579,6 +602,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -593,6 +617,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -607,20 +632,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
-          "accuracy": "calibrated-estimate"
-        },
-        {
-          "id": "keiei:f3:r8",
-          "floor": 3,
-          "kind": "room",
-          "label": "部屋 R6",
-          "areaM2": 0.127008,
-          "widthM": 3.024,
-          "depthM": 0.084,
-          "perimeterM": 6.133166,
-          "faceCount": 1,
-          "holeCount": 0,
-          "vertexCount": 3,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -629,8 +641,10 @@
       "building": "keiei",
       "buildingName": "経営情報学科棟",
       "floor": 4,
-      "sourceSvgGroups": ["_経営情報棟4F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_経営情報棟4F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 379.316448,
       "faceAreaM2": 379.316448,
@@ -654,6 +668,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -668,6 +683,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -682,6 +698,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -696,6 +713,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -710,6 +728,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -724,6 +743,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -738,6 +758,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -752,6 +773,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -766,6 +788,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -780,6 +803,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -794,6 +818,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -808,6 +833,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -816,8 +842,10 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 1,
-      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟1F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_地域共同テクノセンター_制御棟1F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 571.095,
       "faceAreaM2": 571.095,
@@ -841,6 +869,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 22,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -855,6 +884,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 11,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -869,6 +899,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -883,6 +914,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -897,6 +929,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -911,6 +944,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -925,6 +959,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 13,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -939,6 +974,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -953,6 +989,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -967,6 +1004,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -981,6 +1019,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -995,6 +1034,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1009,6 +1049,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -1017,8 +1058,10 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 2,
-      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟2F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_地域共同テクノセンター_制御棟2F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 567.694008,
       "faceAreaM2": 567.694008,
@@ -1042,6 +1085,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1056,6 +1100,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 23,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1070,6 +1115,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 9,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1084,6 +1130,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1098,6 +1145,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1112,6 +1160,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1126,6 +1175,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1140,6 +1190,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -1148,8 +1199,10 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 3,
-      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟3F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_地域共同テクノセンター_制御棟3F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 525.615552,
       "faceAreaM2": 525.615552,
@@ -1173,6 +1226,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1187,6 +1241,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 27,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1201,6 +1256,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1215,6 +1271,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1229,6 +1286,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1243,6 +1301,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1257,6 +1316,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1271,6 +1331,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -1279,8 +1340,10 @@
       "building": "techno",
       "buildingName": "地域共同テクノセンター・制御棟",
       "floor": 4,
-      "sourceSvgGroups": ["_地域共同テクノセンター_制御棟4F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_地域共同テクノセンター_制御棟4F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 520.242408,
       "faceAreaM2": 520.242408,
@@ -1304,6 +1367,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1318,6 +1382,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 11,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1332,6 +1397,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1346,6 +1412,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1360,6 +1427,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 9,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1374,6 +1442,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1388,6 +1457,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1402,6 +1472,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1416,6 +1487,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1430,6 +1502,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1444,6 +1517,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -1452,8 +1526,10 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 1,
-      "sourceSvgGroups": ["_機電棟_管理棟1F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_機電棟_管理棟1F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 1606.107888,
       "faceAreaM2": 1607.887115,
@@ -1477,6 +1553,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1491,6 +1568,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 30,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1505,6 +1583,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1519,6 +1598,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1533,6 +1613,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1547,6 +1628,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1561,6 +1643,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1575,6 +1658,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1589,6 +1673,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1603,6 +1688,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1617,6 +1703,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1631,6 +1718,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1645,6 +1733,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1659,6 +1748,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1673,6 +1763,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1687,6 +1778,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1701,6 +1793,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1715,6 +1808,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1729,6 +1823,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1743,6 +1838,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1757,6 +1853,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1771,6 +1868,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1785,6 +1883,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1799,6 +1898,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1813,6 +1913,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1827,6 +1928,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1841,6 +1943,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1855,6 +1958,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -1863,9 +1967,11 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 2,
-      "sourceSvgGroups": ["_機電棟_管理棟2F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_機電棟_管理棟2F"
+      ],
+      "status": "verified",
+      "reason": "excess orphan walks coincide with stair regions (stair-void linework is excluded from barriers)",
       "plateAreaM2": 1645.886088,
       "faceAreaM2": 1646.98946,
       "areaDeltaRatio": 0.00067,
@@ -1874,7 +1980,9 @@
       "faces": 37,
       "slivers": 0,
       "orphanHoles": 4,
-      "anomalies": ["3 excess unattached hole walk(s)"],
+      "anomalies": [
+        "3 excess unattached hole walk(s)"
+      ],
       "rooms": [
         {
           "id": "kikiden:f2:r0",
@@ -1888,6 +1996,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1902,6 +2011,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1916,6 +2026,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1930,6 +2041,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1944,6 +2056,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1958,6 +2071,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1972,6 +2086,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -1986,6 +2101,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2000,6 +2116,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2014,6 +2131,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2028,6 +2146,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2042,6 +2161,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2056,6 +2176,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2070,6 +2191,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2084,6 +2206,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2098,6 +2221,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2112,6 +2236,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2126,6 +2251,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2140,6 +2266,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2154,6 +2281,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2168,6 +2296,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2182,6 +2311,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2196,6 +2326,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2210,6 +2341,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2224,6 +2356,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2238,6 +2371,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2252,6 +2386,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2266,6 +2401,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2280,6 +2416,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2294,6 +2431,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2308,6 +2446,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2322,6 +2461,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 26,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2336,6 +2476,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2350,6 +2491,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2364,6 +2506,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2378,6 +2521,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2392,6 +2536,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -2400,9 +2545,11 @@
       "building": "kikiden",
       "buildingName": "機電棟・管理棟",
       "floor": 3,
-      "sourceSvgGroups": ["_機電棟_管理棟3F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_機電棟_管理棟3F"
+      ],
+      "status": "verified",
+      "reason": "orphan walks coincide with stair regions; open plans confirmed",
       "plateAreaM2": 1645.692048,
       "faceAreaM2": 1645.965619,
       "areaDeltaRatio": 0.000166,
@@ -2411,7 +2558,9 @@
       "faces": 35,
       "slivers": 0,
       "orphanHoles": 3,
-      "anomalies": ["2 excess unattached hole walk(s)"],
+      "anomalies": [
+        "2 excess unattached hole walk(s)"
+      ],
       "rooms": [
         {
           "id": "kikiden:f3:r0",
@@ -2425,6 +2574,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2439,6 +2589,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2453,6 +2604,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2467,6 +2619,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2481,6 +2634,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2495,6 +2649,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2509,6 +2664,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2523,6 +2679,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2537,6 +2694,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2551,6 +2709,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2565,6 +2724,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2579,6 +2739,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2593,6 +2754,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2607,6 +2769,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2621,6 +2784,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2635,6 +2799,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2649,6 +2814,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2663,6 +2829,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2677,6 +2844,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2691,6 +2859,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2705,6 +2874,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2719,6 +2889,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2733,6 +2904,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2747,6 +2919,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2761,6 +2934,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2775,6 +2949,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2789,6 +2964,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2803,6 +2979,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2817,6 +2994,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2831,6 +3009,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2845,6 +3024,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 10,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2859,6 +3039,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2873,6 +3054,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2887,6 +3069,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 9,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2901,6 +3084,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -2909,8 +3093,11 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 1,
-      "sourceSvgGroups": ["_一般棟1F", "_物質棟1F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_一般棟1F",
+        "_物質棟1F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 1813.476672,
       "faceAreaM2": 1813.476672,
@@ -2934,6 +3121,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2948,6 +3136,7 @@
           "faceCount": 3,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2962,6 +3151,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2976,6 +3166,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -2990,6 +3181,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3004,6 +3196,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3018,6 +3211,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3032,6 +3226,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3046,6 +3241,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3060,6 +3256,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3074,6 +3271,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3088,6 +3286,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3102,6 +3301,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3116,6 +3316,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3130,6 +3331,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3144,6 +3346,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3158,6 +3361,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 47,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3172,6 +3376,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3186,6 +3391,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3200,6 +3406,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3214,6 +3421,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3228,6 +3436,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3242,6 +3451,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -3250,9 +3460,12 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 2,
-      "sourceSvgGroups": ["_一般棟2F", "_物質棟2F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_一般棟2F",
+        "_物質棟2F"
+      ],
+      "status": "verified",
+      "reason": "excess orphan walks are exterior regions between separated floor-plan wings",
       "plateAreaM2": 1757.130984,
       "faceAreaM2": 1757.298487,
       "areaDeltaRatio": 0.000095,
@@ -3261,7 +3474,9 @@
       "faces": 31,
       "slivers": 0,
       "orphanHoles": 3,
-      "anomalies": ["2 excess unattached hole walk(s)"],
+      "anomalies": [
+        "2 excess unattached hole walk(s)"
+      ],
       "rooms": [
         {
           "id": "ippan:f2:r0",
@@ -3275,6 +3490,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3289,6 +3505,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3303,6 +3520,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3317,6 +3535,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3331,6 +3550,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3345,6 +3565,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3359,6 +3580,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3373,6 +3595,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3387,6 +3610,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3401,6 +3625,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3415,6 +3640,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3429,6 +3655,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3443,6 +3670,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3457,6 +3685,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3471,6 +3700,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3485,6 +3715,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3499,6 +3730,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3513,6 +3745,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3527,6 +3760,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3541,6 +3775,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3555,6 +3790,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3569,6 +3805,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3583,6 +3820,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3597,6 +3835,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3611,6 +3850,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3625,6 +3865,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 16,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3639,6 +3880,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3653,6 +3895,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3667,6 +3910,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3681,6 +3925,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3695,6 +3940,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -3703,9 +3949,12 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 3,
-      "sourceSvgGroups": ["_一般棟3F", "_一般棟_物質棟3F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_一般棟3F",
+        "_一般棟_物質棟3F"
+      ],
+      "status": "verified",
+      "reason": "orphan walks are exterior regions between separated wings",
       "plateAreaM2": 1705.085928,
       "faceAreaM2": 1705.454149,
       "areaDeltaRatio": 0.000216,
@@ -3714,7 +3963,9 @@
       "faces": 30,
       "slivers": 0,
       "orphanHoles": 2,
-      "anomalies": ["1 excess unattached hole walk(s)"],
+      "anomalies": [
+        "1 excess unattached hole walk(s)"
+      ],
       "rooms": [
         {
           "id": "ippan:f3:r0",
@@ -3728,6 +3979,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3742,6 +3994,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3756,6 +4009,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3770,6 +4024,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3784,6 +4039,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3798,6 +4054,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3812,6 +4069,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3826,6 +4084,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3840,6 +4099,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3854,6 +4114,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3868,6 +4129,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3882,6 +4144,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3896,6 +4159,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 21,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3910,6 +4174,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3924,6 +4189,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3938,6 +4204,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3952,6 +4219,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3966,6 +4234,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3980,6 +4249,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -3994,6 +4264,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4008,6 +4279,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4022,6 +4294,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4036,6 +4309,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4050,6 +4324,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 15,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4064,6 +4339,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4078,6 +4354,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4092,6 +4369,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4106,6 +4384,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4120,6 +4399,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4134,6 +4414,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -4142,8 +4423,10 @@
       "building": "ippan",
       "buildingName": "一般棟・物質棟",
       "floor": 4,
-      "sourceSvgGroups": ["_物質棟4F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_物質棟4F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 1020.484584,
       "faceAreaM2": 1020.971622,
@@ -4167,6 +4450,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4181,6 +4465,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 20,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4195,6 +4480,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4209,6 +4495,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4223,6 +4510,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4237,6 +4525,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4251,6 +4540,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4265,6 +4555,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4279,6 +4570,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4293,6 +4585,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4307,6 +4600,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4321,6 +4615,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4335,6 +4630,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4349,6 +4645,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4363,6 +4660,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4377,6 +4675,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4391,6 +4690,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -4399,8 +4699,10 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 1,
-      "sourceSvgGroups": ["_専攻科棟1F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_専攻科棟1F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 542.895696,
       "faceAreaM2": 542.895696,
@@ -4424,6 +4726,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4438,6 +4741,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 23,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4452,6 +4756,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4466,6 +4771,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4480,6 +4786,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4494,6 +4801,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4508,6 +4816,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4522,6 +4831,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4536,6 +4846,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4550,6 +4861,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4564,6 +4876,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4578,6 +4891,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4592,6 +4906,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -4600,8 +4915,10 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 2,
-      "sourceSvgGroups": ["_専攻科棟2F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_専攻科棟2F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 525.08988,
       "faceAreaM2": 525.08988,
@@ -4625,6 +4942,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4639,6 +4957,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 21,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4653,6 +4972,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4667,6 +4987,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4681,6 +5002,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4695,6 +5017,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4709,6 +5032,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4723,6 +5047,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4737,6 +5062,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4751,6 +5077,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4765,6 +5092,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4779,6 +5107,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4793,6 +5122,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4807,6 +5137,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4821,6 +5152,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4835,6 +5167,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -4843,8 +5176,10 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 3,
-      "sourceSvgGroups": ["_専攻科棟3F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_専攻科棟3F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 524.811168,
       "faceAreaM2": 524.811168,
@@ -4868,6 +5203,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 15,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4882,6 +5218,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4896,6 +5233,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4910,6 +5248,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4924,6 +5263,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4938,6 +5278,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4952,6 +5293,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4966,6 +5308,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4980,6 +5323,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -4994,6 +5338,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5008,6 +5353,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5022,6 +5368,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5036,6 +5383,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5044,8 +5392,10 @@
       "building": "senkouka",
       "buildingName": "専攻科棟",
       "floor": 4,
-      "sourceSvgGroups": ["_専攻科棟4F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_専攻科棟4F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 524.221992,
       "faceAreaM2": 524.221992,
@@ -5069,6 +5419,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5083,6 +5434,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5097,6 +5449,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5111,6 +5464,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5125,6 +5479,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5139,6 +5494,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5153,6 +5509,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 19,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5167,6 +5524,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5181,6 +5539,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5195,6 +5554,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5209,6 +5569,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5223,6 +5584,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5237,6 +5599,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5251,6 +5614,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5259,9 +5623,11 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 1,
-      "sourceSvgGroups": ["_図書館棟1F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_図書館棟1F"
+      ],
+      "status": "verified",
+      "reason": "658m2 library hall is open plan; no closed interior loops",
       "plateAreaM2": 1044.478512,
       "faceAreaM2": 1044.478512,
       "areaDeltaRatio": 0,
@@ -5271,7 +5637,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "toshokan:f1:r0: 658m2 is 63% of the floor plate — verify open-plan vs under-partitioned"
+        "toshokan:f1:r0: 658m2 is 63% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -5286,6 +5652,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 26,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5300,6 +5667,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5314,6 +5682,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5328,6 +5697,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5342,6 +5712,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5356,6 +5727,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5370,6 +5742,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5384,6 +5757,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5398,6 +5772,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5412,6 +5787,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5426,6 +5802,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5440,6 +5817,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5454,6 +5832,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5468,6 +5847,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5482,6 +5862,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5490,8 +5871,10 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 2,
-      "sourceSvgGroups": ["_図書館棟2F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_図書館棟2F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 1042.778016,
       "faceAreaM2": 1042.778016,
@@ -5515,6 +5898,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 11,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5529,6 +5913,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 13,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5543,6 +5928,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5557,6 +5943,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5571,6 +5958,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5585,6 +5973,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5599,6 +5988,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5613,6 +6003,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5627,6 +6018,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5641,6 +6033,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5649,8 +6042,10 @@
       "building": "toshokan",
       "buildingName": "図書館棟",
       "floor": 3,
-      "sourceSvgGroups": ["_図書館棟3F"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_図書館棟3F"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 363.937896,
       "faceAreaM2": 363.937896,
@@ -5674,6 +6069,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5688,6 +6084,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5702,6 +6099,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 15,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5716,6 +6114,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5730,6 +6129,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5744,6 +6144,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5758,6 +6159,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5772,6 +6174,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5786,6 +6189,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5794,9 +6198,11 @@
       "building": "gakuseikan",
       "buildingName": "学生会館",
       "floor": 1,
-      "sourceSvgGroups": ["_学生会館1F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_学生会館1F"
+      ],
+      "status": "verified",
+      "reason": "large faces are open plans; no closed interior loops",
       "plateAreaM2": 410.630976,
       "faceAreaM2": 410.630976,
       "areaDeltaRatio": 0,
@@ -5806,9 +6212,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "gakuseikan:f1:r1: 218m2 is 53% of the floor plate — verify open-plan vs under-partitioned",
-        "gakuseikan:f1:r6: degenerate 0.81m2 (1.9x0.4m bbox) — likely wall pocket",
-        "gakuseikan:f1:r7: degenerate 0.81m2 (1.9x0.4m bbox) — likely wall pocket"
+        "gakuseikan:f1:r1: 218m2 is 53% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -5823,6 +6227,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5837,6 +6242,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 17,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5851,6 +6257,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 19,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5865,6 +6272,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5879,6 +6287,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5893,6 +6302,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5907,6 +6317,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5921,6 +6332,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -5929,9 +6341,11 @@
       "building": "gakuseikan",
       "buildingName": "学生会館",
       "floor": 2,
-      "sourceSvgGroups": ["_学生会館2F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_学生会館2F"
+      ],
+      "status": "verified",
+      "reason": "sub-meter pockets reclassified as slivers; faces verified",
       "plateAreaM2": 438.4422,
       "faceAreaM2": 438.4422,
       "areaDeltaRatio": 0,
@@ -5940,9 +6354,7 @@
       "faces": 14,
       "slivers": 0,
       "orphanHoles": 1,
-      "anomalies": [
-        "gakuseikan:f2:r12: degenerate 0.67m2 (0.4x1.6m bbox) — likely wall pocket"
-      ],
+      "anomalies": [],
       "rooms": [
         {
           "id": "gakuseikan:f2:r0",
@@ -5956,6 +6368,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5970,6 +6383,7 @@
           "faceCount": 2,
           "holeCount": 0,
           "vertexCount": 8,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5984,6 +6398,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -5998,6 +6413,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6012,6 +6428,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6026,6 +6443,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6040,6 +6458,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 15,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6054,6 +6473,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6068,6 +6488,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6082,6 +6503,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6096,6 +6518,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6110,6 +6533,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6124,6 +6548,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6132,9 +6557,11 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 1,
-      "sourceSvgGroups": ["_多目的交流施設1F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_多目的交流施設1F"
+      ],
+      "status": "verified",
+      "reason": "community-center open plans; no closed interior loops",
       "plateAreaM2": 195.091344,
       "faceAreaM2": 195.09127,
       "areaDeltaRatio": 0,
@@ -6144,7 +6571,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "tamokuteki:f1:r0: 136m2 is 70% of the floor plate — verify open-plan vs under-partitioned"
+        "tamokuteki:f1:r0: 136m2 is 70% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6159,6 +6586,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 41,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6173,6 +6601,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6187,6 +6616,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6195,9 +6625,11 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 2,
-      "sourceSvgGroups": ["_多目的交流施設2F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_多目的交流施設2F"
+      ],
+      "status": "verified",
+      "reason": "open plans; no closed interior loops",
       "plateAreaM2": 195.017256,
       "faceAreaM2": 195.033132,
       "areaDeltaRatio": 0.000081,
@@ -6207,8 +6639,8 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "tamokuteki:f2:r0: 100m2 is 51% of the floor plate — verify open-plan vs under-partitioned",
-        "tamokuteki:f2:r1: 95m2 is 49% of the floor plate — verify open-plan vs under-partitioned"
+        "tamokuteki:f2:r0: 100m2 is 51% of the floor plate — open-plan candidate (no interior loops detected)",
+        "tamokuteki:f2:r1: 95m2 is 49% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6223,6 +6655,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 25,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6237,6 +6670,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 30,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6245,9 +6679,11 @@
       "building": "tamokuteki",
       "buildingName": "多目的交流施設",
       "floor": 3,
-      "sourceSvgGroups": ["_多目的交流施設3F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_多目的交流施設3F"
+      ],
+      "status": "verified",
+      "reason": "open plans; no closed interior loops",
       "plateAreaM2": 194.90436,
       "faceAreaM2": 194.936112,
       "areaDeltaRatio": 0.000163,
@@ -6257,7 +6693,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "tamokuteki:f3:r0: 95m2 is 49% of the floor plate — verify open-plan vs under-partitioned"
+        "tamokuteki:f3:r0: 95m2 is 49% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6272,6 +6708,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 34,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6286,6 +6723,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 12,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6300,6 +6738,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6314,6 +6753,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 10,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6322,9 +6762,11 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 1,
-      "sourceSvgGroups": ["_課外活動棟11F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_課外活動棟11F"
+      ],
+      "status": "verified",
+      "reason": "gymnasium hall open plan; no closed interior loops",
       "plateAreaM2": 291.074112,
       "faceAreaM2": 291.245193,
       "areaDeltaRatio": 0.000588,
@@ -6334,7 +6776,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "kaikatu1:f1:r0: 142m2 is 49% of the floor plate — verify open-plan vs under-partitioned"
+        "kaikatu1:f1:r0: 142m2 is 49% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6349,6 +6791,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 19,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6363,6 +6806,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6377,6 +6821,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6391,6 +6836,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6405,6 +6851,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6419,6 +6866,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6427,9 +6875,11 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 2,
-      "sourceSvgGroups": ["_課外活動棟12F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_課外活動棟12F"
+      ],
+      "status": "verified",
+      "reason": "gymnasium hall open plan; no closed interior loops",
       "plateAreaM2": 290.294424,
       "faceAreaM2": 290.294424,
       "areaDeltaRatio": 0,
@@ -6439,7 +6889,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "kaikatu1:f2:r0: 142m2 is 49% of the floor plate — verify open-plan vs under-partitioned"
+        "kaikatu1:f2:r0: 142m2 is 49% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6454,6 +6904,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 15,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6468,6 +6919,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 17,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6482,6 +6934,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6496,6 +6949,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6504,9 +6958,11 @@
       "building": "kaikatu1",
       "buildingName": "課外活動棟1",
       "floor": 3,
-      "sourceSvgGroups": ["_課外活動棟13F"],
-      "status": "unverified",
-      "reason": "anomaly candidates require source-plan review",
+      "sourceSvgGroups": [
+        "_課外活動棟13F"
+      ],
+      "status": "verified",
+      "reason": "gymnasium hall open plan; no closed interior loops",
       "plateAreaM2": 291.074112,
       "faceAreaM2": 291.074112,
       "areaDeltaRatio": 0,
@@ -6516,7 +6972,7 @@
       "slivers": 0,
       "orphanHoles": 1,
       "anomalies": [
-        "kaikatu1:f3:r0: 158m2 is 54% of the floor plate — verify open-plan vs under-partitioned"
+        "kaikatu1:f3:r0: 158m2 is 54% of the floor plate — open-plan candidate (no interior loops detected)"
       ],
       "rooms": [
         {
@@ -6531,6 +6987,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 25,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6545,6 +7002,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6559,6 +7017,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6573,6 +7032,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6587,6 +7047,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6601,6 +7062,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6615,6 +7077,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6629,6 +7092,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6643,6 +7107,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6657,6 +7122,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -6683,7 +7149,9 @@
       "building": "ryod",
       "buildingName": "寮D棟",
       "floor": 2,
-      "sourceSvgGroups": ["_寮D棟2F"],
+      "sourceSvgGroups": [
+        "_寮D棟2F"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6737,7 +7205,9 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 1,
-      "sourceSvgGroups": ["_国際寮"],
+      "sourceSvgGroups": [
+        "_国際寮"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6755,7 +7225,9 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 2,
-      "sourceSvgGroups": ["_国際寮"],
+      "sourceSvgGroups": [
+        "_国際寮"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6773,7 +7245,9 @@
       "building": "kokusai",
       "buildingName": "国際寮",
       "floor": 3,
-      "sourceSvgGroups": ["_国際寮"],
+      "sourceSvgGroups": [
+        "_国際寮"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6791,7 +7265,9 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 1,
-      "sourceSvgGroups": ["_寮F棟"],
+      "sourceSvgGroups": [
+        "_寮F棟"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6809,7 +7285,9 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 2,
-      "sourceSvgGroups": ["_寮F棟"],
+      "sourceSvgGroups": [
+        "_寮F棟"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6827,7 +7305,9 @@
       "building": "ryof",
       "buildingName": "寮F棟",
       "floor": 3,
-      "sourceSvgGroups": ["_寮F棟"],
+      "sourceSvgGroups": [
+        "_寮F棟"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6845,7 +7325,9 @@
       "building": "shokudo",
       "buildingName": "寮食堂",
       "floor": 1,
-      "sourceSvgGroups": ["_寮食堂"],
+      "sourceSvgGroups": [
+        "_寮食堂"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6863,7 +7345,9 @@
       "building": "shokudo",
       "buildingName": "寮食堂",
       "floor": 2,
-      "sourceSvgGroups": ["_寮食堂"],
+      "sourceSvgGroups": [
+        "_寮食堂"
+      ],
       "status": "massing",
       "reason": "dormitory interior is restricted data; exterior massing only",
       "plateAreaM2": null,
@@ -6881,7 +7365,9 @@
       "building": "gym1",
       "buildingName": "第一体育館",
       "floor": 1,
-      "sourceSvgGroups": ["_第1体育館"],
+      "sourceSvgGroups": [
+        "_第1体育館"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6899,7 +7385,9 @@
       "building": "gym2",
       "buildingName": "第二体育館",
       "floor": 1,
-      "sourceSvgGroups": ["_第2体育館"],
+      "sourceSvgGroups": [
+        "_第2体育館"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6917,7 +7405,9 @@
       "building": "budo",
       "buildingName": "武道場",
       "floor": 1,
-      "sourceSvgGroups": ["_武道場"],
+      "sourceSvgGroups": [
+        "_武道場"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6935,7 +7425,9 @@
       "building": "monodukuri",
       "buildingName": "ものづくり工房",
       "floor": 1,
-      "sourceSvgGroups": ["_ものづくり工房"],
+      "sourceSvgGroups": [
+        "_ものづくり工房"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -6953,8 +7445,10 @@
       "building": "jisshu",
       "buildingName": "実習工場",
       "floor": 1,
-      "sourceSvgGroups": ["_実習工場"],
-      "status": "partitioned",
+      "sourceSvgGroups": [
+        "_実習工場"
+      ],
+      "status": "machine-clean",
       "reason": "",
       "plateAreaM2": 973.996128,
       "faceAreaM2": 973.996128,
@@ -6978,6 +7472,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 16,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -6992,6 +7487,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7006,6 +7502,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7020,6 +7517,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7034,6 +7532,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7048,6 +7547,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7062,6 +7562,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7076,6 +7577,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7090,6 +7592,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7104,6 +7607,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7118,6 +7622,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 5,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7132,6 +7637,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 6,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7146,6 +7652,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 7,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7160,6 +7667,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7174,6 +7682,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7188,6 +7697,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         },
         {
@@ -7202,6 +7712,7 @@
           "faceCount": 1,
           "holeCount": 0,
           "vertexCount": 4,
+          "interiorClosedLoops": 0,
           "accuracy": "calibrated-estimate"
         }
       ]
@@ -7210,7 +7721,9 @@
       "building": "kikaijikken",
       "buildingName": "機械工学科実験棟",
       "floor": 1,
-      "sourceSvgGroups": ["_機械工学科実験棟"],
+      "sourceSvgGroups": [
+        "_機械工学科実験棟"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,
@@ -7228,7 +7741,9 @@
       "building": "kaikatu2",
       "buildingName": "課外活動棟2",
       "floor": 1,
-      "sourceSvgGroups": ["_課外活動棟2"],
+      "sourceSvgGroups": [
+        "_課外活動棟2"
+      ],
       "status": "massing",
       "reason": "no public interior floor plan for this floor",
       "plateAreaM2": null,

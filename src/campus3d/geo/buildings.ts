@@ -81,6 +81,12 @@ export interface RoomSpec {
   readonly depthM: number;
   readonly areaM2: number;
   readonly perimeterM: number;
+  /**
+   * Closed wall-linework cycles inside this room's faces that failed to
+   * partition it. Nonzero means the extraction may have missed a
+   * subdivision drawn in the source plan.
+   */
+  readonly interiorClosedLoops: number;
 }
 
 export type BuildingStatus = "ok" | "nodata" | "missing-data";
@@ -283,6 +289,7 @@ const partitionFloorRooms = (
       depthM: (r.bbox[3] - r.bbox[1]) * M_PER_UNIT,
       areaM2,
       perimeterM: faces.reduce((a, f) => a + ringPerimeterM(f), 0),
+      interiorClosedLoops: r.interiorClosedLoops,
     } satisfies RoomSpec;
   });
   return { rooms: specs, stats };
