@@ -90,10 +90,7 @@ const tapAt = async (x: number, y: number) => {
   for (const type of ["touchStart", "touchEnd"] as const) {
     await send("Input.dispatchTouchEvent", {
       type,
-      touchPoints:
-        type === "touchStart"
-          ? [{ x, y, id: 1 }]
-          : [],
+      touchPoints: type === "touchStart" ? [{ x, y, id: 1 }] : [],
     });
   }
 };
@@ -352,10 +349,7 @@ await evaluate(`(() => {
 })()`);
 await sleep(400);
 await shot("06-mobile-building.png");
-console.log(
-  "mobile panel:",
-  JSON.stringify(await panelText()),
-);
+console.log("mobile panel:", JSON.stringify(await panelText()));
 if (!(await panelText())) {
   // Retry once: the list may still have been animating open.
   await evaluate(`(() => {
