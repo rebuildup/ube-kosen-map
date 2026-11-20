@@ -108,25 +108,6 @@ const projectTail = `
            behind: v.z > 1 };
 `;
 
-const findRoomScreenPos = (roomId: string) =>
-  evaluate(`(() => {
-    const s = window.__campus3d; if (!s) return null;
-    const V3 = s.camera.position.constructor;
-    const v = new V3();
-    let found = null;
-    s.built.root.traverse((o) => {
-      if (found || !o.userData || !o.userData.room) return;
-      if (o.userData.room.id !== ${JSON.stringify(roomId)}) return;
-      o.geometry.computeBoundingBox();
-      const c = o.geometry.boundingBox.getCenter(new V3());
-      o.localToWorld(c);
-      found = c;
-    });
-    if (!found) return null;
-    v.copy(found);
-    ${projectTail}
-  })()`);
-
 /** Screen pos of a building's visible top (roof) center. */
 const findBuildingScreenPos = (key: string) =>
   evaluate(`(() => {
