@@ -1,7 +1,7 @@
 /**
  * Generate SVG overlay evidence: source floor-plan fills + wall linework
  * with the extracted room polygons drawn on top, one file per floor.
- * Usage: bun run quality/room-overlay.mts [building ...]
+ * Usage: bun run tools/room-overlay.mts [building ...]
  * Output: docs/evidence/room-overlay-<building>-f<floor>.svg
  */
 import { mkdirSync, writeFileSync } from "node:fs";

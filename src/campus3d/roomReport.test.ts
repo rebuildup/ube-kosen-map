@@ -66,7 +66,7 @@ describe("room extraction report", () => {
   it("stays consistent with the committed JSON snapshot", () => {
     const committed = JSON.parse(
       readFileSync(
-        new URL("../../quality/room-report.json", import.meta.url),
+        new URL("../../docs/evidence/room-report.json", import.meta.url),
         "utf8",
       ),
     );

@@ -2,7 +2,7 @@
  * Anomaly scan over every partitioned floor: flags oversized rooms,
  * degenerate rooms, orphan holes, and classification outliers for
  * human review against the source plans.
- * Usage: bun run quality/tmp-anomaly-scan.mts
+ * Usage: bun run tools/anomaly-scan.mts
  */
 import { CAMPUS_MODEL_DATA } from "../src/campus3d/data/campusModelData.ts";
 import { withComplementedBuildings } from "../src/campus3d/data/complemented.ts";
