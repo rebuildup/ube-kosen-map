@@ -9,9 +9,49 @@
 import * as THREE from "three";
 
 import type { CampusScene } from "../scene";
-import type { PrismSpec } from "../geo/buildings";
+import {
+  drawingToModel,
+  MODEL_UNITS_PER_DRAWING_UNIT,
+} from "../geo/drawingTransform";
+import type { BuildingModel, PrismSpec, RoomSpec } from "../geo/buildings";
 import type { StepSpec } from "../geo/stairs";
 import type { MeshSpec, PostSpec } from "../geo/lineworkGeometry";
+
+/** Result of resolving a pointer pick against the built scene. */
+export interface CampusPick {
+  readonly buildingKey: string;
+  /** Present when the pick landed on a room partition plate. */
+  readonly room?: RoomSpec;
+}
+
+/**
+ * Walk raycast intersections and resolve the domain-level pick target.
+ * Building meshes live under a Group tagged with `userData.buildingKey`;
+ * room plates are an InstancedMesh whose `instanceId` indexes
+ * `userData.instanceRoom` -> `userData.roomTable`.
+ */
+export const resolvePick = (
+  intersects: readonly THREE.Intersection[],
+): CampusPick | null => {
+  for (const hit of intersects) {
+    const obj = hit.object;
+    let room: RoomSpec | undefined;
+    if (obj.userData.isRoomPick && typeof hit.instanceId === "number") {
+      const table = obj.userData.roomTable as readonly RoomSpec[];
+      const map = obj.userData.instanceRoom as readonly number[];
+      room = table[map[hit.instanceId]];
+    }
+    let node: THREE.Object3D | null = obj;
+    while (node) {
+      const key = node.userData.buildingKey;
+      if (typeof key === "string") {
+        return room ? { buildingKey: key, room } : { buildingKey: key };
+      }
+      node = node.parent;
+    }
+  }
+  return null;
+};
 
 export interface Campus3DScene {
   readonly root: THREE.Group;
@@ -196,6 +236,7 @@ export const buildCampus3DScene = (
   const addPrisms = (
     prisms: readonly PrismSpec[],
     mat: THREE.Material,
+    parent: THREE.Object3D,
     castShadow = false,
   ) => {
     for (const p of prisms) {
@@ -205,19 +246,66 @@ export const buildCampus3DScene = (
       );
       mesh.castShadow = castShadow;
       mesh.receiveShadow = true;
-      root.add(mesh);
+      parent.add(mesh);
     }
+  };
+
+  /* Room partition plates: one instanced quad per grid cell, tagged so a
+     raycast instanceId resolves back to the RoomSpec via userData tables. */
+  const roomMat = track(
+    new THREE.MeshBasicMaterial({
+      color: dark ? 0x8ba173 : 0x74855c,
+      transparent: true,
+      opacity: 0.2,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
+  );
+  const roomPickMesh = (b: BuildingModel): THREE.InstancedMesh | null => {
+    if (!b.rooms.length) return null;
+    const size = b.rooms[0].cellSize * MODEL_UNITS_PER_DRAWING_UNIT;
+    const geo = track(
+      new THREE.PlaneGeometry(size, size).rotateX(-Math.PI / 2),
+    );
+    let count = 0;
+    for (const r of b.rooms) count += r.cells.length;
+    const mesh = new THREE.InstancedMesh(geo, roomMat, count);
+    const instanceRoom = new Array<number>(count);
+    const m = new THREE.Matrix4();
+    let i = 0;
+    b.rooms.forEach((r, ri) => {
+      const y = b.baseY + (r.floor - 1) * b.floorHeight + 0.034;
+      for (const [cx, cy] of r.cells) {
+        const p = drawingToModel(cx, cy);
+        m.makeTranslation(p.x, y, p.z);
+        mesh.setMatrixAt(i, m);
+        instanceRoom[i] = ri;
+        i++;
+      }
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.userData.isRoomPick = true;
+    mesh.userData.roomTable = b.rooms;
+    mesh.userData.instanceRoom = instanceRoom;
+    return mesh;
   };
 
   for (const b of scene.buildings.buildings) {
     if (b.status !== "ok") continue;
-    addPrisms(b.slabs, slabMat);
-    addPrisms(b.ceilings, slabMat);
-    addPrisms(b.caps, capMat, true);
+    // Each building gets its own Group tagged with the domain key so raycast
+    // results resolve to stable building/room ids, not mesh identities.
+    const bg = new THREE.Group();
+    bg.userData.buildingKey = b.key;
+    addPrisms(b.slabs, slabMat, bg);
+    addPrisms(b.ceilings, slabMat, bg);
+    addPrisms(b.caps, capMat, bg, true);
     const walls = instancedBoxes(b.walls, wallMat);
-    if (walls) root.add(walls);
+    if (walls) bg.add(walls);
     const stairs = instancedBoxes(b.stairs, stairMat);
-    if (stairs) root.add(stairs);
+    if (stairs) bg.add(stairs);
+    const rooms = roomPickMesh(b);
+    if (rooms) bg.add(rooms);
+    root.add(bg);
     labelAnchors.push({
       key: b.key,
       name: b.name,

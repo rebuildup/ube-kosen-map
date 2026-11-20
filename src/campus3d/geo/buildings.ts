@@ -71,6 +71,9 @@ export interface BuildingModel {
   readonly color: number;
   readonly status: BuildingStatus;
   readonly floors: number;
+  /** Registry free-text room summary (publishable descriptions only). */
+  readonly roomsInfo: string;
+  readonly note: string;
   readonly baseY: number;
   readonly floorHeight: number;
   readonly totalHeight: number;
@@ -448,6 +451,8 @@ const generateBuilding = (
     category: entry.category,
     color: entry.color ?? 0x888888,
     floors: entry.floors ?? 1,
+    roomsInfo: entry.rooms ?? "",
+    note: entry.note ?? "",
     baseY: entry.baseModelY,
     floorHeight: entry.floorModelHeight,
     centroidDraw: null as readonly [number, number] | null,
