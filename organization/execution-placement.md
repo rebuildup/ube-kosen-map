@@ -2,7 +2,7 @@
 
 - Layer: **Practice**; refines [execution functions](execution-functions.md), [release-driven-solo](profiles/release-driven-solo.md), [parallel-orchestration](../skills/parallel-orchestration/SKILL.md), [quality-gate](../skills/quality-gate/SKILL.md), [herdr-runtime](../skills/herdr-runtime/SKILL.md).
 - Scope: choosing **where** to execute Work, Verify, Review, Benchmark, Render, Serve, or a durable agent attempt. Does **not** define who is authorized, how agents are routed, or how SSH/Herdr sessions are synchronized.
-- Status: policy candidate; cross-device operational acceptance is **not complete**. See [project-init #147](https://github.com/rebuildup/project-init/issues/147) and [dotfiles #78](https://github.com/rebuildup/dotfiles/issues/78).
+- Status: policy candidate; cross-device operational acceptance is **not complete**. See [aude-skills #147](https://github.com/rebuildup/aude-skills/issues/147) and [dotfiles #78](https://github.com/rebuildup/dotfiles/issues/78).
 
 ## Separate identities and authorities
 
